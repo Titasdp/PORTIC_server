@@ -9,6 +9,4 @@ const sequelize = require("../Server/Database/connection.js");
 app.listen(port, async () => {
     await dbConnectionPack.testBdConnection();
     console.log(`PORTIC server is online and working on door: ${port}`);
-
-    console.log(process.env.DB_HOST);
 });
