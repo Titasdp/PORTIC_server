@@ -82,22 +82,22 @@ UserTitleModel.User_title.hasMany(User, {
         type: DataTypes.STRING,
     }
 });
-User.belongsTo(userTypeModel.UserType, {
+User.belongsTo(UserTitleModel.User_title, {
     foreignKey: {
-        name: "id_user_type",
+        name: "id_title",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-// Login type
-loginTypeModel.LoginType.hasMany(User, {
+// User Type
+UserStatusModel.User_status.hasMany(User, {
     foreignKey: {
         name: "id_login_type",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-User.belongsTo(loginTypeModel.LoginType, {
+User.belongsTo(UserStatusModel.User_status, {
     foreignKey: {
         name: "id_login_type",
         allowNull: false,
@@ -105,14 +105,14 @@ User.belongsTo(loginTypeModel.LoginType, {
     }
 });
 // User Status type
-userStatusModel.UserStatus.hasMany(User, {
+UserLevelModel.User_level.hasMany(User, {
     foreignKey: {
         name: "id_user_status",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-User.belongsTo(userStatusModel.UserStatus, {
+User.belongsTo(UserLevelModel.User_level, {
     foreignKey: {
         name: "id_user_status",
         type: DataTypes.STRING,
