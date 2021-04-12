@@ -1,0 +1,31 @@
+{
+  "name": "portic_server",
+  "version": "1.0.0",
+  "description": "This is PORTIC server project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Titasdp/PORTIC_server.git"
+  },
+  "author": "Tiago de Pina",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Titasdp/PORTIC_server/issues"
+  },
+  "homepage": "https://github.com/Titasdp/PORTIC_server#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-sanitizer": "^1.0.5",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.6.2",
+    "uniqid": "^5.3.0"
+  }
+}
