@@ -4,22 +4,25 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
-class User_status extends Model {}
+class Focus extends Model {}
 
-User_status.init({
-    id_status: {
+Focus.init({
+    id_focus: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_UserStatus')
+            return uniqueIdPack.generateRandomId('_Focus')
         },
     },
-    designation: {
+    description_pt: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+    },
+    description_eng: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     created_at: {
         type: 'TIMESTAMP',
@@ -32,16 +35,18 @@ User_status.init({
         allowNull: false,
     },
 
+    //id_entity, id_publisher 
+
 }, {
     sequelize,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "User_status",
-    tableName: "User_status",
+    modelName: "Focus",
+    tableName: "Focus",
     logging: false,
 });
 
 module.exports = {
-    User_status
+    Focus
 };

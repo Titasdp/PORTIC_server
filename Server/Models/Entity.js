@@ -4,33 +4,49 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
-class Media extends Model {}
+class Entity extends Model {}
 
-Media.init({
-    id_media: {
+Entity.init({
+    id_entity: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Media')
+            return uniqueIdPack.generateRandomId('_Entity')
         },
     },
-    title_eng: {
+    designation: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true
     },
-    title_pt: {
+    initials: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
-    description_eng: {
+    desc_html_pt: {
         type: DataTypes.TEXT('Long'),
         allowNull: false,
     },
-    description_pt: {
+    desc_html_eng: {
         type: DataTypes.TEXT('Long'),
         allowNull: false
+    },
+    slogan_eng: {
+        type: DataTypes.TEXT('tiny'),
+        allowNull: false,
+    },
+    slogan_pt: {
+        type: DataTypes.TEXT('tiny'),
+        allowNull: false,
+    },
+    visited: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+        comment: 'This field will increment every time a person Visits and sub entity'
     },
     created_at: {
         type: 'TIMESTAMP',
@@ -43,14 +59,14 @@ Media.init({
         allowNull: false,
     },
 
-    // Publisher, id_ entity, id_status
+    // logo_id, id_ entity_level, id_status
 }, {
     sequelize,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "Media",
-    tableName: "Media",
+    modelName: "Entity",
+    tableName: "Entity",
     logging: false,
 });
 
@@ -101,5 +117,5 @@ Media.init({
 // });
 
 module.exports = {
-    Media
+    Entity
 };

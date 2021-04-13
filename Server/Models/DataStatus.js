@@ -4,16 +4,16 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
-class User_status extends Model {}
+class Data_status extends Model {}
 
-User_status.init({
+Data_status.init({
     id_status: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_UserStatus')
+            return uniqueIdPack.generateRandomId('_DataStatus')
         },
     },
     designation: {
@@ -37,11 +37,11 @@ User_status.init({
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "User_status",
-    tableName: "User_status",
+    modelName: "Data_Status",
+    tableName: "Data_Status",
     logging: false,
 });
 
 module.exports = {
-    User_status
+    Data_status
 };

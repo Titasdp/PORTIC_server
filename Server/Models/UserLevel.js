@@ -19,6 +19,7 @@ User_level.init({
     designation: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true
     },
     created_at: {
         type: 'TIMESTAMP',

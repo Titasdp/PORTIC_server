@@ -19,10 +19,12 @@ User_title.init({
     designation_eng: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true
     },
     designation_pt: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true
     },
     created_at: {
         type: 'TIMESTAMP',

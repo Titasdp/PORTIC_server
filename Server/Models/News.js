@@ -35,7 +35,12 @@ News.init({
     resume_eng: {
         type: DataTypes.STRING,
         allowNull: false,
-
+    },
+    opened: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+        comment: 'This field will increment every time a person press the button watch more of an video in the News'
     },
     resume_pt: {
         type: DataTypes.TEXT(),
@@ -52,14 +57,14 @@ News.init({
         allowNull: false,
     },
 
-    // Publisher, id_ entity, id_status
+    // id_image, id_status, id_creator, id_entity
 }, {
     sequelize,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "Media",
-    tableName: "Media",
+    modelName: "News",
+    tableName: "News",
     logging: false,
 });
 

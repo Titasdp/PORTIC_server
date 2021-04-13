@@ -4,16 +4,16 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
-class User_status extends Model {}
+class Social_media_type extends Model {}
 
-User_status.init({
-    id_status: {
+Social_media_type.init({
+    id_type: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_UserStatus')
+            return uniqueIdPack.generateRandomId('_Social_media_type')
         },
     },
     designation: {
@@ -37,11 +37,11 @@ User_status.init({
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "User_status",
-    tableName: "User_status",
+    modelName: "Social_media_type",
+    tableName: "Social_media_type",
     logging: false,
 });
 
 module.exports = {
-    User_status
+    Social_media_type
 };

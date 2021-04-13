@@ -4,22 +4,35 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
-class User_status extends Model {}
+class Testimonial extends Model {}
 
-User_status.init({
-    id_status: {
+Testimonial.init({
+    id_testimonial: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_UserStatus')
+            return uniqueIdPack.generateRandomId('_Testimonial')
         },
     },
-    designation: {
+    person_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    institution_name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
+    },
+
+    testimonial_text_pt: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: false,
+    },
+    testimonial_text_eng: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: false,
     },
     created_at: {
         type: 'TIMESTAMP',
@@ -37,11 +50,11 @@ User_status.init({
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "User_status",
-    tableName: "User_status",
+    modelName: "Testimonial",
+    tableName: "Testimonial",
     logging: false,
 });
 
 module.exports = {
-    User_status
+    Testimonial
 };
