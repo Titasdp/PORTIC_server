@@ -54,6 +54,8 @@ User.init({
         allowNull: false,
         unique: true
     },
+
+    //id_entity , id_profile_pic
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,
