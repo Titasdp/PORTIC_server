@@ -48,6 +48,18 @@ Entity.init({
         allowNull: false,
         comment: 'This field will increment every time a person Visits and sub entity'
     },
+    lat: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+        defaultValue: 41.1768200254591,
+    },
+    long: {
+
+        type: DataTypes.FLOAT,
+        allowNull: false,
+        defaultValue: -8.60569453069293,
+
+    },
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,
