@@ -2,8 +2,16 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+
+/**
+ * //// Structure (Completed)
+ * //// Connection (completed)
+ */
+
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+// const UserModel = require("../Models/User")
+
 class Picture extends Model {}
 
 Picture.init({
@@ -53,17 +61,32 @@ Picture.init({
     },
 
     //id_publisher,
-
 }, {
     sequelize,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "Outside_investor",
-    tableName: "Outside_investor",
+    modelName: "Picture",
+    tableName: "Picture",
     logging: false,
 });
 
+// //User connection
+// UserModel.User.hasMany(Picture, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         allowNull: false,
+//         type: DataTypes.STRING,
+//     }
+// });
+// Picture.belongsTo(Picture.User, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         type: DataTypes.STRING,
+//         allowNull: false
+//     }
+// });
+
 module.exports = {
-    Outside_investor
+    Picture
 };

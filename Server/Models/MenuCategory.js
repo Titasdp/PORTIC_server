@@ -2,8 +2,19 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+
+/**
+ * //// Structure (Completed)
+ * //// Connection (completed)
+ */
+
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
+const UserModel = require("../Models/User")
+const EntityModel = require("../Models/Entity")
+const DataStatusModel = require("../Models/DataStatus")
+
 class Menu_category extends Model {}
 
 Menu_category.init({
@@ -35,7 +46,7 @@ Menu_category.init({
         allowNull: false,
     },
 
-    //id_status, id_creator
+    //id_status, id_creator, id_entity,
 }, {
     sequelize,
     timestamps: true,
@@ -44,6 +55,56 @@ Menu_category.init({
     modelName: "Menu_category",
     tableName: "Menu_category",
     logging: false,
+});
+
+
+
+///Entity connection
+EntityModel.Entity.hasMany(News, {
+    foreignKey: {
+        name: "id_entity",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+News.belongsTo(EntityModel.Entity, {
+    foreignKey: {
+        name: "id_entity",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
+
+//User connection
+UserModel.User.hasMany(News, {
+    foreignKey: {
+        name: "id_creator",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+News.belongsTo(UserModel.User, {
+    foreignKey: {
+        name: "id_publisher",
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
+});
+
+//DataStatus connection
+DataStatusModel.Data_status.hasMany(Menu_category, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Menu_category.belongsTo(DataStatusModel.Data_status, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
 });
 
 module.exports = {

@@ -2,8 +2,14 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+/**
+ * //// Structure (Completed)
+ * doesn't need other tables primary keys (completed)
+ */
+
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
 class Social_media_type extends Model {}
 
 Social_media_type.init({
@@ -13,7 +19,7 @@ Social_media_type.init({
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Social_media_type')
+            return uniqueIdPack.generateRandomId('_SocialMediaType')
         },
     },
     designation: {

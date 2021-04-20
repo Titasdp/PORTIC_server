@@ -2,8 +2,18 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+/**
+ * //// Structure (Completed)
+ * //// Connection (completed)
+ */
+
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
+const UserModel = require("../Models/User")
+const EntityModel = require("../Models/Entity")
+const DataStatusModel = require("../Models/DataStatus")
+
 class Page extends Model {}
 
 Page.init({
@@ -50,7 +60,7 @@ Page.init({
         allowNull: false,
     },
 
-    //id_logo, id_publisher, id_status
+    //id_entity, id_publisher, id_status
 
 }, {
     sequelize,
@@ -61,6 +71,56 @@ Page.init({
     tableName: "Page",
     logging: false,
 });
+
+
+//User connection
+UserModel.User.hasMany(Page, {
+    foreignKey: {
+        name: "id_creator",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Page.belongsTo(UserModel.User, {
+    foreignKey: {
+        name: "id_creator",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
+//Entity connection
+EntityModel.Entity.hasMany(Page, {
+    foreignKey: {
+        name: "id_entity",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Testimonial.belongsTo(EntityModel.Entity, {
+    foreignKey: {
+        name: "id_entity",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
+
+//DataStatus connection
+DataStatusModel.Data_status.hasMany(Page, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Page.belongsTo(DataStatusModel.Data_status, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+
+
 
 module.exports = {
     Page

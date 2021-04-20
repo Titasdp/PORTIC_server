@@ -2,8 +2,15 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+
+/**
+ * //// Structure (Completed)
+ * doesn't need other tables primary keys (completed)
+ */
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
+
 class Entity_level extends Model {}
 
 Entity_level.init({

@@ -2,8 +2,19 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+
+/**
+ * //// Structure (Completed)
+ * //// Connection (completed)
+ */
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
+const EntityModel = require("../Models/Entity")
+const PictureModel = require("../Models/Picture")
+const UserModel = require("../Models/User")
+const DataStatusModel = require("../Models/DataStatus")
+
 class Unity extends Model {}
 
 Unity.init({
@@ -40,7 +51,6 @@ Unity.init({
     },
 
     //id_photo, id_publisher, id_entity, id_status
-
 }, {
     sequelize,
     timestamps: true,
@@ -49,6 +59,70 @@ Unity.init({
     modelName: "Unity",
     tableName: "Unity",
     logging: false,
+});
+
+// Picture connection
+PictureModel.Picture.hasMany(Unity, {
+    foreignKey: {
+        name: "id_photo",
+        allowNull: true,
+        type: DataTypes.STRING,
+    }
+});
+Unity.belongsTo(PictureModel.Picture, {
+    foreignKey: {
+        name: "id_photo",
+        type: DataTypes.STRING,
+        allowNull: true
+    }
+});
+
+//User connection
+UserModel.User.hasMany(Unity, {
+    foreignKey: {
+        name: "id_creator",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Unity.belongsTo(UserModel.User, {
+    foreignKey: {
+        name: "id_creator",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
+
+//Entity connection
+EntityModel.Entity.hasMany(Unity, {
+    foreignKey: {
+        name: "id_entity",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Unity.belongsTo(EntityModel.Entity, {
+    foreignKey: {
+        name: "id_entity",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
+
+//DataStatus connection
+DataStatusModel.Data_status.hasMany(Unity, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Unity.belongsTo(DataStatusModel.Data_status, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
 });
 
 module.exports = {

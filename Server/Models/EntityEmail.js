@@ -4,6 +4,7 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
 class Entity_email extends Model {}
 
 Entity_email.init({

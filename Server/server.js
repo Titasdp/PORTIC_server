@@ -3,7 +3,7 @@ const express = require("express")
 const app = express()
 const port = process.env.port || 3000
 const dbConnectionPack = require('../Server/Middleware/bdConnection')
-const UserModel = require('../Server/Models/User')
+// const UserModel = require('../Server/Models/User')
 
 
 app.listen(port, async () => {

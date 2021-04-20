@@ -2,8 +2,21 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+
+/**
+ * //// Structure (Completed)
+ * //// Connection (completed)
+ */
+
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
+
+const UserModel = require("../Models/User")
+const EntityModel = require("../Models/Entity")
+const DataStatusModel = require("../Models/DataStatus")
+
+
 class Media extends Model {}
 
 Media.init({
@@ -53,52 +66,56 @@ Media.init({
     tableName: "Media",
     logging: false,
 });
+///Entity connection
+EntityModel.Entity.hasMany(Media, {
+    foreignKey: {
+        name: "id_entity",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Media.belongsTo(EntityModel.Entity, {
+    foreignKey: {
+        name: "id_entity",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
 
-// // UserType Connection
-// UserTitleModel.User_title.hasMany(User, {
-//     foreignKey: {
-//         name: "id_title",
-//         allowNull: false,
-//         type: DataTypes.STRING,
-//     }
-// });
-// User.belongsTo(UserTitleModel.User_title, {
-//     foreignKey: {
-//         name: "id_user_type",
-//         allowNull: false,
-//         type: DataTypes.STRING,
-//     }
-// });
-// // User Type
-// UserStatusModel.User_status.hasMany(User, {
-//     foreignKey: {
-//         name: "id_login_type",
-//         allowNull: false,
-//         type: DataTypes.STRING,
-//     }
-// });
-// User.belongsTo(UserStatusModel.User_status, {
-//     foreignKey: {
-//         name: "id_login_type",
-//         allowNull: false,
-//         type: DataTypes.STRING,
-//     }
-// });
-// // User Status type
-// UserLevelModel.User_level.hasMany(User, {
-//     foreignKey: {
-//         name: "id_user_status",
-//         allowNull: false,
-//         type: DataTypes.STRING,
-//     }
-// });
-// User.belongsTo(UserLevelModel.User_level, {
-//     foreignKey: {
-//         name: "id_user_status",
-//         type: DataTypes.STRING,
-//         allowNull: false
-//     }
-// });
+//User connection
+UserModel.User.hasMany(Media, {
+    foreignKey: {
+        name: "id_publisher",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Media.belongsTo(UserModel.User, {
+    foreignKey: {
+        name: "id_publisher",
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
+});
+
+//DataStatus connection
+DataStatusModel.Data_status.hasMany(Media, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Media.belongsTo(DataStatusModel.Data_status, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+
+
+
 
 module.exports = {
     Media

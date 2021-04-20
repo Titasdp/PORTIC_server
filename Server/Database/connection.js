@@ -1,5 +1,4 @@
 require("dotenv").config();
-const response = require("express");
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
     `${process.env.DB_DESIGNATION}`,
@@ -16,7 +15,9 @@ const sequelize = new Sequelize(
 );
 
 sequelize
-    .sync()
+    .sync(data => {
+        console.log("something");;
+    })
     .then(response => {
         console.log("Sequelize is working normally");
     })
