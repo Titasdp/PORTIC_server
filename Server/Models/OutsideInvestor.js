@@ -96,7 +96,7 @@ Outside_investor.belongsTo(UserModel.User, {
 PictureModel.Picture.hasMany(Outside_investor, {
     foreignKey: {
         name: "id_logo",
-        allowNull: false,
+        allowNull: true,
         type: DataTypes.STRING,
     }
 });
@@ -104,7 +104,7 @@ Outside_investor.belongsTo(PictureModel.Picture, {
     foreignKey: {
         name: "id_logo",
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     }
 });
 

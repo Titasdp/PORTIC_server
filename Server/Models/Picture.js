@@ -60,7 +60,6 @@ Picture.init({
         allowNull: false,
     },
 
-    //id_publisher,
 }, {
     sequelize,
     timestamps: true,
@@ -71,21 +70,6 @@ Picture.init({
     logging: false,
 });
 
-// //User connection
-// UserModel.User.hasMany(Picture, {
-//     foreignKey: {
-//         name: "id_publisher",
-//         allowNull: false,
-//         type: DataTypes.STRING,
-//     }
-// });
-// Picture.belongsTo(Picture.User, {
-//     foreignKey: {
-//         name: "id_publisher",
-//         type: DataTypes.STRING,
-//         allowNull: false
-//     }
-// });
 
 module.exports = {
     Picture

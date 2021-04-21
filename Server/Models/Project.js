@@ -2,61 +2,60 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
-
 /**
  * //// Structure (Completed)
  * //// Connection (completed)
  */
-
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
 const DataStatusModel = require("../Models/DataStatus")
-const PictureModel = require("../Models/Picture")
 
-class News extends Model {}
+class Project extends Model {}
 
-News.init({
-    id_news: {
+Outside_investor.init({
+    id_project: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_News')
+            return uniqueIdPack.generateRandomId('_Project')
         },
     },
-    title_eng: {
+    title: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    title_pt: {
+    initials: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    reference: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    description_pt: {
+    desc_html_structure_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
+        defaultValue: "<div></div>"
     },
-    description_eng: {
+    desc_html_structure_pt: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
+        defaultValue: "<div></div>"
     },
-    resume_eng: {
-        type: DataTypes.STRING,
+    total_budget: {
+        type: DataTypes.FLOAT,
         allowNull: false,
+        defaultValue: 0
     },
-    opened: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
+    PORTIC_budget_cut: {
+        type: DataTypes.FLOAT,
         allowNull: false,
-        comment: 'This field will increment every time a person press the button watch more of an video in the News'
-    },
-    resume_pt: {
-        type: DataTypes.TEXT(),
-        allowNull: false
+        defaultValue: 0
     },
     created_at: {
         type: 'TIMESTAMP',
@@ -68,83 +67,65 @@ News.init({
         defaultValue: sequelize.NOW,
         allowNull: false,
     },
-
-    // id_image, id_status, id_creator, id_entity
 }, {
     sequelize,
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "News",
-    tableName: "News",
+    modelName: "Project",
+    tableName: "Project",
     logging: false,
 });
 
-///Entity connection
-EntityModel.Entity.hasMany(News, {
+
+//Entity connection
+EntityModel.Entity.hasMany(Project, {
     foreignKey: {
-        name: "id_entity",
+        name: "id_leader_entity",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-News.belongsTo(EntityModel.Entity, {
+Project.belongsTo(EntityModel.Entity, {
     foreignKey: {
-        name: "id_entity",
+        name: "id_leader_entity",
         type: DataTypes.STRING,
         allowNull: false
     }
 });
 
 //User connection
-UserModel.User.hasMany(News, {
+UserModel.User.hasMany(Project, {
     foreignKey: {
-        name: "id_publisher",
+        name: "id_creator",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-News.belongsTo(UserModel.User, {
+Project.belongsTo(UserModel.User, {
     foreignKey: {
-        name: "id_publisher",
+        name: "id_creator",
         type: DataTypes.STRING,
         allowNull: false,
-    }
-});
-
-//Picture connection
-PictureModel.Picture.hasMany(News, {
-    foreignKey: {
-        name: "id_picture",
-        allowNull: true,
-        type: DataTypes.STRING,
-    }
-});
-News.belongsTo(PictureModel.Picture, {
-    foreignKey: {
-        name: "id_picture",
-        type: DataTypes.STRING,
-        allowNull: true,
     }
 });
 
 //DataStatus connection
-DataStatusModel.Data_status.hasMany(News, {
+DataStatusModel.Data_status.hasMany(Project, {
     foreignKey: {
         name: "id_status",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-News.belongsTo(DataStatusModel.Data_status, {
+Project.belongsTo(DataStatusModel.Data_status, {
     foreignKey: {
         name: "id_status",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-
 
 module.exports = {
-    News
+    Project
 };
