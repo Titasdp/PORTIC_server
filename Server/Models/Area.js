@@ -2,8 +2,18 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+
+/**
+ * //// Structure (Completed)
+ * //// Connection (completed)
+ */
+
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+
+const UserModel = require("./User")
+const EntityModel = require("./Entity")
+
 class Area extends Model {}
 
 Area.init({
@@ -57,6 +67,40 @@ Area.init({
     modelName: "Area",
     tableName: "Area",
     logging: false,
+});
+
+
+
+///Entity connection
+EntityModel.Entity.hasMany(Area, {
+    foreignKey: {
+        name: "id_entity",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Area.belongsTo(EntityModel.Entity, {
+    foreignKey: {
+        name: "id_entity",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
+
+//User connection
+UserModel.User.hasMany(Area, {
+    foreignKey: {
+        name: "id_publisher",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Area.belongsTo(UserModel.User, {
+    foreignKey: {
+        name: "id_publisher",
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
 });
 
 module.exports = {

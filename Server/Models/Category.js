@@ -4,6 +4,10 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
+/**
+ * //// Structure (Completed)
+ * doesn't need other tables primary keys (completed)
+ */
 class Category extends Model {}
 
 Category.init({

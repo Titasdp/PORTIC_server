@@ -60,14 +60,14 @@ Outside_investor.init({
 
 
 //Entity connection
-EntityModel.Entity.hasMany(Page, {
+EntityModel.Entity.hasMany(Outside_investor, {
     foreignKey: {
         name: "id_entity",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-Testimonial.belongsTo(EntityModel.Entity, {
+Outside_investor.belongsTo(EntityModel.Entity, {
     foreignKey: {
         name: "id_entity",
         type: DataTypes.STRING,
@@ -78,7 +78,7 @@ Testimonial.belongsTo(EntityModel.Entity, {
 //User connection
 UserModel.User.hasMany(Outside_investor, {
     foreignKey: {
-        name: "id_creator",
+        name: "id_publisher",
         allowNull: false,
         type: DataTypes.STRING,
     }
