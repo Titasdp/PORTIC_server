@@ -38,6 +38,7 @@ UserModel.User.belongsToMany(ProjectModel.Project, {
 });
 
 
+
 module.exports = {
     Project_team
 };

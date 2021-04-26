@@ -99,7 +99,7 @@ EntityLevelModel.Entity_level.hasMany(Entity, {
         type: DataTypes.STRING,
     }
 });
-Entity_email.belongsTo(EntityModel.Entity, {
+Entity.belongsTo(EntityLevelModel.Entity_level, {
     foreignKey: {
         name: "id_entity",
         type: DataTypes.STRING,
