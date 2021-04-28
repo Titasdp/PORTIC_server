@@ -52,11 +52,6 @@ Outside_investor.init({
         allowNull: false,
         defaultValue: 0
     },
-    PORTIC_budget_cut: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-        defaultValue: 0
-    },
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,

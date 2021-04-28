@@ -36,18 +36,38 @@ Page.init({
     },
     info_html_pt: {
         type: DataTypes.TEXT('long'),
-        allowNull: false,
+        allowNull: true,
         defaultValue: "<div></div>"
     },
     info_html_eng: {
         type: DataTypes.TEXT('long'),
-        allowNull: false,
+        allowNull: true,
         defaultValue: "<div></div>"
     },
     defaultPage: {
         type: DataTypes.INTEGER(1),
         allowNull: false,
         defaultValue: 0,
+    },
+    spotlight_1: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        defaultValue: null
+    },
+    spotlight_2: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        defaultValue: null
+    },
+    spotlight_3: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        defaultValue: null,
+    },
+    spotlight_4: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        defaultValue: null,
     },
     created_at: {
         type: 'TIMESTAMP',

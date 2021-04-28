@@ -12,9 +12,6 @@ User_status.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_UserStatus')
-        },
     },
     designation: {
         type: DataTypes.STRING,
@@ -35,8 +32,6 @@ User_status.init({
 }, {
     sequelize,
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
     modelName: "User_status",
     tableName: "User_status",
     logging: false,

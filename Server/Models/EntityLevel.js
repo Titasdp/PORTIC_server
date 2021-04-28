@@ -26,30 +26,11 @@ Entity_level.init({
     designation: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
     },
-    designation: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: "",
-    },
-    created_at: {
-        type: 'TIMESTAMP',
-        defaultValue: sequelize.NOW,
-        allowNull: false,
-    },
-    updated_at: {
-        type: 'TIMESTAMP',
-        defaultValue: sequelize.NOW,
-        allowNull: false,
-    },
-
-    //id_logo, id_publisher, id_status
-
 }, {
     sequelize,
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    timestamps: false,
     modelName: "Entity_level",
     tableName: "Entity_level",
     logging: false,

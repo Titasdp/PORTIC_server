@@ -151,15 +151,15 @@ User.belongsTo(EntityModel.Entity, {
 PictureModel.Picture.hasMany(User, {
     foreignKey: {
         name: "id_picture",
-        allowNull: false,
+        allowNull: true,
         type: DataTypes.STRING,
     }
 });
 User.belongsTo(PictureModel.Picture, {
     foreignKey: {
         name: "id_picture",
+        allowNull: true,
         type: DataTypes.STRING,
-        allowNull: false
     }
 });
 

@@ -63,11 +63,9 @@ Entity.init({
         defaultValue: 41.1768200254591,
     },
     long: {
-
         type: DataTypes.FLOAT,
         allowNull: false,
         defaultValue: -8.60569453069293,
-
     },
     created_at: {
         type: 'TIMESTAMP',

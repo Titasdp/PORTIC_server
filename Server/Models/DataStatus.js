@@ -17,9 +17,6 @@ Data_status.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_DataStatus')
-        },
     },
     designation: {
         type: DataTypes.STRING,

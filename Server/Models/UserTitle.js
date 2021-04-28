@@ -12,20 +12,18 @@ User_title.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_UserTitle')
-        },
-    },
-    designation_eng: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
     },
     designation_pt: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
+    designation_eng: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,
