@@ -8,7 +8,6 @@ const {
  */
 
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 class Social_media_type extends Model {}
 
@@ -18,29 +17,26 @@ Social_media_type.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_SocialMediaType')
-        },
     },
     designation: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
-    created_at: {
-        type: 'TIMESTAMP',
-        defaultValue: sequelize.NOW,
-        allowNull: false,
-    },
-    updated_at: {
-        type: 'TIMESTAMP',
-        defaultValue: sequelize.NOW,
-        allowNull: false,
-    },
+    // created_at: {
+    //     type: 'TIMESTAMP',
+    //     defaultValue: sequelize.NOW,
+    //     allowNull: false,
+    // },
+    // updated_at: {
+    //     type: 'TIMESTAMP',
+    //     defaultValue: sequelize.NOW,
+    //     allowNull: false,
+    // },
 
 }, {
     sequelize,
-    timestamps: true,
+    timestamps: false,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     modelName: "Social_media_type",

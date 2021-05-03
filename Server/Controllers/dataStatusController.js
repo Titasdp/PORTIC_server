@@ -38,13 +38,13 @@ getAllDataStatus = (req, callback) => {
  * Function that adds predefined DataStratus elements to the table
  * Done
  */
-initializeDataStatus = async (req, callback) => {
+initDataStatus = (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_DataStatus'), 'Created'],
         [uniqueIdPack.generateRandomId('_DataStatus'), 'Published'],
         [uniqueIdPack.generateRandomId('_DataStatus'), 'Archived'],
     ]
-    await sequelize
+    sequelize
         .query(
             `INSERT INTO Data_Status (id_status,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -53,13 +53,12 @@ initializeDataStatus = async (req, callback) => {
             }
         )
         .then(data => {
-            console.log("Maria");
             let processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "Something went wrong please try again later",
+                    processMsg: "All data Where created successfully",
                 }
             }
             return callback(false, processResp)
@@ -118,6 +117,6 @@ getDataStatusIdByName = (designation, callback) => {
 
 module.exports = {
     getAllDataStatus,
-    initializeDataStatus,
+    initDataStatus,
     getDataStatusIdByName
 }

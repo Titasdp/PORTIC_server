@@ -38,13 +38,13 @@ fetchUserStatus = (req, callback) => {
  * Function that adds predefined UserLevel elements to the table
  * Done
  */
-initializeUserLevel = async (req, callback) => {
+initUserLevel = (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Super Admin'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Entity Admin'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Collaborator'],
     ]
-    await sequelize
+    sequelize
         .query(
             `INSERT INTO User_level (id_user_level,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -58,7 +58,7 @@ initializeUserLevel = async (req, callback) => {
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "All the data were successfully created",
+                    processMsg: "All the data were successfully created.",
                 }
             }
             return callback(false, processResp)
@@ -115,7 +115,7 @@ getUserStatusIdByName = (designation, callback) => {
 
 
 module.exports = {
-    getAllUserStatus,
-    initializeUserStatus,
+    fetchUserStatus,
+    initUserLevel,
     getUserStatusIdByName
 }

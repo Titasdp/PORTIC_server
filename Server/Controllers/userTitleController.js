@@ -6,7 +6,7 @@ const uniqueIdPack = require("../Middleware/uniqueId")
  * Function that fetch all UserTitle from the Database
  * Done
  */
-getAllStatus = (req, callback) => {
+fetchAllUserStatus = (req, callback) => {
     sequelize
         .query("SELECT * FROM User_title", {
             model: UserTitleModel.User_title
@@ -38,7 +38,7 @@ getAllStatus = (req, callback) => {
  * Function that adds predefined UserTitle elements to the table
  * Done
  */
-initializeUserTitle = async (req, callback) => {
+initUserTitle = async (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserTitle'), 'Indefinido', 'Not Defined']
     ]
@@ -161,9 +161,9 @@ getUserLevelByDesignation = (receivedObj, callback) => {
 
 
 module.exports = {
-    getAllUserStatus,
-    initializeUserStatus,
-    getUserStatusIdByName,
+    fetchAllUserStatus,
+    initUserTitle,
+
     // 
     addUserTitle,
     getUserLevelByDesignation

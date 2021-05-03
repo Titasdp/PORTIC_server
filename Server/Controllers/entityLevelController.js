@@ -38,27 +38,26 @@ fetchAllEntityLevel = (req, callback) => {
  * Function that adds predefined entity level elements to the table
  * Done
  */
-initializeEntityLevel = async (req, callback) => {
+initEntityLevel = async (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_EntityLevel'), 'Primary'],
-        [uniqueIdPack.generateRandomId('_EntityLevel'), 'Secondary '], ,
+        [uniqueIdPack.generateRandomId('_EntityLevel'), 'Secondary'],
     ]
     await sequelize
         .query(
-            `INSERT INTO User_status (id_status,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Entity_level (id_entity_level, designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: EntityLevelModel.Entity_level
             }
         )
         .then(data => {
-            console.log("Maria");
             let processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "Something went wrong please try again later",
+                    processMsg: "All the data were successfully created.",
                 }
             }
             return callback(false, processResp)
@@ -70,7 +69,7 @@ initializeEntityLevel = async (req, callback) => {
                 toClient: {
                     processResult: null,
                     processError: error,
-                    processMsg: "Something went wrong please try again later",
+                    processMsg: "Something went wrong please try again later.",
                 }
             }
             return callback(false, processResp)
@@ -117,6 +116,6 @@ fetchEntityLevelIdByDesignation = (designation, callback) => {
 
 module.exports = {
     fetchAllEntityLevel,
-    initializeEntityLevel,
+    initEntityLevel,
     fetchEntityLevelIdByDesignation
 }

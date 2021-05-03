@@ -38,13 +38,13 @@ getAllUserStatus = (req, callback) => {
  * Function that adds predefined UserStratus elements to the table
  * Done
  */
-initializeUserStatus = async (req, callback) => {
+initUserStatus = (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Normal'],
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Blocked'],
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Archived'],
     ]
-    await sequelize
+    sequelize
         .query(
             `INSERT INTO User_status (id_status,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -53,13 +53,12 @@ initializeUserStatus = async (req, callback) => {
             }
         )
         .then(data => {
-            console.log("Maria");
             let processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "Something went wrong please try again later",
+                    processMsg: "All data Where created successfully.",
                 }
             }
             return callback(false, processResp)
@@ -71,7 +70,7 @@ initializeUserStatus = async (req, callback) => {
                 toClient: {
                     processResult: null,
                     processError: error,
-                    processMsg: "Something went wrong please try again later",
+                    processMsg: "Something went wrong please try again later.",
                 }
             }
             return callback(false, processResp)
@@ -118,6 +117,6 @@ getUserStatusIdByName = (designation, callback) => {
 
 module.exports = {
     getAllUserStatus,
-    initializeUserStatus,
+    initUserStatus,
     getUserStatusIdByName
 }
