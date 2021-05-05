@@ -3,7 +3,6 @@ const {
     DataTypes
 } = require("sequelize");
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 class User_title extends Model {}
 
 User_title.init({

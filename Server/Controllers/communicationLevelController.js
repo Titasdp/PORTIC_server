@@ -1,15 +1,15 @@
-const DataStatusModel = require("../Models/DataStatus")
+const CommunicationLevelModel = require("../Models/CommunicationLevel")
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
 /**
- * Function that fetch all dataStatus from the Database
+ * Function that fetch all CommunicationLevel from the Database
  * Done
  */
-getAllDataStatus = (req, callback) => {
+fetchCommunicationLevels = (req, callback) => {
     sequelize
-        .query("SELECT * FROM Data_Status", {
-            model: DataStatusModel.Data_status
+        .query("SELECT * FROM Communication_level", {
+            model: CommunicationLevelModel.Communication_level
         })
         .then(data => {
             let processResp = {
@@ -35,21 +35,20 @@ getAllDataStatus = (req, callback) => {
         });
 };
 /**
- * Function that adds predefined DataStratus elements to the table
+ * Function that adds predefined CommunicationLevel elements to the table
  * Done
  */
-initDataStatus = (req, callback) => {
+initCommunicationLevel = (req, callback) => {
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_DataStatus'), 'Created'],
-        [uniqueIdPack.generateRandomId('_DataStatus'), 'Published'],
-        [uniqueIdPack.generateRandomId('_DataStatus'), 'Archived'],
+        [uniqueIdPack.generateRandomId('_ComLevel'), 'Primary'],
+        [uniqueIdPack.generateRandomId('_ComLevel'), 'Secondary'],
     ]
     sequelize
         .query(
-            `INSERT INTO Data_Status (id_status,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Communication_level (id_communication_level,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
-                model: DataStatusModel.Data_status
+                model: CommunicationLevelModel.Communication_level
             }
         )
         .then(data => {
@@ -58,13 +57,12 @@ initDataStatus = (req, callback) => {
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "All data Where created successfully",
+                    processMsg: "All the data were successfully created.",
                 }
             }
             return callback(false, processResp)
         })
         .catch(error => {
-            console.log(error);
             let processResp = {
                 processRespCode: 500,
                 toClient: {
@@ -77,23 +75,23 @@ initDataStatus = (req, callback) => {
         });
 };
 /**
- * Function that returns dataStatus id based on designation
+ * Function that returns CommunicationLevel id based on designation
  * Done
  */
-fetchDataStatusIdByName = (designation, callback) => {
+fetchCommunicationLevelIdByDes = (designation, callback) => {
     sequelize
-        .query("SELECT id_status FROM Data_Status where designation = :designation", {
+        .query("SELECT id_communication_level FROM Communication_level where designation = :designation", {
             replacements: {
                 designation: designation
             }
         }, {
-            model: DataStatusModel.Data_status
+            model: CommunicationLevelModel.Communication_level
         })
         .then(data => {
             let processResp = {
                 processRespCode: 200,
                 toClient: {
-                    processResult: data[0],
+                    processResult: data,
                     processError: null,
                     processMsg: "Fetched successfully",
                 }
@@ -116,7 +114,7 @@ fetchDataStatusIdByName = (designation, callback) => {
 
 
 module.exports = {
-    getAllDataStatus,
-    initDataStatus,
-    fetchDataStatusIdByName
+    fetchCommunicationLevels,
+    initCommunicationLevel,
+    fetchCommunicationLevelIdByDes
 }

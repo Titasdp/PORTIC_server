@@ -8,7 +8,6 @@ const {
  * doesn't need other tables primary keys (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 
 class Entity_level extends Model {}
@@ -19,9 +18,6 @@ Entity_level.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_EntityLevel')
-        },
     },
     designation: {
         type: DataTypes.STRING,

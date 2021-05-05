@@ -7,7 +7,6 @@ const {
  * //// Connection (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 const EntityLevelModel = require("../Models/EntityLevel")
 const DataStatusModel = require("../Models/DataStatus")
@@ -21,9 +20,7 @@ Entity.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Entity')
-        },
+        // return uniqueIdPack.generateRandomId('_Entity')
     },
     designation: {
         type: DataTypes.STRING,
@@ -92,7 +89,7 @@ Entity.init({
 //Entity level connection
 EntityLevelModel.Entity_level.hasMany(Entity, {
     foreignKey: {
-        name: "id_entity",
+        name: "id_entity_level",
         allowNull: false,
         type: DataTypes.STRING,
     }
@@ -109,7 +106,7 @@ Entity.belongsTo(EntityLevelModel.Entity_level, {
 PictureModel.Picture.hasMany(Entity, {
     foreignKey: {
         name: "id_logo",
-        allowNull: false,
+        allowNull: true,
         type: DataTypes.STRING,
     }
 });
@@ -117,7 +114,7 @@ Entity.belongsTo(PictureModel.Picture, {
     foreignKey: {
         name: "id_logo",
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     }
 });
 

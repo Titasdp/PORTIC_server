@@ -7,7 +7,6 @@ const {
  * doesn't need other tables primary keys (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 class Communication_level extends Model {}
 
@@ -17,9 +16,6 @@ Communication_level.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_ComLevel')
-        },
     },
     designation: {
         type: DataTypes.STRING,
