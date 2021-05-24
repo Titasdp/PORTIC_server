@@ -23,7 +23,7 @@ Page.init({
         primaryKey: true,
         unique: true,
         defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Page')
+            return uniqueIdPack.generateRandomId('_PageInfo')
         },
     },
     designation_eng: {
@@ -44,7 +44,7 @@ Page.init({
         allowNull: true,
         defaultValue: "<div></div>"
     },
-    defaultPage: {
+    default_page: {
         type: DataTypes.INTEGER(1),
         allowNull: false,
         defaultValue: 0,
@@ -59,12 +59,7 @@ Page.init({
         allowNull: true,
         defaultValue: null
     },
-    spotlight_3: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        defaultValue: null,
-    },
-    spotlight_4: {
+    page_description: {
         type: DataTypes.TEXT('medium'),
         allowNull: true,
         defaultValue: null,

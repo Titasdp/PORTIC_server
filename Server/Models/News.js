@@ -48,15 +48,15 @@ News.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
+    resume_pt: {
+        type: DataTypes.TEXT(),
+        allowNull: false
+    },
     opened: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
         allowNull: false,
         comment: 'This field will increment every time a person press the button watch more of an video in the News'
-    },
-    resume_pt: {
-        type: DataTypes.TEXT(),
-        allowNull: false
     },
     created_at: {
         type: 'TIMESTAMP',

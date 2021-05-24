@@ -8,6 +8,8 @@ const {
  * //// Connection (completed)
  */
 
+
+//!About us page
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
 

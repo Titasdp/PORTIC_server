@@ -7,6 +7,9 @@ const {
  * //// Connection (completed)
  */
 
+
+//!Recruitment 
+
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
 

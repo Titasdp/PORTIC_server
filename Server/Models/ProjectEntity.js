@@ -1,3 +1,4 @@
+//Participants entities
 const {
     Model,
     DataTypes
