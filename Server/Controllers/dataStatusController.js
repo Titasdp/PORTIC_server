@@ -77,10 +77,12 @@ initDataStatus = (req, callback) => {
         });
 };
 /**
- * Function that returns dataStatus id based on designation
- * Done
+ * fetches the id of a dataStatus based on his designation  
+ * Status:Completed
+ * @param {String} designation designation denominated to the dataStatus
+ * @param {Callback} callback 
  */
-fetchDataStatusIdByName = (designation, callback) => {
+const fetchDataStatusIdByName = (designation, callback) => {
     sequelize
         .query("SELECT id_status FROM Data_Status where designation = :designation", {
             replacements: {
@@ -90,22 +92,30 @@ fetchDataStatusIdByName = (designation, callback) => {
             model: DataStatusModel.Data_status
         })
         .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+
             let processResp = {
-                processRespCode: 200,
+                processRespCode: respCode,
                 toClient: {
                     processResult: data[0],
                     processError: null,
-                    processMsg: "Fetched successfully",
+                    processMsg: respMsg,
                 }
             }
             return callback(true, processResp)
         })
         .catch(error => {
+            console.log(error);
             let processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }

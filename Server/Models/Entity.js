@@ -96,7 +96,7 @@ EntityLevelModel.Entity_level.hasMany(Entity, {
 });
 Entity.belongsTo(EntityLevelModel.Entity_level, {
     foreignKey: {
-        name: "id_entity",
+        name: "id_entity_level",
         type: DataTypes.STRING,
         allowNull: false
     }

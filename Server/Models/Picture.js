@@ -20,9 +20,6 @@ Picture.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Picture')
-        },
     },
     title: {
         type: DataTypes.STRING,

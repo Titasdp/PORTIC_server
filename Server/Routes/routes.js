@@ -10,6 +10,8 @@ const socialMediaTypeController = require("../Controllers/socialMediaTypeControl
 const categoryController = require("../Controllers/categoryController")
 const communicationLevelController = require("../Controllers/communicationLevelController")
 //
+const pictureController = require("../Controllers/pictureController")
+//
 const entityController = require("../Controllers/entityController")
 //<DataStatus
 router.get("/dataStatus", (req, res) => {
@@ -120,43 +122,69 @@ router.post("/init/communicationLevels", (req, res) => {
 
 
 // *<Entity Routes
-router.post("/init/entity", async (req, res) => {
-    let data_status_id = null;
-    let entity_level_id = null;
-    // #3
-    dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
-        if (statusFetchSuccess) {
-            console.log(statusFetchResult.toClient.processResult.length);
-            if (statusFetchResult.toClient.processResult.length > 0) {
-                data_status_id = statusFetchResult.toClient.processResult[0].id_status
-            }
-            // #2
-            // entityLevelController.fetchAllEntityLevel(req, (entityLevelSuccess, entityLevelResult) => {
-            //     if (entityLevelSuccess) {
-            //         if (entityLevelResult.toClient.processResult[0].length > 0) {
-            //             entity_level_id = entityLevelResult.toClient.processResult[0].id_status
-            //         }
-            //         //#3
+router.post("/init/entities", async (req, res) => {
+    let idDataStatus = null;
+    let idEntityLevel = null;
+    let idLogo = null
 
-            //         console.log(entity_level_id + " " + data_status_id);
-            //          entityController.initEntity({
-            //             data_status_id: data_status_id,
-            //             entity_level_id: entity_level_id
-            //         }, async (initEntitySuccess, initEntityResult) => {
-            //             res.status(initEntityResult.processRespCode).send(initEntityResult.toClient)
-            //         });
-            //     }
-            //     res.status(entityLevelResult.processRespCode).send(entityLevelResult.toClient)
-            // });
+
+    //#0
+    await entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+        if (!entityFetchSuccess) {
+            res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
         }
-        res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
-    });
+
+        if (entityFetchResult.processRespCode === 200) {
+            res.status(409).send({
+                processResult: null,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            })
+        } else {
+            // #1
+            dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
+                if (!statusFetchSuccess) {
+                    res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
+                }
+
+                if (statusFetchResult.processRespCode === 200) {
+                    idDataStatus = statusFetchResult.toClient.processResult[0].id_status
+                }
+                // #2
+                entityLevelController.fetchEntityLevelIdByDesignation("Primary", (entityLevelFetchSuccess, entityLevelFetchResult) => {
+                    if (!entityLevelFetchSuccess) {
+                        res.status(entityLevelFetchResult.processRespCode).send(entityLevelFetchResult.toClient)
+                    }
+                    if (entityLevelFetchResult.processRespCode === 200) {
+                        idEntityLevel = entityLevelFetchResult.toClient.processResult[0].id_entity_level
+                    }
+                    //#3
+                    pictureController.addImgOnInit({
+                        imgPath: `${process.cwd()}/Server/Images/Logos/logoToDel.png`
+                    }, (imgAddSuccess, imgAddResult) => {
+                        if (!imgAddSuccess) {
+                            res.status(imgAddResult.processRespCode).send(imgAddResult.toClient)
+                        }
+                        //#4
+                        entityController.initEntity({
+                            idEntityLevel: idEntityLevel,
+                            idDataStatus: idDataStatus,
+                            idLogo: imgAddResult.toClient.processResult.generatedId
+                        }, async (initEntitySuccess, initEntityResult) => {
+                            res.status(initEntityResult.processRespCode).send(initEntityResult.toClient)
+                        });
+                    })
+
+                });
+            });
+        }
+    })
+
 
 
 
 
 })
-
 // *Entity Routes> 
 
 // <User
