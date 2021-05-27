@@ -24,9 +24,7 @@ User.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_User')
-        },
+
     },
     username: {
         type: DataTypes.STRING,

@@ -5,6 +5,7 @@ const dataStatusController = require("../Controllers/dataStatusController")
 // const UserTitleController = require("../Controllers/userTitleController")
 const userLevelController = require("../Controllers/userLevelController")
 const userStatusController = require("../Controllers/userStatusController")
+const userTitleController = require("../Controllers/userTitleController")
 const entityLevelController = require("../Controllers/entityLevelController")
 const socialMediaTypeController = require("../Controllers/socialMediaTypeController")
 const categoryController = require("../Controllers/categoryController")
@@ -44,6 +45,14 @@ router.post("/init/userLevels", (req, res) => {
     });
 });
 // UserLevel>
+
+//*<UserTitle
+router.post("/init/userTitle", (req, res) => {
+    userTitleController.initUserTitle(req, (success, result) => {
+        res.status(result.processRespCode).send(result.toClient)
+    });
+});
+//*UserTitle>
 
 //<EntityLevel
 //Init
@@ -122,6 +131,10 @@ router.post("/init/communicationLevels", (req, res) => {
 
 
 // *<Entity Routes
+/**
+ * Initialize entity
+ * Status:Completed
+ */
 router.post("/init/entities", async (req, res) => {
     let idDataStatus = null;
     let idEntityLevel = null;
@@ -187,13 +200,106 @@ router.post("/init/entities", async (req, res) => {
 })
 // *Entity Routes> 
 
-// <User
-router.get("/users", (req, res) => {
-    userController.getAllUser(req, result => {
-        res.status(result.processRespCode).send(result.toClient)
-    });
-});
-//>
+// *<User
+/**
+ * Initialize entity
+ * !Status:Todo
+ */
+router.post("/init/users", async (req, res) => {
+    let idDataStatus = null;
+    let idUserLevel = null;
+    let idEntity = null;
+    let idTitle = null
+
+
+    //#0 -ToConfirm if there is something inside users
+    userController.fetchUsers(req, async (usersFetchSuccess, usersFetchResult) => {
+        if (!usersFetchSuccess) {
+            res.status(usersFetchResult.processRespCode).send(usersFetchResult.toClient)
+        } else {
+            if (usersFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            }
+            //#1
+            await entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                if (!entityFetchSuccess) {
+                    res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                }
+
+                if (entityFetchResult.processRespCode === 200) {
+                    idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                }
+                // #2
+                userStatusController.fetchUserStatusIdByName("Normal", (statusFetchSuccess, statusFetchResult) => {
+                    if (!statusFetchSuccess) {
+                        res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
+                    }
+
+                    if (statusFetchResult.processRespCode === 200) {
+                        idDataStatus = statusFetchResult.toClient.processResult[0].id_status
+                    }
+
+                    // #3
+                    userLevelController.fetchUserLevelIdByName("Super Admin", (userLevelFetchSuccess, userLevelFetchResult) => {
+                        if (!userLevelFetchSuccess) {
+                            res.status(userLevelFetchResult.processRespCode).send(userLevelFetchResult.toClient)
+                        }
+                        if (userLevelFetchResult.processRespCode === 200) {
+                            idUserLevel = userLevelFetchResult.toClient.processResult[0].id_user_level
+                        }
+
+
+                        // #5
+                        userTitleController.fetchTitleIdByDesignation({
+                            selectedLang: "pt",
+                            designationPt: "Indefinido",
+                            designationEng: "Not Defined"
+                        }, (userTitleFetchSuccess, userTitleFetchResult) => {
+                            if (!userTitleFetchSuccess) {
+                                res.status(userLevelFetchResult.processRespCode).send(userLevelFetchResult.toClient)
+                            }
+                            if (userTitleFetchResult.processRespCode === 200) {
+                                idTitle = userTitleFetchResult.toClient.processResult[0].id_title
+                            }
+                            userController.initUser({
+                                idUserLevel: idUserLevel,
+                                idDataStatus: idDataStatus,
+                                idEntity: idEntity,
+                                idTitle: idTitle,
+                            }, async (initUserSuccess, initUserResult) => {
+                                res.status(initUserResult.processRespCode).send(initUserResult.toClient)
+                            });
+                        })
+                    });
+                });
+
+            })
+
+
+
+
+
+
+
+
+
+
+        }
+    })
+
+
+
+
+
+
+
+})
+
+//*User>
 
 
 module.exports = router;

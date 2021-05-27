@@ -102,7 +102,7 @@ const fetchEntityIdByName = (designation, callback) => {
             let processResp = {
                 processRespCode: respCode,
                 toClient: {
-                    processResult: data,
+                    processResult: data[0],
                     processError: null,
                     processMsg: respMsg,
                 }
@@ -132,8 +132,6 @@ const fetchEntityIdByName = (designation, callback) => {
  * @returns 
  */
 const initEntity = async (dataObj, callback) => {
-
-    console.log(dataObj);
     let processResp = {}
     if (dataObj.idDataStatus === null || dataObj.idEntityLevel === null || dataObj.idLogo === null) {
 

@@ -3,10 +3,15 @@ const sequelize = require("../Database/connection")
 const tokenPack = require("../Middleware/tokenFunctions")
 const passwordPack = require("../Middleware/randomPasswordFunctions")
 const encryptPack = require("../Middleware/encrypt")
+const uniqueIdPack = require("../Middleware/uniqueId")
 
 
-
-userLogin = (dataObj, callback) => {
+/**
+ * The main objective of this function is to login an user
+ * @param {Object} dataObj Contains multiple information 
+ * @param {Callback} callback 
+ */
+const userLogin = (dataObj, callback) => {
     let processResp = {}
 
     encryptPack.decryptPassword({
@@ -14,7 +19,6 @@ userLogin = (dataObj, callback) => {
         hash: dataObj.userData.password,
     }, (isError, decryptResult) => {
         if (isError) {
-            console.log(decryptResult);
             processResp = {
                 processRespCode: 500,
                 toClient: {
@@ -29,8 +33,8 @@ userLogin = (dataObj, callback) => {
             if (decryptResult) {
                 tokenPack.generateToken({
                         user: {
-                            id: dataObj.userData.id_user,
-                            userCode: "PORTICIPPASSOCIATION"
+                            id_user: dataObj.userData.id_user,
+                            user_code: "PORTIC_IPP_ASSOCIATION"
                         }
                     },
                     token => {
@@ -42,7 +46,7 @@ userLogin = (dataObj, callback) => {
                                     username: dataObj.userData.username
                                 },
                                 processError: null,
-                                processMsg: "Successful Login",
+                                processMsg: "Successful Login !!",
                             }
                         }
                         return callback(true, processResp)
@@ -64,6 +68,124 @@ userLogin = (dataObj, callback) => {
 }
 
 
+/**
+ * Initialize the table User by introducing predefined data to it.
+ * Status:Completed
+ * @param {Object} dataObj 
+ * @param {Callback} callback 
+ * @returns 
+ */
+const initUser = async (dataObj, callback) => {
+    let processResp = {}
+    if (dataObj.idDataStatus === null || dataObj.idUserLevel === null || dataObj.idEntity === null || dataObj.idTitle === null) {
+
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later.",
+            }
+        }
+        return callback(false, processResp)
+    }
+    //If success returns the hashed password
+    encryptPack.encryptPassword("porticSuperAdmin", (encryptError, encryptResult) => {
+
+        if (encryptError) {
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later.",
+                }
+            }
+            return callback(false, processResp)
+        } else {
+            console.log(encryptResult);
+            let insertArray = [
+                [uniqueIdPack.generateRandomId('_User'), `superAdmin`, encryptResult, "Tiago de Pina", "eu tiago", "Me Tiago", "tiagopina20014@gmail.com", "939908427", dataObj.idTitle, dataObj.idDataStatus, dataObj.idUserLevel, dataObj.idEntity],
+            ]
+            sequelize
+                .query(
+                    `INSERT INTO User (id_user,username,password,full_name,description_pt,description_eng,email,phone_numb,id_title,id_status,id_user_level,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+                        replacements: insertArray
+                    }, {
+                        model: UserModel.User
+                    }
+                )
+                .then(data => {
+                    processResp = {
+                        processRespCode: 201,
+                        toClient: {
+                            processResult: data,
+                            processError: null,
+                            processMsg: "All data Where created successfully.",
+                        }
+                    }
+                    return callback(true, processResp)
+                })
+                .catch(error => {
+                    console.log(error);
+                    let processResp = {
+                        processRespCode: 500,
+                        toClient: {
+                            processResult: null,
+                            processError: null,
+                            processMsg: "Something went wrong please try again later",
+                        }
+                    }
+                    return callback(false, processResp)
+                });
+        }
+    })
+}
+
+
+
+
+/**
+ * Fetches all users 
+ * Status: Completed
+ * @param {Object} req Request sended by the client 
+ * @param {Callback} callback 
+ */
+const fetchUsers = (req, callback) => {
+    sequelize
+        .query("SELECT * FROM User", {
+            model: UserModel.User
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data.length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            let processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
+        })
+        .catch(error => {
+            console.log(error);
+            let processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+            return callback(false, processResp)
+        });
+};
 
 
 
@@ -81,4 +203,12 @@ userLogin = (dataObj, callback) => {
 
 
 
-module.exports = {}
+
+
+
+
+
+module.exports = {
+    fetchUsers,
+    initUser
+}

@@ -35,10 +35,11 @@ fetchAllUserStatus = (req, callback) => {
         });
 };
 /**
- * Function that adds predefined UserTitle elements to the table
- * Done
+ * initialize userTitle by adding to the table predefine data
+ * @param {req} req Request sended by the user
+ * @param {Callback} callback 
  */
-initUserTitle = async (req, callback) => {
+const initUserTitle = async (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserTitle'), 'Indefinido', 'Not Defined']
     ]
@@ -117,44 +118,59 @@ addUserTitle = (req, callback) => {
 };
 
 /**
- * Function that gets an user title by email
- * Done
+ * fetch userLevel id by designation
+ * Status:Completed
+ * @param {Object} dataObj Object that contains a bunch of data needed to complete this function
+ * @param {Callback} callback 
  */
-getUserLevelByDesignation = (receivedObj, callback) => {
-    let query = ""
-        (receivedObj.selected_lang = "eng") ? query = `SELECT * FROM User_title where designation_eng = :designation_eng` : query = `SELECT * FROM User_title where designation_pt = :designation_pt`;
+const fetchTitleIdByDesignation = (dataObj, callback) => {
+
+    let query = (dataObj.selectedLang === "eng") ? `SELECT id_title FROM User_title where designation_eng = :designation_eng` : `SELECT id_title FROM User_title where designation_pt = :designation_pt`;
+
     sequelize
         .query(query, {
             replacements: {
-                designation_pt: receivedObj.designation_pt,
-                designation_eng: receivedObj.designation_eng
+                designation_pt: dataObj.designationPt,
+                designation_eng: dataObj.designationEng
             }
         }, {
             model: UserTitleModel.User_title
         })
         .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
             let processResp = {
-                processRespCode: 200,
+                processRespCode: respCode,
                 toClient: {
-                    processResult: data,
+                    processResult: data[0],
                     processError: null,
-                    processMsg: "Fetched successfully",
+                    processMsg: respMsg,
                 }
             }
             return callback(true, processResp)
         })
         .catch(error => {
+            console.log(error);
             let processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }
             return callback(false, processResp)
         });
+
+
+
 };
+
+
 
 
 
@@ -166,5 +182,5 @@ module.exports = {
 
     // 
     addUserTitle,
-    getUserLevelByDesignation
+    fetchTitleIdByDesignation
 }

@@ -79,9 +79,9 @@ initUserLevel = (req, callback) => {
  * Function that returns UserLevel id based on designation
  * Done
  */
-getUserStatusIdByName = (designation, callback) => {
+const fetchUserLevelIdByName = (designation, callback) => {
     sequelize
-        .query("SELECT id_status FROM User_level where designation = :designation", {
+        .query("SELECT id_user_level FROM User_level where designation = :designation", {
             replacements: {
                 designation: designation
             }
@@ -89,22 +89,29 @@ getUserStatusIdByName = (designation, callback) => {
             model: UserLevelModel.User_level
         })
         .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
             let processResp = {
-                processRespCode: 200,
+                processRespCode: respCode,
                 toClient: {
-                    processResult: data,
+                    processResult: data[0],
                     processError: null,
-                    processMsg: "Fetched successfully",
+                    processMsg: respMsg,
                 }
             }
             return callback(true, processResp)
         })
         .catch(error => {
+            console.log(error);
             let processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }
@@ -117,5 +124,5 @@ getUserStatusIdByName = (designation, callback) => {
 module.exports = {
     fetchUserStatus,
     initUserLevel,
-    getUserStatusIdByName
+    fetchUserLevelIdByName
 }
