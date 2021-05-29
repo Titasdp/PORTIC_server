@@ -2,19 +2,28 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
+
+/**
+ * //// Structure (Completed)
+ * //// Connection (completed)
+ */
+
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+
+const EntityModel = require("./Entity")
+const DataStatusModel = require("./DataStatus")
+
 class Menu extends Model {}
 
-Menu_category.init({
+Menu.init({
     id_menu: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Menu')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_Menu')
+        // },
     },
     designation_eng: {
         type: DataTypes.STRING,
@@ -24,12 +33,6 @@ Menu_category.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    external_path: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: null
-    },
-
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,
@@ -41,7 +44,7 @@ Menu_category.init({
         allowNull: false,
     },
 
-    //id_status, id_creator, id_internal_page, id_menu
+    //id_status, id_entity,
 }, {
     sequelize,
     timestamps: true,
@@ -50,6 +53,41 @@ Menu_category.init({
     modelName: "Menu",
     tableName: "Menu",
     logging: false,
+});
+
+
+
+///Entity connection
+EntityModel.Entity.hasMany(Menu, {
+    foreignKey: {
+        name: "id_entity",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Menu.belongsTo(EntityModel.Entity, {
+    foreignKey: {
+        name: "id_entity",
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
+
+
+//DataStatus connection
+DataStatusModel.Data_status.hasMany(Menu, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Menu.belongsTo(DataStatusModel.Data_status, {
+    foreignKey: {
+        name: "id_status",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
 });
 
 module.exports = {

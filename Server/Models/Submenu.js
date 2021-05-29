@@ -2,30 +2,25 @@ const {
     Model,
     DataTypes
 } = require("sequelize");
-
-/**
- * //// Structure (Completed)
- * //// Connection (completed)
- */
-
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+// const uniqueIdPack = require("../Middleware/uniqueId")
 
-const UserModel = require("../Models/User")
-const EntityModel = require("../Models/Entity")
-const DataStatusModel = require("../Models/DataStatus")
+const DataStatusModel = require("./DataStatus")
+const MenuModel = require("./Menu")
 
-class Menu_category extends Model {}
 
-Menu_category.init({
-    id_menu_category: {
+
+class Submenu extends Model {}
+
+Submenu.init({
+    id_submenu: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_MenuCat')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_Submenu')
+        // },
     },
     designation_eng: {
         type: DataTypes.STRING,
@@ -35,6 +30,12 @@ Menu_category.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
+    external_path: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
+
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,
@@ -46,7 +47,6 @@ Menu_category.init({
         allowNull: false,
     },
 
-    //id_status, id_creator, id_entity,
 }, {
     sequelize,
     timestamps: true,
@@ -58,48 +58,32 @@ Menu_category.init({
 });
 
 
+//Menu connection
+MenuModel.Menu.hasMany(Submenu, {
+    foreignKey: {
+        name: "id_parent",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Submenu.belongsTo(MenuModel.Menu, {
+    foreignKey: {
+        name: "id_parent",
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
+});
 
-///Entity connection
-EntityModel.Entity.hasMany(News, {
-    foreignKey: {
-        name: "id_entity",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-News.belongsTo(EntityModel.Entity, {
-    foreignKey: {
-        name: "id_entity",
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-});
-
-//User connection
-UserModel.User.hasMany(News, {
-    foreignKey: {
-        name: "id_creator",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-News.belongsTo(UserModel.User, {
-    foreignKey: {
-        name: "id_publisher",
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-});
 
 //DataStatus connection
-DataStatusModel.Data_status.hasMany(Menu_category, {
+DataStatusModel.Data_status.hasMany(Submenu, {
     foreignKey: {
         name: "id_status",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
-Menu_category.belongsTo(DataStatusModel.Data_status, {
+Submenu.belongsTo(DataStatusModel.Data_status, {
     foreignKey: {
         name: "id_status",
         allowNull: false,
@@ -107,6 +91,7 @@ Menu_category.belongsTo(DataStatusModel.Data_status, {
     }
 });
 
+
 module.exports = {
-    Menu_category
+    Submenu
 };

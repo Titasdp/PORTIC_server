@@ -9,11 +9,21 @@ const userTitleController = require("../Controllers/userTitleController")
 const entityLevelController = require("../Controllers/entityLevelController")
 const socialMediaTypeController = require("../Controllers/socialMediaTypeController")
 const categoryController = require("../Controllers/categoryController")
+//
 const communicationLevelController = require("../Controllers/communicationLevelController")
+//
+const menuController = require("../Controllers/menuController")
+const pageController = require("../Controllers/pageController")
+//
+const EntityEmailController = require("../Controllers/entityEmailController")
+//
 //
 const pictureController = require("../Controllers/pictureController")
 //
-const entityController = require("../Controllers/entityController")
+const entityController = require("../Controllers/entityController");
+const {
+    Communication_level
+} = require("../Models/CommunicationLevel");
 //<DataStatus
 router.get("/dataStatus", (req, res) => {
     dataStatusController.getAllDataStatus(req, result => {
@@ -121,12 +131,13 @@ router.patch("/categories/:id", (req, res) => {
 // *Category>
 
 //*<CommunicationLevel Routes
-//Init
-router.post("/init/communicationLevels", (req, res) => {
-    communicationLevelController.initCommunicationLevel(req, (success, result) => {
-        res.status(result.processRespCode).send(result.toClient)
-    });
-});
+// //Init
+// router.post("/init/communicationLevels", (req, res) => {
+//     communicationLevelController.initCommunicationLevel(req, (success, result) => {
+//         res.status(result.processRespCode).send(result.toClient)
+//     });
+// });
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // *CommunicationLevel Routes>
 
 
@@ -138,7 +149,6 @@ router.post("/init/communicationLevels", (req, res) => {
 router.post("/init/entities", async (req, res) => {
     let idDataStatus = null;
     let idEntityLevel = null;
-    let idLogo = null
 
 
     //#0
@@ -200,17 +210,248 @@ router.post("/init/entities", async (req, res) => {
 })
 // *Entity Routes> 
 
+//*<Entity Email Routes
+
+/** 
+ * Status: Completed
+ * !OBS: Future Adaptation with entity Init
+ */
+router.post("/init/entityEmails", async (req, res) => {
+    let idEntity = null
+    let communicationLevels = []
+    let idUser = null
+
+    //#0 - Completed
+    await EntityEmailController.fetchEmails(req, async (emailsFetchSuccess, emailsFetchResult) => {
+        if (!emailsFetchSuccess) {
+            res.status(emailsFetchResult.processRespCode).send(emailsFetchResult.toClient)
+        } else if (emailsFetchSuccess) {
+            if (emailsFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+
+                //#1
+                await communicationLevelController.fetchCommunicationLevels(req, (comLevelFetchSuccess, comLevelFetchResult) => {
+                    if (!comLevelFetchSuccess) {
+                        res.status(comLevelFetchResult.processRespCode).send(comLevelFetchResult.toClient)
+                    } else if (comLevelFetchSuccess) {
+                        if (comLevelFetchResult.processRespCode === 200) {
+                            communicationLevels = comLevelFetchResult.toClient.processResult;
+                        }
+
+                        //#2
+                        entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                            if (!entityFetchSuccess) {
+                                res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                            }
+
+                            if (entityFetchResult.processRespCode === 200) {
+                                idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                            }
+                            //#4
+                            userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                                if (!fetchUserSuccess) {
+                                    res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                                }
+
+                                if (fetchUserResult.processRespCode === 200) {
+                                    idUser = fetchUserResult.toClient.processResult[0].id_user
+                                }
+
+                                //   #5
+                                EntityEmailController.initEntityEmail({
+                                    idEntity: idEntity,
+                                    communicationLevels: communicationLevels,
+                                    idUser: idUser
+                                }, (success, result) => {
+                                    res.status(result.processRespCode).send(result.toClient)
+                                });
+                            })
+                        })
+                    }
+
+                })
+
+
+            }
+        }
+    })
+});
+
+
+//*Entity Email Routes>
+
+
+//*<Entity Menu
+/**
+ * Initialize Menu
+ * Status:Completed
+ */
+router.post("/init/menus", async (req, res) => {
+    let idEntity = null
+    let idDataStatus = null
+    //#0
+
+    await menuController.fetchMenus(req, (menusFetchSuccess, menusFetchResult) => {
+        if (!menusFetchSuccess) {
+            res.status(menusFetchResult.processRespCode).send(menusFetchResult.toClient)
+        } else if (menusFetchSuccess) {
+            if (menusFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+
+
+
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    } else {
+
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+
+                    //#1
+                    dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
+                        if (!statusFetchSuccess) {
+                            res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
+                        }
+
+                        if (statusFetchResult.processRespCode === 200) {
+                            idDataStatus = statusFetchResult.toClient.processResult[0].id_status
+                        }
+                        //#2
+                        menuController.initMenu({
+                            idEntity: idEntity,
+                            idDataStatus: idDataStatus
+                        }, (success, result) => {
+                            res.status(result.processRespCode).send(result.toClient)
+                        });
+
+                    })
+                })
+            }
+        }
+
+    })
+
+});
+//*Entity Menu>
+
+//*<Entity Pages
+//Todo
+router.post("/init/pages", async (req, res) => {
+    let idEntity = null
+    let idDataStatus = null
+    let idUser = null
+    let menusIds = []
+    //#0
+
+    await pageController.fetchPages(req, async (pagesFetchSuccess, pagesFetchResult) => {
+        if (!pagesFetchSuccess) {
+            res.status(pagesFetchResult.processRespCode).send(pagesFetchResult.toClient)
+        } else if (pagesFetchSuccess) {
+            if (pagesFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                await menuController.fetchMenus(req, (menusFetchSuccess, menusFetchResult) => {
+                    if (!menusFetchSuccess) {
+                        res.status(menusFetchResult.processRespCode).send(menusFetchResult.toClient)
+                    } else if (menusFetchSuccess) {
+                        if (menusFetchResult.processRespCode === 200) {
+                            menusIds = menusFetchResult.toClient.processResult;
+                        }
+
+
+                        //#2
+                        entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                            if (!entityFetchSuccess) {
+                                res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                            }
+
+                            if (entityFetchResult.processRespCode === 200) {
+                                idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                            }
+
+                            //#3
+                            dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
+                                if (!statusFetchSuccess) {
+                                    res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
+                                }
+
+                                if (statusFetchResult.processRespCode === 200) {
+                                    idDataStatus = statusFetchResult.toClient.processResult[0].id_status
+                                }
+
+                                userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                                    if (!fetchUserSuccess) {
+                                        res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                                    }
+
+                                    if (fetchUserResult.processRespCode === 200) {
+                                        idUser = fetchUserResult.toClient.processResult[0].id_user
+                                    }
+
+                                    //#4
+                                    pageController.initPage({
+                                        idEntity: idEntity,
+                                        idDataStatus: idDataStatus,
+                                        idUser: idUser,
+                                        menusIds: menusIds
+                                    }, (success, result) => {
+                                        res.status(result.processRespCode).send(result.toClient)
+                                    });
+                                })
+
+                            })
+                        })
+
+                    }
+
+                })
+
+
+            }
+        }
+    })
+
+
+
+
+
+
+
+});
+
+//*Entity Pages>
+
+
+
 // *<User
 /**
- * Initialize entity
- * !Status:Todo
+ * Initialize User
+ * Status:Completed
  */
 router.post("/init/users", async (req, res) => {
     let idDataStatus = null;
     let idUserLevel = null;
     let idEntity = null;
     let idTitle = null
-
 
     //#0 -ToConfirm if there is something inside users
     userController.fetchUsers(req, async (usersFetchSuccess, usersFetchResult) => {
@@ -298,8 +539,38 @@ router.post("/init/users", async (req, res) => {
 
 
 })
-
 //*User>
+
+
+//Todo new 
+
+// *<Communication Level Routes
+router.post("/init/communicationLevels", async (req, res) => {
+    //#0 -ToConfirm if there is something inside Communication level
+    communicationLevelController.fetchCommunicationLevels(req, async (fetchComLevelSuccess, fetchCommLevelResult) => {
+        if (!fetchComLevelSuccess) {
+            res.status(fetchCommLevelResult.processRespCode).send(fetchCommLevelResult.toClient)
+        } else {
+            if (fetchCommLevelResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                communicationLevelController.initCommunicationLevel({}, async (initSuccess, initResult) => {
+                    res.status(initResult.processRespCode).send(initResult.toClient)
+                });
+            }
+        }
+    })
+})
+//*Communication level Routes>
+
+
+
+
+
 
 
 module.exports = router;

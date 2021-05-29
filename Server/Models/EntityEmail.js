@@ -7,7 +7,7 @@ const {
  * //// Connection (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+
 
 const EntityModel = require("../Models/Entity")
 const CommunicationLevelModel = require("../Models/CommunicationLevel")
@@ -21,24 +21,14 @@ Entity_email.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Email')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_Email')
+        // },
     },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-    },
-    description_pt: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        defaultValue: "Não há informações adicionais relacionadas a este email",
-    },
-    description_eng: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        defaultValue: "There is no additional information related to this email",
     },
     created_at: {
         type: 'TIMESTAMP',

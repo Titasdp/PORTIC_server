@@ -4,20 +4,29 @@ const uniqueIdPack = require("../Middleware/uniqueId")
 
 /**
  * Function that fetch all CommunicationLevel from the Database
- * Done
+ * Status: Completed
+ * @param {Req} req Request sended by the client to the server
+ * @param {Callback} callback 
  */
-fetchCommunicationLevels = (req, callback) => {
+const fetchCommunicationLevels = (req, callback) => {
     sequelize
         .query("SELECT * FROM Communication_level", {
             model: CommunicationLevelModel.Communication_level
         })
         .then(data => {
+
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data.length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
             let processResp = {
-                processRespCode: 200,
+                processRespCode: respCode,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "Fetched successfully",
+                    processMsg: respMsg,
                 }
             }
             return callback(true, processResp)
@@ -34,11 +43,16 @@ fetchCommunicationLevels = (req, callback) => {
             return callback(false, processResp)
         });
 };
+
+
+
 /**
- * Function that adds predefined CommunicationLevel elements to the table
- * Done
+ * Initialize communication level by introducing data to the table
+ * Status: completed
+ * @param {Object} dataObj 
+ * @param {Callback} callback 
  */
-initCommunicationLevel = (req, callback) => {
+const initCommunicationLevel = (dataObj, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_ComLevel'), 'Primary'],
         [uniqueIdPack.generateRandomId('_ComLevel'), 'Secondary'],
@@ -75,12 +89,14 @@ initCommunicationLevel = (req, callback) => {
         });
 };
 /**
- * Function that returns CommunicationLevel id based on designation
- * Done
+ * Fetches Communication level data based on the designation 
+ * Status: Completed
+ * @param {Object} req Request sended by the client 
+ * @param {Callback} callback 
  */
-fetchCommunicationLevelIdByDes = (designation, callback) => {
+const fetchCommunicationLevelByDesignation = (designation, callback) => {
     sequelize
-        .query("SELECT id_communication_level FROM Communication_level where designation = :designation", {
+        .query("SELECT * FROM Communication_level where designation = :designation", {
             replacements: {
                 designation: designation
             }
@@ -88,12 +104,18 @@ fetchCommunicationLevelIdByDes = (designation, callback) => {
             model: CommunicationLevelModel.Communication_level
         })
         .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data.length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
             let processResp = {
-                processRespCode: 200,
+                processRespCode: respCode,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "Fetched successfully",
+                    processMsg: respMsg,
                 }
             }
             return callback(true, processResp)
@@ -116,5 +138,5 @@ fetchCommunicationLevelIdByDes = (designation, callback) => {
 module.exports = {
     fetchCommunicationLevels,
     initCommunicationLevel,
-    fetchCommunicationLevelIdByDes
+    fetchCommunicationLevelByDesignation
 }

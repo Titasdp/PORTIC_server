@@ -10,6 +10,10 @@ const {
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
 
+
+
+const MenuModel = require("./Menu")
+const SubmenuModel = require("./Submenu")
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
 const DataStatusModel = require("../Models/DataStatus")
@@ -22,9 +26,6 @@ Page.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_PageInfo')
-        },
     },
     designation_eng: {
         type: DataTypes.STRING,
@@ -37,32 +38,28 @@ Page.init({
     info_html_pt: {
         type: DataTypes.TEXT('long'),
         allowNull: true,
-        defaultValue: "<div></div>"
+
     },
     info_html_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: true,
-        defaultValue: "<div></div>"
     },
     default_page: {
         type: DataTypes.INTEGER(1),
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 1,
     },
     spotlight_1: {
         type: DataTypes.TEXT('medium'),
         allowNull: true,
-        defaultValue: null
     },
     spotlight_2: {
         type: DataTypes.TEXT('medium'),
         allowNull: true,
-        defaultValue: null
     },
     page_description: {
-        type: DataTypes.TEXT('medium'),
+        type: DataTypes.TEXT('long'),
         allowNull: true,
-        defaultValue: null,
     },
     created_at: {
         type: 'TIMESTAMP',
@@ -75,7 +72,7 @@ Page.init({
         allowNull: false,
     },
 
-    //id_entity, id_publisher, id_status
+
 
 }, {
     sequelize,
@@ -111,7 +108,7 @@ EntityModel.Entity.hasMany(Page, {
         type: DataTypes.STRING,
     }
 });
-Testimonial.belongsTo(EntityModel.Entity, {
+Page.belongsTo(EntityModel.Entity, {
     foreignKey: {
         name: "id_entity",
         type: DataTypes.STRING,
@@ -134,6 +131,41 @@ Page.belongsTo(DataStatusModel.Data_status, {
         type: DataTypes.STRING,
     }
 });
+
+//Menu
+MenuModel.Menu.hasMany(Page, {
+    foreignKey: {
+        name: "id_menu",
+        allowNull: true,
+        type: DataTypes.STRING,
+    }
+});
+Page.belongsTo(MenuModel.Menu, {
+    foreignKey: {
+        name: "id_menu",
+        allowNull: true,
+        type: DataTypes.STRING,
+    }
+});
+
+//Submenu 
+SubmenuModel.Submenu.hasMany(Page, {
+    foreignKey: {
+        name: "id_submenu",
+        allowNull: true,
+        type: DataTypes.STRING,
+    }
+});
+Page.belongsTo(MenuModel.Menu, {
+    foreignKey: {
+        name: "id_submenu",
+        allowNull: true,
+        type: DataTypes.STRING,
+    }
+});
+
+
+
 
 
 

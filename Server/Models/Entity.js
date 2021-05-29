@@ -54,6 +54,16 @@ Entity.init({
         allowNull: false,
         comment: 'This field will increment every time a person Visits and sub entity'
     },
+    postal_code: {
+        type: DataTypes.STRING,
+        defaultValue: "4200-375 Porto",
+        allowNull: false,
+    },
+    street: {
+        type: DataTypes.STRING,
+        defaultValue: "Rua Arquitecto Lobão Vital, 172",
+        allowNull: false
+    },
     lat: {
         type: DataTypes.FLOAT,
         allowNull: false,

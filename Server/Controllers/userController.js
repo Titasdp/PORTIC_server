@@ -190,6 +190,57 @@ const fetchUsers = (req, callback) => {
 
 
 
+/**
+ * Fetches user data based on his username 
+ * Status: Completed
+ * @param {Object} req Request sended by the client 
+ * @param {Callback} callback 
+ */
+const fetchUsedDataByUsername = (username, callback) => {
+    sequelize
+        .query("SELECT * FROM User where username =:username", {
+            replacements: {
+                username: username
+            }
+        }, {
+            model: UserModel.User
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            let processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
+        })
+        .catch(error => {
+            console.log(error);
+            let processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+            return callback(false, processResp)
+        });
+};
+
+
+
+
+
+
 
 
 
@@ -210,5 +261,6 @@ const fetchUsers = (req, callback) => {
 
 module.exports = {
     fetchUsers,
+    fetchUsedDataByUsername,
     initUser
 }
