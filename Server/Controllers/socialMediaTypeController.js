@@ -3,42 +3,11 @@ const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
 /**
- * Function that fetch all entity levels from the Database
- * Done
+ * init social media types 
+ * @param {Req} req The request sended by the client
+ * @param {Callback} callback 
  */
-fetchAllSocialMediaType = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM Social_media_type", {
-            model: SocialMediaTypeModel.Social_media_type
-        })
-        .then(data => {
-            let processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "Fetched successfully",
-                }
-            }
-            return callback(true, processResp)
-        })
-        .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
-        });
-};
-/**
- * Function that adds predefined entity level elements to the table
- * Done
- */
-initSocialMediaType = async (req, callback) => {
+const initSocialMediaType = async (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_SocialMediaType'), 'Facebook'],
         [uniqueIdPack.generateRandomId('_SocialMediaType'), 'Instagram'],
@@ -78,31 +47,39 @@ initSocialMediaType = async (req, callback) => {
             return callback(false, processResp)
         });
 };
+
+
+
+
 /**
- * Function that returns entity level id based on designation
- * Done
+ * fetches all Social media type
+ * @param {Req} req Sended by the client
+ * @param {callback} callback 
  */
-fetchSocialMediaTypeIdByEntity = (designation, callback) => {
+const fetchSocialMediaTypes = (req, callback) => {
     sequelize
-        .query("SELECT id_type FROM Social_media_type where designation = :designation", {
-            replacements: {
-                designation: designation
-            }
-        }, {
+        .query("SELECT * FROM Social_media_type ", {
             model: SocialMediaTypeModel.Social_media_type
         })
         .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data.length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
             let processResp = {
-                processRespCode: 200,
+                processRespCode: respCode,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "Fetched successfully",
+                    processMsg: respMsg,
                 }
             }
             return callback(true, processResp)
         })
         .catch(error => {
+            console.log(error);
             let processResp = {
                 processRespCode: 500,
                 toClient: {
@@ -118,7 +95,6 @@ fetchSocialMediaTypeIdByEntity = (designation, callback) => {
 
 
 module.exports = {
-    fetchAllSocialMediaType,
     initSocialMediaType,
-    fetchSocialMediaTypeIdByEntity
+    fetchSocialMediaTypes
 }

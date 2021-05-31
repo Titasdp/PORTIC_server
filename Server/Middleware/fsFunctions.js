@@ -165,7 +165,9 @@ const fileDelete = (dataObj, callback) => {
 const fileFetch = (dataObj, callback) => {
     let processResp = {}
 
-    checkFileExistence(dataObj.path, (exist) => {
+    console.log(dataObj.path);
+    checkFileExistence(dataObj.path, (exist, result) => {
+
         if (!exist) {
             processResp = {
                 processRespCode: 409,
@@ -176,33 +178,34 @@ const fileFetch = (dataObj, callback) => {
                 }
             }
             return callback(false, processResp)
-        }
-        fs.readFile(dataObj.path, function (err, data) {
-            let functionSuccess = false
-            if (err) {
-                console.log(err);
-                processResp = {
-                    processRespCode: 500,
-                    toClient: {
-                        processResult: null,
-                        processError: null,
-                        processMsg: "Something went wrong please ty again later.",
+        } else {
+            fs.readFile(dataObj.path, function (err, data) {
+                let functionSuccess = false
+                if (err) {
+                    console.log(err);
+                    processResp = {
+                        processRespCode: 500,
+                        toClient: {
+                            processResult: null,
+                            processError: null,
+                            processMsg: "Something went wrong please ty again later.",
+                        }
+                    }
+                } else {
+                    functionSuccess = true
+                    processResp = {
+                        processRespCode: 200,
+                        toClient: {
+                            processResult: data,
+                            processError: null,
+                            processMsg: "The file was successfully fetched.",
+                        }
                     }
                 }
-            } else {
-                functionSuccess = true
-                processResp = {
-                    processRespCode: 200,
-                    toClient: {
-                        processResult: true ? data : new Buffer(data).toString('base64'),
-                        processError: null,
-                        processMsg: "The file was successfully fetched.",
-                    }
-                }
-            }
-            return callback(functionSuccess, processResp)
-        });
+                return callback(functionSuccess, processResp)
+            });
 
+        }
     })
 }
 
@@ -246,12 +249,14 @@ fileExtermination = (dataObj, callback) => {
  * @param {String} imgPath The path where file is stored in the Server
  * @returns true (if confirms file existent) or false (if denny existent)
  */
-const checkFileExistence = async (imgPath) => {
+const checkFileExistence = async (imgPath, callback) => {
+
     await fs.access(imgPath, (err, data) => {
+
         if (err) {
-            return false
+            return callback(false, error)
         }
-        return true
+        return callback(true, data)
     })
 }
 

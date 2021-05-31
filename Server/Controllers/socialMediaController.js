@@ -1,17 +1,15 @@
+const EntitySocialMediaModel = require("../Models/EntitySocialMedia")
 const sequelize = require("../Database/connection")
-const uniqueIdPack = require("../Middleware/uniqueId")
-const EntityEmailModel = require("../Models/EntityEmail")
+
 
 /**
- * Initialize the table Entity_email by introducing predefined data to it.
- * Status:Completed
- * @param {Object} dataObj 
+ * init social media types 
+ * @param {Req} req The request sended by the client
  * @param {Callback} callback 
- * @returns 
  */
-const initEntityEmail = async (dataObj, callback) => {
-    let processResp = {}
-    if (dataObj.communicationLevels.length === 0 || dataObj.idEntity === null || dataObj.idUser === null) {
+const initSocialMediaType = async (dataObj, callback) => {
+
+    if (dataObj.idEntity === null || dataObj.socialMediaTypes.length === 0) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -22,31 +20,31 @@ const initEntityEmail = async (dataObj, callback) => {
         }
         return callback(false, processResp)
     }
-
-
-    console.log(dataObj.communicationLevels[1].dataValues.id_communication_level);
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Email'), "portic@portic.ipp.pt", dataObj.idEntity, dataObj.idUser, dataObj.communicationLevels[0].dataValues.id_communication_level],
-        [uniqueIdPack.generateRandomId('_Email'), "communication@portic.ipp.pt", dataObj.idEntity, dataObj.idUser, dataObj.communicationLevels[1].dataValues.id_communication_level],
+        ['https://www.facebook.com/porticpporto', dataObj.socialMediaTypes[0].dataValues.id_type, dataObj.idEntity],
+        ['https://www.instagram.com/politecnicodoporto/', dataObj.socialMediaTypes[1].dataValues.id_type, dataObj.idEntity],
+        ['https://www.youtube.com/channel/UCa0njrkoyEd8kwjIVPE5pNg', dataObj.socialMediaTypes[2].dataValues.id_type, dataObj.idEntity],
+        ['https://twitter.com/politecnico', dataObj.socialMediaTypes[3].dataValues.id_type, dataObj.idEntity],
+        ['https://www.linkedin.com/company/portic-pporto', dataObj.socialMediaTypes[4].dataValues.id_type, dataObj.idEntity],
     ]
-    sequelize
+    await sequelize
         .query(
-            `INSERT INTO Entity_email (id_email , email , id_entity , id_creator , id_communication_level) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Entity_social_media (url, id_social_media,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
-                model: EntityEmailModel.Entity_email
+                model: EntitySocialMediaModel.Entity_social_media
             }
         )
         .then(data => {
-            processResp = {
+            let processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "All data Where created successfully.",
+                    processMsg: "All the data were successfully created.",
                 }
             }
-            return callback(true, processResp)
+            return callback(false, processResp)
         })
         .catch(error => {
             console.log(error);
@@ -54,24 +52,23 @@ const initEntityEmail = async (dataObj, callback) => {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: null,
-                    processMsg: "Something went wrong please try again later",
+                    processError: error,
+                    processMsg: "Something went wrong please try again later.",
                 }
             }
             return callback(false, processResp)
         });
-}
+};
 
 /**
- * Fetches all Pages 
- * Status: Completed
- * @param {Object} req Request sended by the client 
- * @param {Callback} callback 
+ * fetches all  entities Social medias 
+ * @param {Req} req Sended by the client
+ * @param {callback} callback 
  */
-const fetchEmails = (req, callback) => {
+const fetchSocialEntitiesSocialMedias = (req, callback) => {
     sequelize
-        .query("SELECT * FROM Entity_email", {
-            model: EntityEmailModel.Entity_email
+        .query("SELECT * FROM Entity_social_media ", {
+            model: EntitySocialMediaModel.Entity_social_media
         })
         .then(data => {
             let respCode = 200;
@@ -91,12 +88,12 @@ const fetchEmails = (req, callback) => {
             return callback(true, processResp)
         })
         .catch(error => {
-            console.log(error);
+            console.log(error)
             let processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: null,
+                    processError: error,
                     processMsg: "Something when wrong please try again later",
                 }
             }
@@ -105,26 +102,23 @@ const fetchEmails = (req, callback) => {
 };
 
 
-
-
-
 /**
- * Fetches all entity emails 
+ * Fetches all Social media for a specific social media 
  * Status: Completed
  * @param {Object} req Request sended by the client 
  * @param {Callback} callback 
  */
-const fetchEntityEmails = (dataObj, callback) => {
-    let query = `SELECT Entity_email.email, Communication_level.designation as communication_level FROM ( Entity_email inner Join 
-        Communication_level on Entity_email.id_communication_level = Communication_level.id_communication_level)
-       where Entity_email.id_entity =:id_entity;`
+const fetchEntitySocialMedia = (dataObj, callback) => {
+    let query = `SELECT Entity_social_media.url, Social_media_type.designation as social_media_type FROM (Entity_social_media inner Join 
+        Social_media_type on Social_media_type.id_type = Entity_social_media.id_social_media)
+       where Entity_social_media.id_entity =:id_entity;`
     sequelize
         .query(query, {
             replacements: {
                 id_entity: dataObj.req.sanitize(dataObj.req.params.id)
             }
         }, {
-            model: EntityEmailModel.Entity_email
+            model: EntitySocialMediaModel.Entity_social_media
         })
         .then(data => {
             let respCode = 200;
@@ -163,18 +157,8 @@ const fetchEntityEmails = (dataObj, callback) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
 module.exports = {
-    initEntityEmail,
-    fetchEmails,
-    fetchEntityEmails
+    initSocialMediaType,
+    fetchSocialEntitiesSocialMedias,
+    fetchEntitySocialMedia
 }

@@ -22,6 +22,7 @@ Entity.init({
         unique: true,
         // return uniqueIdPack.generateRandomId('_Entity')
     },
+
     designation: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -73,6 +74,32 @@ Entity.init({
         type: DataTypes.FLOAT,
         allowNull: false,
         defaultValue: -8.60569453069293,
+    },
+
+
+    hightLight_1_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+        comment: "highlight it can be a news,project etc id"
+    },
+    hightLight_2_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+        comment: "highlight it can be a news,project etc id"
+
+    },
+    hightLight_3_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+        comment: "highlight it can be a news,project etc id"
+    },
+    colors: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: `[#ffff,#C94D24,#080808]`
     },
     created_at: {
         type: 'TIMESTAMP',

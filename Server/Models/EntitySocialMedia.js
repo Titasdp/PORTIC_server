@@ -10,6 +10,11 @@ const EntityModel = require("../Models/Entity");
 class Entity_social_media extends Model {}
 
 Entity_social_media.init({
+    url: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,
@@ -22,13 +27,16 @@ Entity_social_media.init({
     },
 }, {
     sequelize,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     modelName: "Entity_social_media",
     tableName: "Entity_social_media",
     timestamps: true,
+    logging: false
 });
 
 SocialMediaTypeModel.Social_media_type.belongsToMany(EntityModel.Entity, {
-    through: Project_entity,
+    through: Entity_social_media,
     foreignKey: {
         name: "id_social_media",
         primaryKey: true,
@@ -37,7 +45,7 @@ SocialMediaTypeModel.Social_media_type.belongsToMany(EntityModel.Entity, {
     }
 });
 EntityModel.Entity.belongsToMany(SocialMediaTypeModel.Social_media_type, {
-    through: Project_entity,
+    through: Entity_social_media,
     foreignKey: {
         name: "id_entity",
         primaryKey: true,

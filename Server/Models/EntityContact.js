@@ -7,7 +7,6 @@ const {
  * //// Connection (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 const EntityModel = require("../Models/Entity")
 const CommunicationLevelModel = require("../Models/CommunicationLevel")
@@ -23,24 +22,11 @@ Entity_contact.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Contact')
-        },
     },
     number: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-    },
-    description_pt: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        defaultValue: "Não há informações adicionais relacionadas a este contato",
-    },
-    description_eng: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        defaultValue: "There is no additional information related to this contact",
     },
     created_at: {
         type: 'TIMESTAMP',

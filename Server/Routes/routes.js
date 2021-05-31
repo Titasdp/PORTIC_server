@@ -13,17 +13,19 @@ const categoryController = require("../Controllers/categoryController")
 const communicationLevelController = require("../Controllers/communicationLevelController")
 //
 const menuController = require("../Controllers/menuController")
-const pageController = require("../Controllers/pageController")
+// const pageController = require("../Controllers/pageController")
 //
-const EntityEmailController = require("../Controllers/entityEmailController")
+const entityEmailController = require("../Controllers/entityEmailController");
+const entityContactController = require("../Controllers/entityContactController")
+const socialMediaController = require("../Controllers/socialMediaController")
 //
 //
 const pictureController = require("../Controllers/pictureController")
 //
 const entityController = require("../Controllers/entityController");
-const {
-    Communication_level
-} = require("../Models/CommunicationLevel");
+
+
+
 //<DataStatus
 router.get("/dataStatus", (req, res) => {
     dataStatusController.getAllDataStatus(req, result => {
@@ -142,6 +144,8 @@ router.patch("/categories/:id", (req, res) => {
 
 
 // *<Entity Routes
+
+// !Here brother
 /**
  * Initialize entity
  * Status:Completed
@@ -208,21 +212,34 @@ router.post("/init/entities", async (req, res) => {
 
 
 })
+
+
+/**
+ * Fetch an entity and his data based on an id
+ * Todo:Under development
+ */
+router.get("/entities/:id", (req, res) => {
+    entityController.fetchFullEntityDataById({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
 // *Entity Routes> 
 
 //*<Entity Email Routes
-
 /** 
  * Status: Completed
  * !OBS: Future Adaptation with entity Init
  */
-router.post("/init/entityEmails", async (req, res) => {
+router.post("/init/entities/emails", async (req, res) => {
     let idEntity = null
     let communicationLevels = []
     let idUser = null
 
     //#0 - Completed
-    await EntityEmailController.fetchEmails(req, async (emailsFetchSuccess, emailsFetchResult) => {
+    await entityEmailController.fetchEmails(req, async (emailsFetchSuccess, emailsFetchResult) => {
         if (!emailsFetchSuccess) {
             res.status(emailsFetchResult.processRespCode).send(emailsFetchResult.toClient)
         } else if (emailsFetchSuccess) {
@@ -263,7 +280,7 @@ router.post("/init/entityEmails", async (req, res) => {
                                 }
 
                                 //   #5
-                                EntityEmailController.initEntityEmail({
+                                entityEmailController.initEntityEmail({
                                     idEntity: idEntity,
                                     communicationLevels: communicationLevels,
                                     idUser: idUser
@@ -281,9 +298,143 @@ router.post("/init/entityEmails", async (req, res) => {
         }
     })
 });
-
-
 //*Entity Email Routes>
+
+//*<Entity Contact Routes
+/** 
+ * Status Completed 
+ * !OBS: Future Adaptation with entity Init
+ */
+router.post("/init/entities/contacts", async (req, res) => {
+    let idEntity = null
+    let communicationLevels = []
+    let idUser = null
+
+    //#0 - Completed
+    await entityContactController.fetchContacts(req, async (contactsFetchSuccess, contactsFetchResult) => {
+        if (!contactsFetchSuccess) {
+            res.status(contactsFetchResult.processRespCode).send(contactsFetchResult.toClient)
+        } else if (contactsFetchSuccess) {
+            if (contactsFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                await communicationLevelController.fetchCommunicationLevels(req, (comLevelFetchSuccess, comLevelFetchResult) => {
+                    if (!comLevelFetchSuccess) {
+                        res.status(comLevelFetchResult.processRespCode).send(comLevelFetchResult.toClient)
+                    } else if (comLevelFetchSuccess) {
+                        if (comLevelFetchResult.processRespCode === 200) {
+                            communicationLevels = comLevelFetchResult.toClient.processResult;
+                        }
+                        //#2
+                        entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                            if (!entityFetchSuccess) {
+                                res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                            }
+
+                            if (entityFetchResult.processRespCode === 200) {
+                                idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                            }
+                            //#4
+                            userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                                if (!fetchUserSuccess) {
+                                    res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                                }
+
+                                if (fetchUserResult.processRespCode === 200) {
+                                    idUser = fetchUserResult.toClient.processResult[0].id_user
+                                }
+                                //#5
+                                entityContactController.initEntityContact({
+                                    idEntity: idEntity,
+                                    communicationLevels: communicationLevels,
+                                    idUser: idUser
+                                }, (success, result) => {
+                                    res.status(result.processRespCode).send(result.toClient)
+                                });
+                            })
+                        })
+                    }
+                })
+            }
+        }
+    })
+});
+//*Entity Contact Routes>
+
+
+
+//*<Entity Social Media  Routes
+/** 
+ * todo 
+ * !OBS: Future Adaptation with entity Init
+ */
+router.post("/init/entities/social_medias", async (req, res) => {
+    let idEntity = null
+    let socialMediaTypes = []
+    //#0 - Completed
+    await socialMediaController.fetchSocialEntitiesSocialMedias(req, async (socMediaFetchSuccess, socMediaFetchResult) => {
+        if (!socMediaFetchSuccess) {
+            res.status(socMediaFetchResult.processRespCode).send(socMediaFetchResult.toClient)
+        } else if (socMediaFetchSuccess) {
+            if (socMediaFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                await socialMediaTypeController.fetchSocialMediaTypes(req, (typesFetchSuccess, typesFetchResult) => {
+                    if (!typesFetchSuccess) {
+                        res.status(typesFetchResult.processRespCode).send(typesFetchResult.toClient)
+                    } else if (typesFetchSuccess) {
+                        if (typesFetchResult.processRespCode === 200) {
+                            socialMediaTypes = typesFetchResult.toClient.processResult;
+                        }
+                        //#2
+                        entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                            if (!entityFetchSuccess) {
+                                res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                            }
+
+                            if (entityFetchResult.processRespCode === 200) {
+                                idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                            }
+                            //#3
+                            socialMediaController.initSocialMediaType({
+                                idEntity: idEntity,
+                                socialMediaTypes: socialMediaTypes,
+                            }, (success, result) => {
+                                res.status(result.processRespCode).send(result.toClient)
+                            });
+                        })
+                    }
+                })
+            }
+        }
+    })
+});
+//*Entity Social Media Routes>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //*<Entity Menu
@@ -291,7 +442,7 @@ router.post("/init/entityEmails", async (req, res) => {
  * Initialize Menu
  * Status:Completed
  */
-router.post("/init/menus", async (req, res) => {
+router.post("/init/entities/menus", async (req, res) => {
     let idEntity = null
     let idDataStatus = null
     //#0
@@ -349,98 +500,89 @@ router.post("/init/menus", async (req, res) => {
 //*Entity Menu>
 
 //*<Entity Pages
-//Todo
-router.post("/init/pages", async (req, res) => {
-    let idEntity = null
-    let idDataStatus = null
-    let idUser = null
-    let menusIds = []
-    //#0
+// //Todo
+// router.post("/init/entities/pages", async (req, res) => {
+//     let idEntity = null
+//     let idDataStatus = null
+//     let idUser = null
+//     let menusIds = []
+//     //#0
 
-    await pageController.fetchPages(req, async (pagesFetchSuccess, pagesFetchResult) => {
-        if (!pagesFetchSuccess) {
-            res.status(pagesFetchResult.processRespCode).send(pagesFetchResult.toClient)
-        } else if (pagesFetchSuccess) {
-            if (pagesFetchResult.processRespCode === 200) {
-                res.status(409).send({
-                    processResult: null,
-                    processError: null,
-                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
-                })
-            } else {
-                //#1
-                await menuController.fetchMenus(req, (menusFetchSuccess, menusFetchResult) => {
-                    if (!menusFetchSuccess) {
-                        res.status(menusFetchResult.processRespCode).send(menusFetchResult.toClient)
-                    } else if (menusFetchSuccess) {
-                        if (menusFetchResult.processRespCode === 200) {
-                            menusIds = menusFetchResult.toClient.processResult;
-                        }
-
-
-                        //#2
-                        entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
-                            if (!entityFetchSuccess) {
-                                res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
-                            }
-
-                            if (entityFetchResult.processRespCode === 200) {
-                                idEntity = entityFetchResult.toClient.processResult[0].id_entity
-                            }
-
-                            //#3
-                            dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
-                                if (!statusFetchSuccess) {
-                                    res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
-                                }
-
-                                if (statusFetchResult.processRespCode === 200) {
-                                    idDataStatus = statusFetchResult.toClient.processResult[0].id_status
-                                }
-
-                                userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
-                                    if (!fetchUserSuccess) {
-                                        res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
-                                    }
-
-                                    if (fetchUserResult.processRespCode === 200) {
-                                        idUser = fetchUserResult.toClient.processResult[0].id_user
-                                    }
-
-                                    //#4
-                                    pageController.initPage({
-                                        idEntity: idEntity,
-                                        idDataStatus: idDataStatus,
-                                        idUser: idUser,
-                                        menusIds: menusIds
-                                    }, (success, result) => {
-                                        res.status(result.processRespCode).send(result.toClient)
-                                    });
-                                })
-
-                            })
-                        })
-
-                    }
-
-                })
+//     await pageController.fetchPages(req, async (pagesFetchSuccess, pagesFetchResult) => {
+//         if (!pagesFetchSuccess) {
+//             res.status(pagesFetchResult.processRespCode).send(pagesFetchResult.toClient)
+//         } else if (pagesFetchSuccess) {
+//             if (pagesFetchResult.processRespCode === 200) {
+//                 res.status(409).send({
+//                     processResult: null,
+//                     processError: null,
+//                     processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+//                 })
+//             } else {
+//                 //#1
+//                 await menuController.fetchMenus(req, (menusFetchSuccess, menusFetchResult) => {
+//                     if (!menusFetchSuccess) {
+//                         res.status(menusFetchResult.processRespCode).send(menusFetchResult.toClient)
+//                     } else if (menusFetchSuccess) {
+//                         if (menusFetchResult.processRespCode === 200) {
+//                             menusIds = menusFetchResult.toClient.processResult;
+//                         }
 
 
-            }
-        }
-    })
+//                         //#2
+//                         entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+//                             if (!entityFetchSuccess) {
+//                                 res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+//                             }
+
+//                             if (entityFetchResult.processRespCode === 200) {
+//                                 idEntity = entityFetchResult.toClient.processResult[0].id_entity
+//                             }
+
+//                             //#3
+//                             dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
+//                                 if (!statusFetchSuccess) {
+//                                     res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
+//                                 }
+
+//                                 if (statusFetchResult.processRespCode === 200) {
+//                                     idDataStatus = statusFetchResult.toClient.processResult[0].id_status
+//                                 }
+
+//                                 userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+//                                     if (!fetchUserSuccess) {
+//                                         res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+//                                     }
+
+//                                     if (fetchUserResult.processRespCode === 200) {
+//                                         idUser = fetchUserResult.toClient.processResult[0].id_user
+//                                     }
+
+//                                     //#4
+//                                     pageController.initPage({
+//                                         idEntity: idEntity,
+//                                         idDataStatus: idDataStatus,
+//                                         idUser: idUser,
+//                                         menusIds: menusIds
+//                                     }, (success, result) => {
+//                                         res.status(result.processRespCode).send(result.toClient)
+//                                     });
+//                                 })
+
+//                             })
+//                         })
+
+//                     }
+
+//                 })
 
 
-
-
-
-
-
-});
+//             }
+//         }
+//     })
+// });
 
 //*Entity Pages>
-
-
 
 // *<User
 /**
@@ -519,25 +661,8 @@ router.post("/init/users", async (req, res) => {
                 });
 
             })
-
-
-
-
-
-
-
-
-
-
         }
     })
-
-
-
-
-
-
-
 })
 //*User>
 

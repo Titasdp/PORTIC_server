@@ -1,7 +1,7 @@
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 const PageModel = require("../Models/Page")
-
+//!Working here
 /**
  * Initialize the table Page by introducing predefined data to it.
  * Status:Completed
@@ -10,8 +10,6 @@ const PageModel = require("../Models/Page")
  * @returns 
  */
 const initPage = async (dataObj, callback) => {
-
-
     console.log(dataObj.idUser);
     let processResp = {}
     if (dataObj.idDataStatus === null || dataObj.idEntity === null || dataObj.menusIds.length !== 7 || dataObj.idUser === null) {
@@ -78,6 +76,50 @@ const initPage = async (dataObj, callback) => {
 const fetchPages = (req, callback) => {
     sequelize
         .query("SELECT * FROM Page", {
+            model: PageModel.Page
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data.length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            let processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
+        })
+        .catch(error => {
+            console.log(error);
+            let processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+            return callback(false, processResp)
+        });
+};
+
+
+
+/**
+ * Fetches all Pages from an entity
+ * Status: Completed
+ * @param {Object} req Request sended by the client 
+ * @param {Callback} callback 
+ */
+const fetchMenuPage = (dataObj, callback) => {
+    sequelize
+        .query("SELECT * FROM Page where is page", {
             model: PageModel.Page
         })
         .then(data => {

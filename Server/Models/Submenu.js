@@ -35,6 +35,20 @@ Submenu.init({
         allowNull: true,
         defaultValue: null
     },
+    info_html_pt: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+        // Just for not default pages
+    },
+    info_html_eng: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+        // Just for not default pages
+    },
+    page_description: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+    },
 
     created_at: {
         type: 'TIMESTAMP',
@@ -52,8 +66,8 @@ Submenu.init({
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
-    modelName: "Menu_category",
-    tableName: "Menu_category",
+    modelName: "Submenu",
+    tableName: "Submenu",
     logging: false,
 });
 

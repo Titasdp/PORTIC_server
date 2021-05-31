@@ -21,9 +21,6 @@ Menu.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        // defaultValue: function () {
-        //     return uniqueIdPack.generateRandomId('_Menu')
-        // },
     },
     designation_eng: {
         type: DataTypes.STRING,
@@ -32,6 +29,61 @@ Menu.init({
     designation_pt: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    page_description: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+    },
+    page_description_eng: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+    },
+    page_description_pt: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+    },
+    external_path: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+    },
+    default: {
+        type: DataTypes.INTEGER(1),
+        defaultValue: 1,
+        allowNull: false
+    },
+
+    spotlight_1_eng: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        //
+    },
+    spotlight_2_eng: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        //
+    },
+
+    spotlight_1_pt: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        //
+    },
+    spotlight_2_pt: {
+        type: DataTypes.TEXT('medium'),
+        allowNull: true,
+        //
+    },
+
+    info_html_pt: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+        // Just for not default pages
+    },
+    info_html_eng: {
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+        // Just for not default pages
     },
     created_at: {
         type: 'TIMESTAMP',
