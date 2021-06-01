@@ -53,7 +53,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
 
     console.log(dataObj.req.body.selectedLang);
     console.log(dataObj.req.params.id);
-    if (!dataObj.req.body.selectedLang || !dataObj.req.params.id) {
+    if (!dataObj.req.sanitize(dataObj.req.params.lang === "pt") || !dataObj.req.params.id) {
 
         processResp = {
             processRespCode: 400,
@@ -68,7 +68,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
 
 
 
-    let query = (dataObj.req.sanitize(dataObj.req.body.selectedLang === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
+    let query = (dataObj.req.sanitize(dataObj.req.params.lang === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
         Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
         Inner Join
         Picture on Picture.id_picture = Entity.id_logo)
