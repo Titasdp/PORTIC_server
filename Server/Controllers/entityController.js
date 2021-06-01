@@ -179,7 +179,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: null,
+                    processError: error,
                     processMsg: "Something when wrong please try again later",
                 }
             }
