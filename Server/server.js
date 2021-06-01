@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express")
 const app = express()
-const port = process.env.port || 3000
+const port = process.env.PORT || 3000
 const dbConnectionPack = require('../Server/Middleware/bdConnection')
 const expressSanitizer = require("express-sanitizer");
 const router = require("../Server/Routes/routes")
