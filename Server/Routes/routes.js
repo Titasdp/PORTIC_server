@@ -695,7 +695,7 @@ router.post("/init/communicationLevels", async (req, res) => {
 
 
 //!TO delete
-router.get("/something", async (req, res) => {
+router.get("/something/:id/:second", async (req, res) => {
     res.status(400).send("Just a test")
 })
 
