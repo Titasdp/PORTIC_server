@@ -218,7 +218,7 @@ router.post("/init/entities", async (req, res) => {
  * Fetch an entity and his data based on an id
  * Todo:Under development
  */
-router.get("/:lang/entities/:id", (req, res) => {
+router.get("/entities/:id/:lang", (req, res) => {
     entityController.fetchFullEntityDataById({
         req: req
     }, (fetchSuccess, fetchResult) => {
