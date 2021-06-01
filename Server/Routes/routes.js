@@ -219,16 +219,12 @@ router.post("/init/entities", async (req, res) => {
  * Todo:Under development
  */
 router.get("/:lng/entities/:id", (req, res) => {
-
-
-    console.log();
-
     res.status(200).send(req.params.id + " " + req.params.lng)
-    // entityController.fetchFullEntityDataById({
-    //     req: req
-    // }, (fetchSuccess, fetchResult) => {
-    //     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
-    // })
+    entityController.fetchFullEntityDataById({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
 })
 
 // *Entity Routes> 
