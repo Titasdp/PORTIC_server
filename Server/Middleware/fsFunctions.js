@@ -250,9 +250,9 @@ fileExtermination = (dataObj, callback) => {
  * @returns true (if confirms file existent) or false (if denny existent)
  */
 const checkFileExistence = async (imgPath, callback) => {
-
+    console.log("here");
     await fs.access(imgPath, (err, data) => {
-
+        console.log(err);
         if (err) {
             return callback(false, error)
         }
