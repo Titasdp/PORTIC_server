@@ -123,53 +123,65 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                 }
 
 
-                // fsPack.fileFetch({
-                //     path: data[0][0].img
-                // }, (fsSuccess, fsResult) => {
-                //     if (fsSuccess) {
-                //         entityObj.img = fsResult.toClient.processResult
-                //     }
-                menuController.fetchEntityMenus({
-                    req: dataObj.req
-                }, (fetchSuccess, fetchResult) => {
-                    if (fetchSuccess) {
-                        entityObj.menus = fetchResult.toClient.processResult
-                    }
-                    entityEmailController.fetchEntityEmails({
-                        req: dataObj.req
-                    }, (fetchSuccess, fetchResult) => {
-                        if (fetchSuccess) {
-                            entityObj.emails = fetchResult.toClient.processResult
-                        }
-                        entityContactController.fetchEntityContacts({
-                            req: dataObj.req
-                        }, (fetchSuccess, fetchResult) => {
-                            if (fetchSuccess) {
-                                entityObj.contacts = fetchResult.toClient.processResult
+                fsPack.fileFetch({
+                    path: data[0][0].img
+                }, (fsSuccess, fsResult) => {
+                    if (fsSuccess) {
+                        entityObj.img = fsResult.toClient.processResult
+                    } else {
+
+                        let processResp = {
+                            processRespCode: respCode,
+                            toClient: {
+                                processResult: fsResult,
+                                processError: null,
+                                processMsg: respMsg,
                             }
+                        }
+                        return callback(true, processResp)
 
-                            socialMediaController.fetchEntitySocialMedia({
-                                req: dataObj.req
-                            }, (fetchSuccess, fetchResult) => {
-                                if (fetchSuccess) {
-                                    entityObj.social_medias = fetchResult.toClient.processResult
-                                }
-                                let processResp = {
-                                    processRespCode: respCode,
-                                    toClient: {
-                                        processResult: [entityObj],
-                                        processError: null,
-                                        processMsg: respMsg,
-                                    }
-                                }
-                                return callback(true, processResp)
-                            })
+                    }
+                    // menuController.fetchEntityMenus({
+                    //     req: dataObj.req
+                    // }, (fetchSuccess, fetchResult) => {
+                    //     if (fetchSuccess) {
+                    //         entityObj.menus = fetchResult.toClient.processResult
+                    //     }
+                    //     entityEmailController.fetchEntityEmails({
+                    //         req: dataObj.req
+                    //     }, (fetchSuccess, fetchResult) => {
+                    //         if (fetchSuccess) {
+                    //             entityObj.emails = fetchResult.toClient.processResult
+                    //         }
+                    //         entityContactController.fetchEntityContacts({
+                    //             req: dataObj.req
+                    //         }, (fetchSuccess, fetchResult) => {
+                    //             if (fetchSuccess) {
+                    //                 entityObj.contacts = fetchResult.toClient.processResult
+                    //             }
 
-                        })
+                    //             socialMediaController.fetchEntitySocialMedia({
+                    //                 req: dataObj.req
+                    //             }, (fetchSuccess, fetchResult) => {
+                    //                 if (fetchSuccess) {
+                    //                     entityObj.social_medias = fetchResult.toClient.processResult
+                    //                 }
+                    //                 let processResp = {
+                    //                     processRespCode: respCode,
+                    //                     toClient: {
+                    //                         processResult: [entityObj],
+                    //                         processError: null,
+                    //                         processMsg: respMsg,
+                    //                     }
+                    //                 }
+                    //                 return callback(true, processResp)
+                    //             })
 
-                    })
+                    //         })
+
+                    //     })
+                    // })
                 })
-                // })
             }
         })
         .catch(error => {
