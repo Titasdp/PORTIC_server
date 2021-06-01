@@ -68,7 +68,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
     processResp = {
         processRespCode: 200,
         toClient: {
-            processResult: (dataObj.req.params.lng === "pt" + " " + dataObj.req.params.id),
+            processResult: (dataObj.req.params.lng + " " + dataObj.req.params.id),
             processError: null,
             processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
         }
