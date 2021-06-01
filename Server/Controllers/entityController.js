@@ -128,18 +128,6 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                 }, (fsSuccess, fsResult) => {
                     if (fsSuccess) {
                         entityObj.img = fsResult.toClient.processResult
-                    } else {
-
-                        let processResp = {
-                            processRespCode: respCode,
-                            toClient: {
-                                processResult: fsResult,
-                                processError: null,
-                                processMsg: respMsg,
-                            }
-                        }
-                        return callback(true, processResp)
-
                     }
                     menuController.fetchEntityMenus({
                         req: dataObj.req
