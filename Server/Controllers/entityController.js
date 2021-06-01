@@ -65,132 +65,126 @@ const fetchFullEntityDataById = (dataObj, callback) => {
     }
 
 
-    processResp = {
-        processRespCode: 200,
-        toClient: {
-            processResult: (dataObj.req.params.lng + " " + dataObj.req.params.id),
-            processError: null,
-            processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
-        }
-    }
 
-    return callback(false, processResp)
 
-    // let query = (dataObj.req.sanitize(dataObj.req.params.lng === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
-    //     Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
-    //     Inner Join
-    //     Picture on Picture.id_picture = Entity.id_logo)
-    //     Inner Join
-    //     Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;` : `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_eng as desc_html  ,Entity.slogan_eng as slogan, Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id, Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
-    //     Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
-    //     Inner Join
-    //     Picture on Picture.id_picture = Entity.id_logo)
-    //     Inner Join
-    //     Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;`;
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
+        Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
+        Inner Join
+        Picture on Picture.id_picture = Entity.id_logo)
+        Inner Join
+        Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;` : `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_eng as desc_html  ,Entity.slogan_eng as slogan, Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id, Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
+        Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
+        Inner Join
+        Picture on Picture.id_picture = Entity.id_logo)
+        Inner Join
+        Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;`;
 
-    // sequelize
-    //     .query(query, {
-    //         replacements: {
-    //             id_entity: dataObj.req.sanitize(dataObj.req.params.id)
-    //         }
-    //     }, {
-    //         model: EntityModel.Entity
-    //     })
-    //     .then(data => {
+    sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+            }
+        }, {
+            model: EntityModel.Entity
+        })
+        .then(data => {
 
-    //         let respCode = 200;
-    //         let respMsg = "Fetched successfully."
-    //         if (data[0].length === 0) {
-    //             respCode = 204
-    //             respMsg = "Fetch process completed successfully, but there is no content."
-    //             let processResp = {
-    //                 processRespCode: respCode,
-    //                 toClient: {
-    //                     processResult: data[0],
-    //                     processError: null,
-    //                     processMsg: respMsg,
-    //                 }
-    //             }
-    //             return callback(true, processResp)
-    //         } else {
-    //             let entityObj = {
-    //                 id_entity: data[0][0].id_entity,
-    //                 designation: data[0][0].designation,
-    //                 initials: data[0][0].initials,
-    //                 desc_html: data[0][0].desc_html,
-    //                 slogan: data[0][0].slogan,
-    //                 postal_code: data[0][0].postal_code,
-    //                 street: data[0][0].street,
-    //                 lat: data[0][0].lat,
-    //                 long: data[0][0].long,
-    //                 highlights: [data[0][0].hightLight_1_id, data[0][0].hightLight_2_id, data[0][0].hightLight_3_id],
-    //                 colors: data[0][0].colors,
-    //                 menus: [],
-    //                 contacts: [],
-    //                 emails: [],
-    //                 social_medias: [],
-    //             }
-    //             fsPack.fileFetch({
-    //                 path: data[0][0].img
-    //             }, (fsSuccess, fsResult) => {
-    //                 if (fsSuccess) {
-    //                     entityObj.img = fsResult.toClient.processResult
-    //                 }
-    //                 menuController.fetchEntityMenus({
-    //                     req: dataObj.req
-    //                 }, (fetchSuccess, fetchResult) => {
-    //                     if (fetchSuccess) {
-    //                         entityObj.menus = fetchResult.toClient.processResult
-    //                     }
-    //                     entityEmailController.fetchEntityEmails({
-    //                         req: dataObj.req
-    //                     }, (fetchSuccess, fetchResult) => {
-    //                         if (fetchSuccess) {
-    //                             entityObj.emails = fetchResult.toClient.processResult
-    //                         }
-    //                         entityContactController.fetchEntityContacts({
-    //                             req: dataObj.req
-    //                         }, (fetchSuccess, fetchResult) => {
-    //                             if (fetchSuccess) {
-    //                                 entityObj.contacts = fetchResult.toClient.processResult
-    //                             }
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+                let processResp = {
+                    processRespCode: respCode,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: respMsg,
+                    }
+                }
+                return callback(true, processResp)
+            } else {
+                let entityObj = {
+                    id_entity: data[0][0].id_entity,
+                    designation: data[0][0].designation,
+                    initials: data[0][0].initials,
+                    desc_html: data[0][0].desc_html,
+                    slogan: data[0][0].slogan,
+                    postal_code: data[0][0].postal_code,
+                    street: data[0][0].street,
+                    lat: data[0][0].lat,
+                    long: data[0][0].long,
+                    highlights: [data[0][0].hightLight_1_id, data[0][0].hightLight_2_id, data[0][0].hightLight_3_id],
+                    colors: data[0][0].colors,
+                    menus: [],
+                    contacts: [],
+                    emails: [],
+                    social_medias: [],
+                }
 
-    //                             socialMediaController.fetchEntitySocialMedia({
-    //                                 req: dataObj.req
-    //                             }, (fetchSuccess, fetchResult) => {
-    //                                 if (fetchSuccess) {
-    //                                     entityObj.social_medias = fetchResult.toClient.processResult
-    //                                 }
-    //                                 let processResp = {
-    //                                     processRespCode: respCode,
-    //                                     toClient: {
-    //                                         processResult: [entityObj],
-    //                                         processError: null,
-    //                                         processMsg: respMsg,
-    //                                     }
-    //                                 }
-    //                                 return callback(true, processResp)
-    //                             })
 
-    //                         })
+                return callback(true, entityObj)
+                // fsPack.fileFetch({
+                //     path: data[0][0].img
+                // }, (fsSuccess, fsResult) => {
+                //     if (fsSuccess) {
+                //         entityObj.img = fsResult.toClient.processResult
+                //     }
+                //     menuController.fetchEntityMenus({
+                //         req: dataObj.req
+                //     }, (fetchSuccess, fetchResult) => {
+                //         if (fetchSuccess) {
+                //             entityObj.menus = fetchResult.toClient.processResult
+                //         }
+                //         entityEmailController.fetchEntityEmails({
+                //             req: dataObj.req
+                //         }, (fetchSuccess, fetchResult) => {
+                //             if (fetchSuccess) {
+                //                 entityObj.emails = fetchResult.toClient.processResult
+                //             }
+                //             entityContactController.fetchEntityContacts({
+                //                 req: dataObj.req
+                //             }, (fetchSuccess, fetchResult) => {
+                //                 if (fetchSuccess) {
+                //                     entityObj.contacts = fetchResult.toClient.processResult
+                //                 }
 
-    //                     })
-    //                 })
-    //             })
-    //         }
-    //     })
-    //     .catch(error => {
-    //         console.log(error);
-    //         let processResp = {
-    //             processRespCode: 500,
-    //             toClient: {
-    //                 processResult: null,
-    //                 processError: null,
-    //                 processMsg: "Something when wrong please try again later",
-    //             }
-    //         }
-    //         return callback(false, processResp)
-    //     });
+                //                 socialMediaController.fetchEntitySocialMedia({
+                //                     req: dataObj.req
+                //                 }, (fetchSuccess, fetchResult) => {
+                //                     if (fetchSuccess) {
+                //                         entityObj.social_medias = fetchResult.toClient.processResult
+                //                     }
+                //                     let processResp = {
+                //                         processRespCode: respCode,
+                //                         toClient: {
+                //                             processResult: [entityObj],
+                //                             processError: null,
+                //                             processMsg: respMsg,
+                //                         }
+                //                     }
+                //                     return callback(true, processResp)
+                //                 })
+
+                //             })
+
+                //         })
+                //     })
+                // })
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            let processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+            return callback(false, processResp)
+        });
 };
 
 
