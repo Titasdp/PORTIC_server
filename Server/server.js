@@ -25,4 +25,5 @@ app.use(router);
 app.listen(port, async () => {
     await dbConnectionPack.testBdConnection();
     console.log(`PORTIC server is online and working on door: ${port}`);
+    console.log(`${process.cwd()}/Server/Images/Logos/logoToDel.png`);
 });

@@ -120,6 +120,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     contacts: [],
                     emails: [],
                     social_medias: [],
+                    img: []
                 }
 
 
