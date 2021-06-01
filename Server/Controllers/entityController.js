@@ -68,17 +68,17 @@ const fetchFullEntityDataById = (dataObj, callback) => {
 
 
 
-    let query = (dataObj.req.sanitize(dataObj.req.body.selectedLang === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan, Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
+    let query = (dataObj.req.sanitize(dataObj.req.body.selectedLang === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
         Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
         Inner Join
         Picture on Picture.id_picture = Entity.id_logo)
         Inner Join
-        Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;` : `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_eng as desc_html  ,Entity.slogan_eng as slogan, Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
-            Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
-            Inner Join
-            Picture on Picture.id_picture = Entity.id_logo)
-            Inner Join
-            Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;`;
+        Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;` : `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_eng as desc_html  ,Entity.slogan_eng as slogan, Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id, Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
+        Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
+        Inner Join
+        Picture on Picture.id_picture = Entity.id_logo)
+        Inner Join
+        Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;`;
 
     sequelize
         .query(query, {
@@ -115,11 +115,12 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     street: data[0][0].street,
                     lat: data[0][0].lat,
                     long: data[0][0].long,
-                    colors: null,
+                    highlights: [data[0][0].hightLight_1_id, data[0][0].hightLight_2_id, data[0][0].hightLight_3_id],
+                    colors: data[0][0].colors,
                     menus: [],
                     contacts: [],
                     emails: [],
-                    social_medias: []
+                    social_medias: [],
                 }
                 fsPack.fileFetch({
                     path: data[0][0].img
