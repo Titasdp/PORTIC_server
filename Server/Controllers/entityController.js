@@ -123,7 +123,16 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                 }
 
 
-                return callback(true, entityObj)
+                let processResp = {
+                    processRespCode: respCode,
+                    toClient: {
+                        processResult: entityObj,
+                        processError: null,
+                        processMsg: respMsg,
+                    }
+                }
+                return callback(true, processResp)
+
                 // fsPack.fileFetch({
                 //     path: data[0][0].img
                 // }, (fsSuccess, fsResult) => {
