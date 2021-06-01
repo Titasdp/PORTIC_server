@@ -6,7 +6,10 @@ const dbConnectionPack = require('../Server/Middleware/bdConnection')
 const expressSanitizer = require("express-sanitizer");
 const router = require("../Server/Routes/routes")
 const cors = require("cors");
-
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+});
 app.use(express.json()); //Used to parse JSON bodies
 app.use(express.urlencoded({
     extended: true
@@ -15,6 +18,9 @@ app.use(cors())
 
 app.use(expressSanitizer());
 app.use(router);
+
+
+
 
 app.listen(port, async () => {
     await dbConnectionPack.testBdConnection();
