@@ -254,7 +254,7 @@ const checkFileExistence = async (imgPath, callback) => {
     await fs.access(imgPath, (err, data) => {
         console.log(err);
         if (err) {
-            return callback(false, error)
+            return callback(false, err) //
         }
         return callback(true, data)
     })
