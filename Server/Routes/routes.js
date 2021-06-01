@@ -699,6 +699,9 @@ router.get("/something/:id/:second", async (req, res) => {
     res.status(400).send("Just a test")
 })
 
+router.get("/solo/:id", async (req, res) => {
+    res.status(400).send("Just a test solo")
+})
 
 // const something = ((req, res, next) => {
 //     res.header('Access-Control-Allow-Origin', '*');
