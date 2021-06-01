@@ -25,6 +25,12 @@ const pictureController = require("../Controllers/pictureController")
 const entityController = require("../Controllers/entityController");
 
 
+const something = ((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+});
+
+
 
 //<DataStatus
 router.get("/dataStatus", (req, res) => {
@@ -218,7 +224,7 @@ router.post("/init/entities", async (req, res) => {
  * Fetch an entity and his data based on an id
  * Todo:Under development
  */
-router.get("/entities/:id/:lang", (req, res) => {
+router.get("/entities/:id/:lang", something, (req, res) => {
     entityController.fetchFullEntityDataById({
         req: req
     }, (fetchSuccess, fetchResult) => {
@@ -698,6 +704,7 @@ router.post("/init/communicationLevels", async (req, res) => {
 router.get("/something", async (req, res) => {
     res.status(400).send("Just a test")
 })
+
 
 
 
