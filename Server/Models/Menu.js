@@ -42,6 +42,11 @@ Menu.init({
         type: DataTypes.TEXT('long'),
         allowNull: true,
     },
+    router_link: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
     external_path: {
         type: DataTypes.STRING,
         allowNull: true,

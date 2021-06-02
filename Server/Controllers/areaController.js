@@ -57,7 +57,7 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
                 return callback(true, processResp)
             } else {
                 for (const el of data[0]) {
-                    let something = await selectAreaRelatedProjects("nada", dataObj.req.sanitize(dataObj.req.params.lng));
+                    let = await selectAreaRelatedProjects("nada", dataObj.req.sanitize(dataObj.req.params.lng));
                     console.log(something);
 
                     let areaObj = {
@@ -405,10 +405,10 @@ const selectAreaRelatedProjects = async (id_area, lng) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return processResp
+
         });
 
-    return processResp
+    return processResp.toClient.processResult
 
 }
 
