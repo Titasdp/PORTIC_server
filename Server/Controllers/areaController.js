@@ -46,41 +46,44 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
             if (data[0].length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
-                let processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: data[0],
-                        processError: null,
-                        processMsg: respMsg,
-                    }
-                }
-                return callback(true, processResp)
             } else {
                 for (const el of data[0]) {
-                    let = await selectAreaRelatedProjects("nada", dataObj.req.sanitize(dataObj.req.params.lng));
-                    console.log(something);
-
+                    let projectTags = await selectAreaRelatedProjects(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng));
+                    let courseTags = await selectAreaRelatedCourse(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let recruitmentTags = await selectAreaRelatedRecruitment(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let unityTags = await selectAreaRelatedUnity(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
                     let areaObj = {
                         id_area: el.id_area,
                         designation: el.designation,
                         description: el.description,
                         page_url: el.page_url,
-                        // course_tags: selectAreaRelatedProjects(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng)).toClient.processResult
+                        course_tags: courseTags,
+                        project_tags: projectTags,
+                        recruitment_tags: recruitmentTags,
+                        unity_tags: unityTags,
                     }
 
                     areas.push(areaObj)
-
                 }
 
+                processResp = {
+                    processRespCode: respCode,
+                    toClient: {
+                        processResult: areas,
+                        processError: null,
+                        processMsg: respMsg,
+                    }
+                }
+                return callback(true, processResp)
             }
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }
@@ -206,7 +209,7 @@ const fetchAreas = (req, callback) => {
  * Todo
  * @param {String} id_area id of the area that we want the tags
  */
-const selectAreaRelatedUnity = (id_area, lng) => {
+const selectAreaRelatedUnity = async (id_area, lng) => {
     let processResp = {}
     let query = `SELECT Unity.id_unity, Unity.designation FROM(((  Area_unity  inner Join 
         Unity on Unity.id_unity= Area_unity.id_unity)
@@ -215,7 +218,7 @@ const selectAreaRelatedUnity = (id_area, lng) => {
         Inner Join
         Data_Status on Data_Status.id_status= Unity.id_status)  where Data_Status.designation= 'Published' and  Area.id_area =:id_area;`;
 
-    sequelize
+    await sequelize
         .query(query, {
             replacements: {
                 id_area: id_area
@@ -239,7 +242,6 @@ const selectAreaRelatedUnity = (id_area, lng) => {
                     processMsg: respMsg,
                 }
             }
-            return processResp
         })
         .catch(error => {
             console.log(error);
@@ -251,13 +253,14 @@ const selectAreaRelatedUnity = (id_area, lng) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp.toClient.processResult
 
 }
 
 
-const selectAreaRelatedCourse = (id_area, lng) => {
+const selectAreaRelatedCourse = async (id_area, lng) => {
     let processResp = {}
     let query = `SELECT Course.id_course, Course.designation FROM(((  Course_area  inner Join 
         Course on Course.id_course= Course_area.id_course)
@@ -266,7 +269,7 @@ const selectAreaRelatedCourse = (id_area, lng) => {
         Inner Join
         Data_Status on Data_Status.id_status= Course.id_status)  where Data_Status.designation= 'Published' and Area.id_area =:id_area`
 
-    sequelize
+    await sequelize
         .query(query, {
             replacements: {
                 id_area: id_area
@@ -290,7 +293,7 @@ const selectAreaRelatedCourse = (id_area, lng) => {
                     processMsg: respMsg,
                 }
             }
-            return processResp
+
         })
         .catch(error => {
             console.log(error);
@@ -302,24 +305,24 @@ const selectAreaRelatedCourse = (id_area, lng) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return processResp
         });
+    return processResp.toClient.processResult
 
 }
 
 
 
-const selectAreaRelatedRecruitment = (id_area, lng) => {
+const selectAreaRelatedRecruitment = async (id_area, lng) => {
     let processResp = {}
-    let query = (lng === 'eng') ? `SELECT Available_position.id_available_position, Available_position.designation_eng as designation FROM((  Recruitment_area  inner Join 
+    let query = (lng !== 'pt') ? `SELECT Available_position.id_available_position, Available_position.designation_eng as designation FROM((  Recruitment_area  inner Join 
         Available_position on Available_position.id_available_position= Recruitment_area.id_available_position)
         Inner Join
         Area on Area.id_area = Recruitment_area.id_area) where  Area.id_area =:id_area;` : `SELECT Available_position.id_available_position, Available_position.designation_pt as designation FROM((  Recruitment_area  inner Join 
             Available_position on Available_position.id_available_position= Recruitment_area.id_available_position)
             Inner Join
-            Area on Area.id_area = Recruitment_area.id_area) where  Area.id_area =:id_Area;`
+            Area on Area.id_area = Recruitment_area.id_area) where  Area.id_area =:id_area;`
 
-    sequelize
+    await sequelize
         .query(query, {
             replacements: {
                 id_area: id_area
@@ -343,7 +346,7 @@ const selectAreaRelatedRecruitment = (id_area, lng) => {
                     processMsg: respMsg,
                 }
             }
-            return processResp
+
         })
         .catch(error => {
             console.log(error);
@@ -355,8 +358,9 @@ const selectAreaRelatedRecruitment = (id_area, lng) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return processResp
+
         });
+    return processResp.toClient.processResult
 
 }
 
@@ -378,7 +382,6 @@ const selectAreaRelatedProjects = async (id_area, lng) => {
             model: ProjectAreaModel.Project_area
         })
         .then(data => {
-            console.log(data);
             let respCode = 200
             let respMsg = "Fetch successfully."
             if (data[0].length === 0) {

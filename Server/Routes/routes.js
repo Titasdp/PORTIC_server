@@ -745,7 +745,7 @@ router.post("/init/communicationLevels", async (req, res) => {
 
 
 
-router.get("/:lng/entities/:id/areas", async (req, rep) => {
+router.get("/:lng/entities/:id/areas", async (req, res) => {
     areaController.fetchEntityAreaByIdEntity({
         req: req
     }, (fetchSuccess, fetchResult) => {
