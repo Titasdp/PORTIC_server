@@ -7,7 +7,7 @@ const {
  * //// Connection (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+// const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
@@ -21,14 +21,17 @@ Course.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Course')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_Course')
+        // },
+    },
+    designation: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     html_structure: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
-        defaultValue: "<div></div>"
     },
     candidacy_link: {
         type: DataTypes.STRING,

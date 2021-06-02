@@ -295,7 +295,63 @@ const initEntity = async (dataObj, callback) => {
 }
 
 
+
+/**
+ * Fetches id of the main entity
+ * @param {Object} dataObject 
+ * @param {*} callback 
+ */
+const fetchMainEntityId = (dataObj, callback) => {
+    let query = `SELECT id_entity  FROM (Entity inner join Entity_level on Entity_level.id_entity_level = Entity.id_entity_level) Where Entity_level.designation= 'Primary' ;`
+    sequelize
+        .query(query, {
+            model: EntityModel.Entity
+        })
+        .then(data => {
+
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+
+            let processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
+        })
+        .catch(error => {
+            console.log(error);
+            let processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+            return callback(false, processResp)
+        });
+};
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
+    fetchMainEntityId,
     initEntity,
     fetchEntityIdByName,
     fetchFullEntityDataById

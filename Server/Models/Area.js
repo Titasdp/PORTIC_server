@@ -9,7 +9,7 @@ const {
  */
 
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+
 
 const UserModel = require("./User")
 const EntityModel = require("./Entity")
@@ -22,9 +22,9 @@ Area.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Area')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_Area')
+        // },
     },
     designation_pt: {
         type: DataTypes.STRING,

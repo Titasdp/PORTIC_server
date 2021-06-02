@@ -15,15 +15,15 @@ const DataStatusModel = require("../Models/DataStatus")
 
 class Project extends Model {}
 
-Outside_investor.init({
+Project.init({
     id_project: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Project')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_Project')
+        // },
     },
     title: {
         type: DataTypes.STRING,
@@ -40,12 +40,10 @@ Outside_investor.init({
     desc_html_structure_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
-        defaultValue: "<div></div>"
     },
     desc_html_structure_pt: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
-        defaultValue: "<div></div>"
     },
     total_budget: {
         type: DataTypes.FLOAT,

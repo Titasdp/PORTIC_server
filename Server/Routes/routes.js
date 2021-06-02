@@ -19,6 +19,10 @@ const entityEmailController = require("../Controllers/entityEmailController");
 const entityContactController = require("../Controllers/entityContactController")
 const socialMediaController = require("../Controllers/socialMediaController")
 //
+
+//
+const areaController = require("../Controllers/areaController")
+
 //
 const pictureController = require("../Controllers/pictureController")
 //
@@ -216,7 +220,7 @@ router.post("/init/entities", async (req, res) => {
 
 /**
  * Fetch an entity and his data based on an id
- * Todo:Under development
+ * Status:Completed
  */
 router.get("/:lng/entities/:id", (req, res) => {
 
@@ -226,6 +230,40 @@ router.get("/:lng/entities/:id", (req, res) => {
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
     })
 })
+
+
+
+
+/**
+ * Fetch an entity and his data based on an id
+ * Status:Completed
+ */
+router.get("/entities/main", (req, res) => {
+    entityController.fetchMainEntityId({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+
+
+/**
+ * Fetch an entity and his data based on an id
+ * Status:Completed
+ */
+router.get("/:lng/entities/:id", (req, res) => {
+
+    entityController.fetchFullEntityDataById({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+
 
 // *Entity Routes> 
 
@@ -695,21 +733,88 @@ router.post("/init/communicationLevels", async (req, res) => {
 
 
 
-//!TO delete
-router.get("/something/:id/:second", async (req, res) => {
-    res.status(400).send(req.params.second)
+//*<Areas Routes
+// router.get("/entities/main", (req, res) => {
+//     entityController.fetchMainEntityId({
+//         req: req
+//     }, (fetchSuccess, fetchResult) => {
+//         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+//     })
+// })
+
+
+
+
+router.get("/:lng/entities/:id/areas", async (req, rep) => {
+    areaController.fetchEntityAreaByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
 })
 
-router.get("/solo/:id", async (req, res) => {
-    res.status(400).send("Just a test solo")
-})
 
-// const something = ((req, res, next) => {
-//     res.header('Access-Control-Allow-Origin', '*');
-//     next();
-// });
+router.post("/init/entities/areas", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+
+    //#0
+
+    await areaController.fetchAreas(req, async (pagesFetchSuccess, pagesFetchResult) => {
+        if (!pagesFetchSuccess) {
+            res.status(pagesFetchResult.processRespCode).send(pagesFetchResult.toClient)
+        } else if (pagesFetchSuccess) {
+            if (pagesFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
 
 
+
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+
+                        //#3
+                        areaController.initAreas({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        }, (success, result) => {
+                            res.status(result.processRespCode).send(result.toClient)
+                        });
+                    })
+
+                })
+
+
+
+
+
+
+            }
+        }
+    })
+});
+
+//*Areas Routes>
 
 
 

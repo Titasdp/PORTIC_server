@@ -9,7 +9,7 @@ const CourseModel = require("../Models/Course");
 
 class Course_area extends Model {}
 
-Course_unity.init({
+Course_area.init({
 
 }, {
     sequelize,

@@ -11,7 +11,6 @@ const {
 //!Recruitment 
 
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
@@ -24,19 +23,25 @@ Available_position.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_AvailablePos')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_AvailablePos')
+        // },
+    },
+    designation_pt: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    designation_eng: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     desc_html_structure_pt: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
-        defaultValue: "<div></div>"
     },
     desc_html_structure_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
-        defaultValue: "<div></div>"
     },
     pdf_path: {
         type: DataTypes.STRING,
