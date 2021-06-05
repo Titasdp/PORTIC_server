@@ -9,7 +9,6 @@ const {
  */
 
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 
 const UserModel = require("../Models/User")
@@ -25,9 +24,7 @@ Media.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Media')
-        },
+
     },
     title_eng: {
         type: DataTypes.STRING,
@@ -43,6 +40,10 @@ Media.init({
     },
     description_pt: {
         type: DataTypes.TEXT('Long'),
+        allowNull: false
+    },
+    youtube_path: {
+        type: DataTypes.STRING,
         allowNull: false
     },
     created_at: {

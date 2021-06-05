@@ -26,6 +26,7 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
                 processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
             }
         }
+        return callback(false, processResp)
 
     }
 
