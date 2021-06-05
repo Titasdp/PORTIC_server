@@ -22,6 +22,7 @@ const socialMediaController = require("../Controllers/socialMediaController")
 
 //
 const areaController = require("../Controllers/areaController")
+const courseController = require("../Controllers/courseController")
 
 //
 const pictureController = require("../Controllers/pictureController")
@@ -803,18 +804,96 @@ router.post("/init/entities/areas", async (req, res) => {
                     })
 
                 })
-
-
-
-
-
-
             }
         }
     })
 });
 
 //*Areas Routes>
+
+
+
+
+
+//*<Course Routes
+
+router.get("/:lng/entities/:id/course", async (req, res) => {
+    courseController.fetchCourseByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+router.post("/init/entities/course", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+    let idDataStatus = null
+
+
+    //#0
+
+    await courseController.fetchCourse(req, async (CourseFetchSuccess, CourseFetchResult) => {
+        if (!CourseFetchSuccess) {
+            res.status(CourseFetchResult.processRespCode).send(CourseFetchResult.toClient)
+        } else if (CourseFetchSuccess) {
+            if (CourseFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+                        //#3
+                        dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
+                            if (!statusFetchSuccess) {
+                                res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
+                            }
+
+                            if (statusFetchResult.processRespCode === 200) {
+                                idDataStatus = statusFetchResult.toClient.processResult[0].id_status
+                            }
+
+                            //#3
+                            courseController.initCourse({
+                                idEntity: idEntity,
+                                idUser: idUser,
+                                idDataStatus: idDataStatus,
+                            }, (success, result) => {
+                                res.status(result.processRespCode).send(result.toClient)
+                            });
+                        })
+                    })
+
+                })
+            }
+        }
+    })
+});
+
+//*Course Routes>
+
+
+
 
 
 

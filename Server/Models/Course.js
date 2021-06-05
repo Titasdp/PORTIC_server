@@ -7,7 +7,6 @@ const {
  * //// Connection (completed)
  */
 const sequelize = require("../Database/connection");
-// const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
@@ -29,7 +28,11 @@ Course.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    html_structure: {
+    html_structure_eng: {
+        type: DataTypes.TEXT('long'),
+        allowNull: false,
+    },
+    html_structure_pt: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
     },
