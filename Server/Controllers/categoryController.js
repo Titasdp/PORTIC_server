@@ -3,10 +3,12 @@ const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
 /**
- * Function that fetch all Category from the Database
- * Done
+ * fetch all Category from the Database
+ * Status:Completed
+ * @param {obj} dataObj Obj with info
+ * @param {callback} callback 
  */
-fetchAllCategory = (req, callback) => {
+const fetchAllCategory = (dataObj, callback) => {
     sequelize
         .query("SELECT * FROM Category", {
             model: CategoryModel.Category
@@ -23,22 +25,26 @@ fetchAllCategory = (req, callback) => {
             return callback(true, processResp)
         })
         .catch(error => {
+            console.log(error);
             let processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }
             return callback(false, processResp)
         });
 };
+
+
 /**
- * Function that adds predefined Category elements to the table
- * Done
+ * 
+ * @param {*} req 
+ * @param {*} callback 
  */
-initCategory = (req, callback) => {
+const initCategory = (req, callback) => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_Category'), 'Digital Systems for Health and Telehealth'],
         [uniqueIdPack.generateRandomId('_Category'), 'Cibersecurity'],
@@ -81,8 +87,8 @@ initCategory = (req, callback) => {
  * Function that returns Category id based on designation
  * Done
  */
-fetchCategoryIdByDesignation = async (designation, callback) => {
-    console.log("here 2");
+const fetchCategoryIdByDesignation = async (designation, callback) => {
+
     await sequelize
         .query("SELECT id_category FROM Category where designation = :designation", {
             replacements: {
@@ -170,7 +176,7 @@ addCategory = (dataObj, callback) => {
  * Function that updates a Category
  * Done
  */
-updateCategory = (dataObj, callback) => {
+const updateCategory = (dataObj, callback) => {
     if (dataObj.exist) {
         return callback(true, processResp = {
             processRespCode: 401,
@@ -217,6 +223,70 @@ updateCategory = (dataObj, callback) => {
         });
 };
 
+const simpleFetchCategoryIdByDesignation = async (designation) => {
+    let processResult = null;
+    await sequelize
+        .query("SELECT id_category FROM Category where designation = :designation", {
+            replacements: {
+                designation: designation
+            }
+        }, {
+            model: CategoryModel.Category
+        })
+        .then(data => {
+
+
+            processResult = data[0]
+
+        })
+        .catch(error => {
+            processResult = null
+
+        });
+    return processResult
+};
+
+
+
+const getCategoryByIdAvailablePosition = async (id_available_position) => {
+
+    let progressResp = {}
+    let query = `Select Category.id_category, Category.designation from ((Recruitment_category INNER JOIN Category ON Category.id_category = Recruitment_category.id_category ) INNER JOIN  Available_position on Available_position.id_available_position = Recruitment_category.id_available_position)  Where Available_position.id_available_position =:id_available_position`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_available_position: id_available_position
+            }
+        }, {
+            model: CategoryModel.Category
+        })
+        .then(data => {
+
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Fetched successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
 
 
 
@@ -229,5 +299,6 @@ module.exports = {
     addCategory,
     fetchAllCategory,
     initCategory,
-    fetchCategoryIdByDesignation
+    fetchCategoryIdByDesignation,
+    simpleFetchCategoryIdByDesignation
 }

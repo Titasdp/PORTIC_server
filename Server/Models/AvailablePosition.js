@@ -23,9 +23,6 @@ Available_position.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        // defaultValue: function () {
-        //     return uniqueIdPack.generateRandomId('_AvailablePos')
-        // },
     },
     designation_pt: {
         type: DataTypes.STRING,
@@ -46,7 +43,12 @@ Available_position.init({
     pdf_path: {
         type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: false,
+        defaultValue: "",
+    },
+    candidacy_link: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
     },
     created_at: {
         type: 'TIMESTAMP',
