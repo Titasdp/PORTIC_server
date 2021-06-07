@@ -9,7 +9,7 @@ const ProjectModel = require("../Models/Project");
 
 class Project_recruitment extends Model {}
 
-Recruitment_course.init({
+Project_recruitment.init({
 
 }, {
     sequelize,

@@ -248,7 +248,7 @@ const simpleFetchCategoryIdByDesignation = async (designation) => {
 
 
 
-const getCategoryByIdAvailablePosition = async (id_available_position) => {
+const fetchCategoryByIdAvailablePosition = async (id_available_position) => {
 
     let progressResp = {}
     let query = `Select Category.id_category, Category.designation from ((Recruitment_category INNER JOIN Category ON Category.id_category = Recruitment_category.id_category ) INNER JOIN  Available_position on Available_position.id_available_position = Recruitment_category.id_available_position)  Where Available_position.id_available_position =:id_available_position`
@@ -284,7 +284,7 @@ const getCategoryByIdAvailablePosition = async (id_available_position) => {
             }
 
         });
-    return processResp
+    return processResp.toClient.processResult
 }
 
 
@@ -300,5 +300,6 @@ module.exports = {
     fetchAllCategory,
     initCategory,
     fetchCategoryIdByDesignation,
-    simpleFetchCategoryIdByDesignation
+    simpleFetchCategoryIdByDesignation,
+    fetchCategoryByIdAvailablePosition
 }

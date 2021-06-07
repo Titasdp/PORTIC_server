@@ -5,7 +5,12 @@ const uniqueIdPack = require("../Middleware/uniqueId");
 
 const categoryController = require("../Controllers/categoryController")
 const recruitmentCategoryController = require("../Controllers/recruitmentCategoryController")
-// const AreaUnityModel = require("../Models/AreaUnity") // done 
+
+// Secondary models
+const RecruitmentAreaModel = require("../Models/RecruitmentAreas") // done
+const RecruitmentUnityModel = require("../Models/RecruitmentUnity")
+const RecruitmentCourseModel = require("../Models/RecruitmentCourse")
+const ProjectRecruitmentModel = require("../Models/ProjectRecruitment")
 // const CourseAreaModel = require("../Models/CourseArea") // done
 // const ProjectAreaModel = require("../Models/ProjectArea")
 // const RecruitmentAreaModel = require("../Models/RecruitmentAreas") // 
@@ -34,17 +39,17 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
 
     }
 
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `` : ``
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT Available_position.id_available_position, Available_position.designation_pt as designation, Available_position.desc_html_structure_pt as desc_html_structure, Available_position.pdf_path, Available_position.candidacy_link FROM Available_position WHERE Available_position.id_entity =:id_entity` : `SELECT Available_position.id_available_position, Available_position.designation_eng as designation, Available_position.desc_html_structure_eng as desc_html_structure, Available_position.pdf_path, Available_position.candidacy_link FROM Available_position WHERE  Available_position.id_entity = :id_entity;`
     await sequelize
         .query(query, {
             replacements: {
                 id_entity: dataObj.req.sanitize(dataObj.req.params.id)
             }
         }, {
-            model: AreaModel.Area
+            model: AvailablePositionModel.Available_position
         })
         .then(async data => {
-            let areas = []
+            let availablePositions = []
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
@@ -52,28 +57,33 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let projectTags = await selectAreaRelatedProjects(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng));
-                    let courseTags = await selectAreaRelatedCourse(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let recruitmentTags = await selectAreaRelatedRecruitment(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let unityTags = await selectAreaRelatedUnity(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let areaObj = {
-                        // id_area: el.id_area,
-                        // designation: el.designation,
-                        // description: el.description,
-                        // page_url: el.page_url,
-                        // course_tags: courseTags,
-                        // project_tags: projectTags,
-                        // recruitment_tags: recruitmentTags,
-                        // unity_tags: unityTags,
+                    let categories = await categoryController.fetchCategoryByIdAvailablePosition(el.id_available_position)
+                    let projectTags = await selectAvailablePositionRelatedProjects(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng));
+                    let courseTags = await selectAvailablePositionRelatedCourse(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let areaTags = await selectAvailablePositionRelatedArea(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let unityTags = await selectAvailablePositionRelatedUnity(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
+
+                    let positionObj = {
+                        id_available_position: el.id_available_position,
+                        designation: el.designation,
+                        description: el.description,
+                        desc_html_structure: el.desc_html_structure,
+                        pdf_path: el.pdf_path,
+                        candidacy_link: el.candidacy_link,
+                        course_tags: courseTags,
+                        project_tags: projectTags,
+                        area_tags: areaTags,
+                        unity_tags: unityTags,
+                        categories: categories
                     }
 
-                    areas.push(areaObj)
+                    availablePositions.push(positionObj)
                 }
 
                 processResp = {
                     processRespCode: respCode,
                     toClient: {
-                        processResult: areas,
+                        processResult: availablePositions,
                         processError: null,
                         processMsg: respMsg,
                     }
@@ -307,211 +317,210 @@ const fetchAvailablePositions = (req, callback) => {
 //  * Todo
 //  * @param {String} id_area id of the area that we want the tags
 //  */
-// const selectAvailablePositionRelatedUnity = async (id_area, lng) => {
-//     let processResp = {}
-//     let query = `SELECT Unity.id_unity, Unity.designation FROM(((  Area_unity  inner Join 
-//         Unity on Unity.id_unity= Area_unity.id_unity)
-//         Inner Join
-//         Area on Area.id_area = Area_unity.id_area)
-//         Inner Join
-//         Data_Status on Data_Status.id_status= Unity.id_status)  where Data_Status.designation= 'Published' and  Area.id_area =:id_area;`;
+const selectAvailablePositionRelatedUnity = async (id_available_position, lng) => {
+    let processResp = {}
+    let query = `SELECT Unity.id_unity, Unity.designation FROM(((  Recruitment_unity  inner Join 
+        Unity on Unity.id_unity= Recruitment_unity.id_unity)
+        Inner Join
+        Available_position on Available_position.id_available_position= Recruitment_unity.id_available_position)
+        Inner Join
+        Data_Status on Data_Status.id_status= Unity.id_status)  where Data_Status.designation= 'Published' and   Available_position.id_available_position =:id_available_position`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_available_position: id_available_position
+            }
+        }, {
+            model: RecruitmentUnityModel.Recruitment_unity
+        })
+        .then(data => {
+            let respCode = 200
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
 
-//     await sequelize
-//         .query(query, {
-//             replacements: {
-//                 id_area: id_area
-//             }
-//         }, {
-//             model: AreaUnityModel.Area_unity
-//         })
-//         .then(data => {
-//             let respCode = 200
-//             let respMsg = "Fetch successfully."
-//             if (data[0].length === 0) {
-//                 respCode = 204
-//                 respMsg = "Fetch process completed successfully, but there is no content."
-//             }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            let processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
 
-//             processResp = {
-//                 processRespCode: respCode,
-//                 toClient: {
-//                     processResult: data[0],
-//                     processError: null,
-//                     processMsg: respMsg,
-//                 }
-//             }
-//         })
-//         .catch(error => {
-//             console.log(error);
-//             let processResp = {
-//                 processRespCode: 500,
-//                 toClient: {
-//                     processResult: null,
-//                     processError: error,
-//                     processMsg: "Something when wrong please try again later",
-//                 }
-//             }
+        });
+    return processResp.toClient.processResult
 
-//         });
-//     return processResp.toClient.processResult
-
-// }
-
-
-// const selectAreaRelatedCourse = async (id_area, lng) => {
-//     let processResp = {}
-//     let query = `SELECT Course.id_course, Course.designation FROM(((  Course_area  inner Join 
-//         Course on Course.id_course= Course_area.id_course)
-//         Inner Join
-//         Area on Area.id_area = Course_area.id_area)
-//         Inner Join
-//         Data_Status on Data_Status.id_status= Course.id_status)  where Data_Status.designation= 'Published' and Area.id_area =:id_area`
-
-//     await sequelize
-//         .query(query, {
-//             replacements: {
-//                 id_area: id_area
-//             }
-//         }, {
-//             model: CourseAreaModel.Course_area
-//         })
-//         .then(data => {
-//             let respCode = 200
-//             let respMsg = "Fetch successfully."
-//             if (data[0].length === 0) {
-//                 respCode = 204
-//                 respMsg = "Fetch process completed successfully, but there is no content."
-//             }
-
-//             processResp = {
-//                 processRespCode: respCode,
-//                 toClient: {
-//                     processResult: data[0],
-//                     processError: null,
-//                     processMsg: respMsg,
-//                 }
-//             }
-
-//         })
-//         .catch(error => {
-//             console.log(error);
-//             processResp = {
-//                 processRespCode: 500,
-//                 toClient: {
-//                     processResult: null,
-//                     processError: error,
-//                     processMsg: "Something when wrong please try again later",
-//                 }
-//             }
-//         });
-//     return processResp.toClient.processResult
-
-// }
+}
 
 
+const selectAvailablePositionRelatedCourse = async (id_available_position, lng) => {
+    let processResp = {}
+    let query = `SELECT Course.id_course, Course.designation FROM(((  Recruitment_course  inner Join 
+        Course on Course.id_course= Recruitment_course.id_course)
+        Inner Join
+        Available_position on Available_position.id_available_position= Recruitment_course.id_available_position)
+        Inner Join
+        Data_Status on Data_Status.id_status= Course.id_status)  where Data_Status.designation= 'Published' and Available_position.id_available_position=:id_available_position`
 
-// const selectAreaRelatedRecruitment = async (id_area, lng) => {
-//     let processResp = {}
-//     let query = (lng !== 'pt') ? `SELECT Available_position.id_available_position, Available_position.designation_eng as designation FROM((  Recruitment_area  inner Join 
-//         Available_position on Available_position.id_available_position= Recruitment_area.id_available_position)
-//         Inner Join
-//         Area on Area.id_area = Recruitment_area.id_area) where  Area.id_area =:id_area;` : `SELECT Available_position.id_available_position, Available_position.designation_pt as designation FROM((  Recruitment_area  inner Join 
-//             Available_position on Available_position.id_available_position= Recruitment_area.id_available_position)
-//             Inner Join
-//             Area on Area.id_area = Recruitment_area.id_area) where  Area.id_area =:id_area;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_available_position: id_available_position
+            }
+        }, {
+            model: RecruitmentCourseModel.Recruitment_course
+        })
+        .then(data => {
+            let respCode = 200
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
 
-//     await sequelize
-//         .query(query, {
-//             replacements: {
-//                 id_area: id_area
-//             }
-//         }, {
-//             model: RecruitmentAreaModel.Recruitment_area
-//         })
-//         .then(data => {
-//             let respCode = 200
-//             let respMsg = "Fetch successfully."
-//             if (data[0].length === 0) {
-//                 respCode = 204
-//                 respMsg = "Fetch process completed successfully, but there is no content."
-//             }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
 
-//             processResp = {
-//                 processRespCode: respCode,
-//                 toClient: {
-//                     processResult: data[0],
-//                     processError: null,
-//                     processMsg: respMsg,
-//                 }
-//             }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+    return processResp.toClient.processResult
 
-//         })
-//         .catch(error => {
-//             console.log(error);
-//             processResp = {
-//                 processRespCode: 500,
-//                 toClient: {
-//                     processResult: null,
-//                     processError: error,
-//                     processMsg: "Something when wrong please try again later",
-//                 }
-//             }
+}
 
-//         });
-//     return processResp.toClient.processResult
 
-// }
 
-// const selectAreaRelatedProjects = async (id_area, lng) => {
-//     let processResp = {}
-//     let query = `SELECT Project.id_project, Project.title FROM(( ( Project_area  inner Join 
-//         Project on Project.id_project= Project_area.id_project)
-//         Inner Join
-//         Area on Area.id_area = Project_area.id_area) 
-//         Inner Join
-//         Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Area.id_area =:id_area;`
+const selectAvailablePositionRelatedArea = async (id_available_position, lng) => {
+    let processResp = {}
+    let query = (lng === 'pt') ? `SELECT Area.id_area, Area.designation_pt as designation FROM((  Recruitment_area  inner Join 
+        Available_position on Available_position.id_available_position= Recruitment_area.id_available_position)
+        Inner Join
+        Area on Area.id_area = Recruitment_area.id_area) where  Available_position.id_available_position=:id_available_position` : `SELECT Area.id_area, Area.designation_eng as designation FROM((  Recruitment_area  inner Join 
+        Available_position on Available_position.id_available_position= Recruitment_area.id_available_position)
+        Inner Join
+        Area on Area.id_area = Recruitment_area.id_area) where  Available_position.id_available_position=:id_available_position`
 
-//     await sequelize
-//         .query(query, {
-//             replacements: {
-//                 id_area: id_area
-//             }
-//         }, {
-//             model: ProjectAreaModel.Project_area
-//         })
-//         .then(data => {
-//             let respCode = 200
-//             let respMsg = "Fetch successfully."
-//             if (data[0].length === 0) {
-//                 respCode = 204
-//                 respMsg = "Fetch process completed successfully, but there is no content."
-//             }
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_available_position: id_available_position
+            }
+        }, {
+            model: RecruitmentAreaModel.Recruitment_area
+        })
+        .then(data => {
+            let respCode = 200
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
 
-//             processResp = {
-//                 processRespCode: respCode,
-//                 toClient: {
-//                     processResult: data[0],
-//                     processError: null,
-//                     processMsg: respMsg,
-//                 }
-//             }
-//         })
-//         .catch(error => {
-//             console.log(error);
-//             processResp = {
-//                 processRespCode: 500,
-//                 toClient: {
-//                     processResult: null,
-//                     processError: error,
-//                     processMsg: "Something when wrong please try again later",
-//                 }
-//             }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
 
-//         });
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
 
-//     return processResp.toClient.processResult
+        });
+    return processResp.toClient.processResult
 
-// }
+}
+
+const selectAvailablePositionRelatedProjects = async (id_available_position, lng) => {
+    let processResp = {}
+    let query = `SELECT Project.id_project, Project.title FROM(( ( Project_recruitment inner Join 
+        Project on Project.id_project= Project_recruitment.id_project)
+        Inner Join
+        Available_position on Available_position.id_available_position = Project_recruitment.id_available_position) 
+        Inner Join
+        Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Available_position.id_available_position=:id_available_position`
+
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_available_position: id_available_position
+            }
+        }, {
+            model: ProjectRecruitmentModel.Project_recruitment
+        })
+        .then(data => {
+            let respCode = 200
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp.toClient.processResult
+
+}
 
 
 

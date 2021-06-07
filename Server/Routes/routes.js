@@ -991,7 +991,7 @@ router.post("/init/entities/medias", async (req, res) => {
 //*<Available_position routes
 
 router.get("/:lng/entities/:id/available_positions", async (req, res) => {
-    mediaController.fetchMediaByIdEntity({
+    recruitmentController.fetchAvailablePositionByIdEntity({
         req: req
     }, (fetchSuccess, fetchResult) => {
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
