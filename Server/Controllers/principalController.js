@@ -93,11 +93,11 @@ const initPrincipal = async (dataObj, callback) => {
     }
     //If success returns the hashed password
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_HiringTip'), `Trabalho em equipa`, `Teamwork`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_HiringTip'), `Excelente Comunicação`, `Excellent Communication`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_HiringTip'), `Responsabilidade`, `Responsibility`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_HiringTip'), `Autonomia`, `Autonomy`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_HiringTip'), `Expectativas elevadas`, `High expectations`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Principal'), `Trabalho em equipa`, `Teamwork`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Principal'), `Excelente Comunicação`, `Excellent Communication`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Principal'), `Responsabilidade`, `Responsibility`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Principal'), `Autonomia`, `Autonomy`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Principal'), `Expectativas elevadas`, `High expectations`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
     ]
     await sequelize
         .query(
