@@ -44,17 +44,17 @@ const fetchPrincipalsByIdEntity = async (dataObj, callback) => {
             if (data[0].length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
-            } else {
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: data[0],
-                        processError: null,
-                        processMsg: respMsg,
-                    }
-                }
-                return callback(true, processResp)
             }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
@@ -96,6 +96,8 @@ const initPrincipal = async (dataObj, callback) => {
         [uniqueIdPack.generateRandomId('_HiringTip'), `Trabalho em equipa`, `Teamwork`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_HiringTip'), `Excelente Comunicação`, `Excellent Communication`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_HiringTip'), `Responsabilidade`, `Responsibility`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_HiringTip'), `Autonomia`, `Autonomy`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_HiringTip'), `Expectativas elevadas`, `High expectations`, `pt`, `eng`, dataObj.idUser, dataObj.idEntity],
     ]
     await sequelize
         .query(
