@@ -10,9 +10,6 @@ const {
 
 const sequelize = require("../Database/connection");
 
-
-
-
 const EntityModel = require("../Models/Entity")
 const UserModel = require("../Models/User")
 

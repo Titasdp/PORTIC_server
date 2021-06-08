@@ -219,51 +219,46 @@ const simplifyFileFetch = async (path) => {
     let processResp = {}
 
     let exist = await simplifyCheckFileExistence(path)
-    return await new Promise((resolve, reject) => {
-        if (exist) {
 
-            fs.readFile(path, function (err, data) {
-                let functionSuccess = false
-                if (err) {
-                    console.log(err);
-                    processResp = {
-                        processRespCode: 500,
-                        toClient: {
-                            processResult: null,
-                            processError: null,
-                            processMsg: "Something went wrong please ty again later.",
-                        }
-                    }
-                } else {
-                    functionSuccess = true
-                    processResp = {
-                        processRespCode: 200,
-                        toClient: {
-                            processResult: data,
-                            processError: null,
-                            processMsg: "The file was successfully fetched.",
-                        }
+    if (!exist) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Missing file.",
+            }
+        }
+        return processResp
+    }
+    return await new Promise((resolve, reject) => {
+
+        fs.readFile(path, function (err, data) {
+            let functionSuccess = false
+            if (err) {
+                console.log(err);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong please ty again later.",
                     }
                 }
-                resolve(processResp);
-            });
-
-        } else {
-
-            processResp = {
-                processRespCode: 400,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "The file was successfully fetched.",
+            } else {
+                functionSuccess = true
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data,
+                        processError: null,
+                        processMsg: "The file was successfully fetched.",
+                    }
                 }
             }
-            return processResp;
-
-        }
+            resolve(processResp);
+        });
     })
-
-
 }
 
 //!May be deleted
@@ -338,14 +333,16 @@ const confirmIsImg = async (fileMimeType) => {
  */
 const simplifyCheckFileExistence = async (imgPath) => {
     return await new Promise((resolve, reject) => {
-        fs.access(imgPath, (err, data) => {
+        fs.access(imgPath, (err) => {
             if (err) {
-                reject(false) //
+                resolve(false) //
             } else {
+                console.log();
                 resolve(true)
             }
         })
     })
+    console.log();
 }
 
 
