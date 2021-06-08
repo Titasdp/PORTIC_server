@@ -11,7 +11,6 @@ const {
 
 //!About us page
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
@@ -25,9 +24,9 @@ Entity_courses_focus.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Focus')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_CourseFocus')
+        // },
     },
     description_pt: {
         type: DataTypes.STRING,
@@ -95,14 +94,14 @@ Entity_courses_focus.belongsTo(UserModel.User, {
 //Picture connection
 PictureModel.Picture.hasMany(Entity_courses_focus, {
     foreignKey: {
-        name: "id_picture",
+        name: "id_icon",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
 Entity_courses_focus.belongsTo(PictureModel.Picture, {
     foreignKey: {
-        name: "id_picture",
+        name: "id_icon",
         type: DataTypes.STRING,
         allowNull: false,
     }

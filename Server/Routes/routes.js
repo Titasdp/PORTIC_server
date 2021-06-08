@@ -21,6 +21,7 @@ const socialMediaController = require("../Controllers/socialMediaController")
 const focusController = require("../Controllers/focusController")
 const principalController = require("../Controllers/principalController")
 const hiringTipsController = require("../Controllers/hiringTipsController")
+const courseFocusController = require("../Controllers/courseFocusController")
 //
 
 //
@@ -1345,6 +1346,85 @@ router.post("/init/entities/hiring_tips", async (req, res) => {
 
 //*Hiring tips>
 
+
+
+//*< Course Focus Models
+
+
+router.get("/:lng/entities/:id/course_focus", async (req, res) => {
+    courseFocusController.fetchCourseFocusByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+router.post("/init/entities/course_focus", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+    let idDataStatus = null
+
+
+    //#0
+    await courseFocusController.fetchCourseFocus(req, async (focusFetchSuccess, focusFetchResult) => {
+        if (!focusFetchSuccess) {
+            res.status(focusFetchResult.processRespCode).send(focusFetchResult.toClient)
+        } else if (focusFetchSuccess) {
+            if (focusFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+                        // #3
+                        pictureController.initAddMultipleImgs({
+                            insertArray: [`${process.cwd()}/Server/Images/Icons/student.svg`, `${process.cwd()}/Server/Images/Icons/diversity.svg`, `${process.cwd()}/Server/Images/Icons/international.svg`, `${process.cwd()}/Server/Images/Icons/companies.svg`, `${process.cwd()}/Server/Images/Icons/prototype.svg`]
+                        }, (imgAddSuccess, imgAddResult) => {
+                            if (!imgAddSuccess) {
+                                res.status(imgAddResult.processRespCode).send(imgAddResult.toClient)
+                            } else {
+                                //#6
+                                courseFocusController.initCorseFocus({
+                                    idEntity: idEntity,
+                                    idCreator: idUser,
+                                    imgsIds: imgAddResult.toClient.processResult.generatedIds,
+                                }, (success, result) => {
+                                    res.status(result.processRespCode).send(result.toClient)
+                                });
+                            }
+
+                        })
+                    })
+                })
+
+
+            }
+        }
+    })
+});
+
+
+//*Course Focus Models >
 
 
 

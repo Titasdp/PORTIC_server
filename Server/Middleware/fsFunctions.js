@@ -337,12 +337,10 @@ const simplifyCheckFileExistence = async (imgPath) => {
             if (err) {
                 resolve(false) //
             } else {
-                console.log();
                 resolve(true)
             }
         })
     })
-    console.log();
 }
 
 
