@@ -163,8 +163,6 @@ router.patch("/categories/:id", (req, res) => {
 router.post("/init/entities", async (req, res) => {
     let idDataStatus = null;
     let idEntityLevel = null;
-
-
     //#0
     await entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
         if (!entityFetchSuccess) {
@@ -197,7 +195,7 @@ router.post("/init/entities", async (req, res) => {
                     }
                     //#3
                     pictureController.addImgOnInit({
-                        imgPath: `${process.cwd()}/Server/Images/Logos/logoToDel.png`
+                        imgPath: `${process.cwd()}/Server/Images/Logos/logoPortic.png`
                     }, (imgAddSuccess, imgAddResult) => {
                         if (!imgAddSuccess) {
                             res.status(imgAddResult.processRespCode).send(imgAddResult.toClient)
@@ -216,11 +214,6 @@ router.post("/init/entities", async (req, res) => {
             });
         }
     })
-
-
-
-
-
 })
 
 
