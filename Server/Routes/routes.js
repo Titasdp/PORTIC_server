@@ -1436,8 +1436,7 @@ router.get("/:lng/entities/:id/area_focus", async (req, res) => {
     areaFocusController.fetchAreaFocusByIdEntity({
         req: req
     }, (fetchSuccess, fetchResult) => {
-        console.log(fetchResult.toClient);
-        res.status(204).send(fetchResult.toClient)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
     })
 })
 

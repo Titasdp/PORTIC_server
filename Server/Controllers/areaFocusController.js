@@ -40,7 +40,7 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
             model: EntityAreasFocusModel.Entity_areas_focus
         })
         .then(async data => {
-            console.log(data);
+
             let coursesFocus = []
             let respCode = 200;
             let respMsg = "Fetched successfully."
@@ -48,15 +48,6 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
                 console.log("here");
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: [],
-                        processError: null,
-                        processMsg: respMsg,
-                    }
-                }
-
             } else {
                 for (const el of data[0]) {
                     let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
@@ -70,15 +61,14 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
                     }
                     coursesFocus.push(courseFocusObj)
                 }
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: coursesFocus,
-                        processError: null,
-                        processMsg: respMsg,
-                    }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: coursesFocus,
+                    processError: null,
+                    processMsg: respMsg,
                 }
-
             }
             return callback(true, processResp)
         })
