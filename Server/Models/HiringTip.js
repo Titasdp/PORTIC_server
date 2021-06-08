@@ -9,11 +9,12 @@ const {
  */
 
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+
 
 
 
 const EntityModel = require("../Models/Entity")
+const UserModel = require("../Models/User")
 
 
 class Hiring_tip extends Model {}
@@ -24,9 +25,6 @@ Hiring_tip.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_HiringTip')
-        },
     },
     title_eng: {
         type: DataTypes.STRING,
@@ -64,6 +62,22 @@ Hiring_tip.belongsTo(EntityModel.Entity, {
         name: "id_entity",
         allowNull: false,
         type: DataTypes.STRING,
+    }
+});
+
+//User Connection
+UserModel.User.hasMany(Hiring_tip, {
+    foreignKey: {
+        name: "id_creator",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Hiring_tip.belongsTo(UserModel.User, {
+    foreignKey: {
+        name: "id_creator",
+        type: DataTypes.STRING,
+        allowNull: false,
     }
 });
 

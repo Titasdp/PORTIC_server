@@ -20,6 +20,7 @@ const entityContactController = require("../Controllers/entityContactController"
 const socialMediaController = require("../Controllers/socialMediaController")
 const focusController = require("../Controllers/focusController")
 const principalController = require("../Controllers/principalController")
+const hiringTipsController = require("../Controllers/hiringTipsController")
 //
 
 //
@@ -1279,6 +1280,70 @@ router.post("/init/entities/principals", async (req, res) => {
 });
 
 //*Focus Routes>
+
+
+
+
+// *<Hiring Tips
+router.get("/:lng/entities/:id/hiring_tips", async (req, res) => {
+    hiringTipsController.fetchHiringTipsByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+router.post("/init/entities/hiring_tips", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+    //#0
+    await hiringTipsController.fetchHiringTips(req, async (hiringTipFetchSuccess, hiringTipFetchResult) => {
+        if (!hiringTipFetchSuccess) {
+            res.status(hiringTipFetchResult.processRespCode).send(hiringTipFetchResult.toClient)
+        } else if (hiringTipFetchSuccess) {
+            if (hiringTipFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+
+                        //#3
+                        hiringTipsController.initHiringTip({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        }, (success, result) => {
+                            res.status(result.processRespCode).send(result.toClient)
+                        });
+                    })
+
+                })
+            }
+        }
+    })
+});
+
+//*Hiring tips>
 
 
 
