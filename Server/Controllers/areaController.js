@@ -95,7 +95,7 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
 
 
 /**
- * Initialize the table Menu by introducing predefined data to it.
+ * Initialize the table Area by introducing predefined data to it.
  * Status:Completed
  * @param {Object} dataObj 
  * @param {Callback} callback 

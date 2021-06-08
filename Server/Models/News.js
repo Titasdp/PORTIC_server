@@ -1,6 +1,7 @@
 const {
     Model,
-    DataTypes
+    DataTypes,
+    STRING
 } = require("sequelize");
 
 /**
@@ -52,11 +53,10 @@ News.init({
         type: DataTypes.TEXT(),
         allowNull: false
     },
-    opened: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
+    published_date: {
+        type: DataTypes.STRING,
         allowNull: false,
-        comment: 'This field will increment every time a person press the button watch more of an video in the News'
+        defaultValue: "2021-01-01"
     },
     created_at: {
         type: 'TIMESTAMP',
@@ -68,6 +68,7 @@ News.init({
         defaultValue: sequelize.NOW,
         allowNull: false,
     },
+
 
     // id_image, id_status, id_creator, id_entity
 }, {

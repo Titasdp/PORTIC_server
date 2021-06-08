@@ -18,6 +18,8 @@ const menuController = require("../Controllers/menuController")
 const entityEmailController = require("../Controllers/entityEmailController");
 const entityContactController = require("../Controllers/entityContactController")
 const socialMediaController = require("../Controllers/socialMediaController")
+const focusController = require("../Controllers/focusController")
+const principalController = require("../Controllers/principalController")
 //
 
 //
@@ -1057,21 +1059,6 @@ router.post("/init/entities/available_positions", async (req, res) => {
 
 //*Available_position routes>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //*<Unity routes
 
 router.get("/:lng/entities/:id/unities", async (req, res) => {
@@ -1166,6 +1153,139 @@ router.post("/init/entities/unities", async (req, res) => {
 
 //*Unity routes>
 
+
+
+
+
+// *<Focus Routes
+router.get("/:lng/entities/:id/focus", async (req, res) => {
+    focusController.fetchEntityFocusByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+router.post("/init/entities/focus", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+
+    //#0
+
+    await focusController.fetchFocus(req, async (focusFetchSuccess, focusFetchResult) => {
+        if (!focusFetchSuccess) {
+            res.status(focusFetchResult.processRespCode).send(focusFetchResult.toClient)
+        } else if (focusFetchSuccess) {
+            if (focusFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+
+                        //#3
+                        focusController.initFocus({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        }, (success, result) => {
+                            res.status(result.processRespCode).send(result.toClient)
+                        });
+                    })
+
+                })
+            }
+        }
+    })
+});
+
+//*Focus Routes>
+
+
+
+
+
+// *<Focus Routes
+router.get("/:lng/entities/:id/principals", async (req, res) => {
+    principalController.fetchPrincipalsByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+router.post("/init/entities/principals", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+
+    //#0
+
+    await principalController.fetchPrincipals(req, async (principalFetchSuccess, principalFetchResult) => {
+        if (!principalFetchSuccess) {
+            res.status(principalFetchResult.processRespCode).send(principalFetchResult.toClient)
+        } else if (principalFetchSuccess) {
+            if (principalFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+
+                        //#3
+                        principalController.initPrincipal({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        }, (success, result) => {
+                            res.status(result.processRespCode).send(result.toClient)
+                        });
+                    })
+
+                })
+            }
+        }
+    })
+});
+
+//*Focus Routes>
 
 
 

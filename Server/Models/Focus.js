@@ -11,7 +11,6 @@ const {
 
 //!About us page
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
@@ -24,9 +23,7 @@ Focus.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Focus')
-        },
+
     },
     description_pt: {
         type: DataTypes.STRING,
