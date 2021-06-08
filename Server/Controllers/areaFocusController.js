@@ -27,7 +27,6 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
             }
         }
         return callback(false, processResp)
-
     }
 
     let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_pt as description, Picture.img_path from  (Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) WHERE Entity_Areas_focus.id_entity =:id_entity;` : `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng as description, Picture.img_path from  (Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) WHERE Entity_Areas_focus.id_entity =:id_entity;`
@@ -40,32 +39,28 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
             model: EntityAreasFocusModel.Entity_areas_focus
         })
         .then(async data => {
-
-            let coursesFocus = []
+            let areasFocus = []
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
-                console.log("here");
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
                     let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
 
-                    let courseFocusObj = {
-                        id_courses_focus: el.id_courses_focus,
-                        description: el.description,
+                    let areaFocusObj = {
+                        id_areas_focus: el.id_areas_focus,
                         description: el.description,
                         img: await (imgFetch.processRespCode === 200) ? imgFetch.toClient.processResult : [],
 
                     }
-                    coursesFocus.push(courseFocusObj)
+                    areasFocus.push(areaFocusObj)
                 }
             }
             processResp = {
                 processRespCode: respCode,
                 toClient: {
-                    processResult: coursesFocus,
+                    processResult: areasFocus,
                     processError: null,
                     processMsg: respMsg,
                 }
