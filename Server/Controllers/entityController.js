@@ -7,14 +7,9 @@ const entityEmailController = require("./entityEmailController")
 const entityContactController = require("./entityContactController")
 const socialMediaController = require("./socialMediaController")
 /**
- * Function that fetch all entity from the Database
- * Done
- * Admin Only
+ * Todo
  */
 fetchAllEntity = (receivedObj, callback) => {
-    let query = ""
-        (receivedObj.selected_lang = "eng") ? query = `SELECT * FROM User_title where designation_eng = :designation_eng` : query = `SELECT * FROM User_title where designation_pt = :designation_pt`;
-
     sequelize
         .query("SELECT * FROM User_title", {
             model: UserTitleModel.User_title

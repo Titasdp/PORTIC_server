@@ -8,7 +8,7 @@ const {
  * //// Connection (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+
 
 const EntityModel = require("../Models/Entity")
 const PictureModel = require("../Models/Picture")
@@ -23,9 +23,6 @@ Unity.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Unity')
-        },
     },
     designation: {
         type: DataTypes.STRING,

@@ -25,6 +25,7 @@ const areaController = require("../Controllers/areaController")
 const courseController = require("../Controllers/courseController")
 const mediaController = require("../Controllers/mediaController")
 const recruitmentController = require("../Controllers/recruitmentController")
+const unityController = require("../Controllers/unityController")
 
 //
 const pictureController = require("../Controllers/pictureController")
@@ -1061,5 +1062,115 @@ router.post("/init/entities/available_positions", async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+//*<Unity routes
+
+router.get("/:lng/entities/:id/unities", async (req, res) => {
+    unityController.fetchEntityUnityByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    })
+})
+
+
+router.post("/init/entities/unities", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+    let idDataStatus = null
+
+
+    //#0
+    await unityController.fetchAllUnities(req, async (unityFetchSuccess, unityFetchResult) => {
+        if (!unityFetchSuccess) {
+            res.status(unityFetchResult.processRespCode).send(unityFetchResult.toClient)
+        } else if (unityFetchSuccess) {
+            if (unityFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+                        //#3
+
+                        // #4
+                        dataStatusController.fetchDataStatusIdByName("Published", (statusFetchSuccess, statusFetchResult) => {
+                            if (!statusFetchSuccess) {
+                                res.status(statusFetchResult.processRespCode).send(statusFetchResult.toClient)
+                            }
+
+                            if (statusFetchResult.processRespCode === 200) {
+                                idDataStatus = statusFetchResult.toClient.processResult[0].id_status
+                            }
+
+                            //#5
+                            pictureController.initAddMultipleImgs({
+                                insertArray: [`${process.cwd()}/Server/Images/UnitiesGalley/portoDesignFactory.jpg`, `${process.cwd()}/Server/Images/UnitiesGalley/startupPorto.jpg`, `${process.cwd()}/Server/Images/UnitiesGalley/portoBusinessInnovation.jpg`]
+                            }, (imgAddSuccess, imgAddResult) => {
+                                if (!imgAddSuccess) {
+                                    res.status(imgAddResult.processRespCode).send(imgAddResult.toClient)
+                                } else {
+                                    console.log();
+                                    //#6
+                                    unityController.initUnity({
+                                        idEntity: idEntity,
+                                        idCreator: idUser,
+                                        imgsIds: imgAddResult.toClient.processResult.generatedIds,
+                                        idDataStatus: idDataStatus
+
+                                    }, (success, result) => {
+                                        res.status(result.processRespCode).send(result.toClient)
+                                    });
+                                }
+
+                            })
+                        })
+
+
+                    })
+                })
+
+
+            }
+        }
+    })
+});
+
+//*Unity routes>
+
+
+
+
+
+
+//unityController
 
 module.exports = router;

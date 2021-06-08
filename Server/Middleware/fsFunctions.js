@@ -1,3 +1,6 @@
+const {
+    rejects
+} = require('assert');
 const fs = require('fs')
 //Upload File
 fileUpload = async (dataObj, callback) => {
@@ -210,6 +213,58 @@ const fileFetch = (dataObj, callback) => {
 }
 
 
+
+//Todo
+const simplifyFileFetch = async (path) => {
+    let processResp = {}
+
+    let exist = await simplifyCheckFileExistence(path)
+
+    if (exist) {
+        return await new Promise((resolve, reject) => {
+            fs.readFile(path, function (err, data) {
+                let functionSuccess = false
+                if (err) {
+                    console.log(err);
+                    processResp = {
+                        processRespCode: 500,
+                        toClient: {
+                            processResult: null,
+                            processError: null,
+                            processMsg: "Something went wrong please ty again later.",
+                        }
+                    }
+                } else {
+                    functionSuccess = true
+                    processResp = {
+                        processRespCode: 200,
+                        toClient: {
+                            processResult: data,
+                            processError: null,
+                            processMsg: "The file was successfully fetched.",
+                        }
+                    }
+                }
+                resolve(processResp);
+            });
+        })
+    } else {
+
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "The file was successfully fetched.",
+            }
+        }
+        return processResp;
+
+    }
+
+
+}
+
 //!May be deleted
 fileExtermination = (dataObj, callback) => {
 
@@ -275,10 +330,30 @@ const confirmIsImg = async (fileMimeType) => {
     }
 }
 
+/**
+ * Confirms if there is a file in a expecific path 
+ * @param {String} imgPath The path where file is stored in the Server
+ * @returns true (if confirms file existent) or false (if denny existent)
+ */
+const simplifyCheckFileExistence = async (imgPath) => {
+    return await new Promise((resolve, reject) => {
+        fs.access(imgPath, (err, data) => {
+            if (err) {
+                reject(false) //
+            } else {
+                resolve(true)
+            }
+        })
+    })
+}
+
+
+
 // C:\Users\tiago\Documents\PersonalProjects\BackEnd\moitasCarsServer\moitasCarsServer\Server\images\adlisa.jpg
 
 module.exports = {
     fileUpload,
     fileDelete,
-    fileFetch
+    fileFetch,
+    simplifyFileFetch
 }
