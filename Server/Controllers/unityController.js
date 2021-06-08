@@ -70,7 +70,6 @@ const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
                     }
                     unities.push(unityObj)
                 }
-
                 processResp = {
                     processRespCode: respCode,
                     toClient: {
