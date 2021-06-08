@@ -30,7 +30,7 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
 
     }
 
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `Select Entity_courses_focus.id_courses_focus, Entity_courses_focus.description_pt as description, Picture.img_path from  (Entity_courses_focus INNER JOIN Picture ON Picture.id_picture = Entity_courses_focus.id_icon) WHERE Entity_courses_focus.id_entity =:id_entity` : `Select Entity_courses_focus.id_courses_focus, Entity_courses_focus.description_eng as description, Picture.img_path from  (Entity_courses_focus INNER JOIN Picture ON Picture.id_picture = Entity_courses_focus.id_icon) WHERE Entity_courses_focus.id_entity =:id_entity;`
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_pt as description, Picture.img_path from  (Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) WHERE Entity_Areas_focus.id_entity =:id_entity;` : `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng as description, Picture.img_path from  (Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) WHERE Entity_Areas_focus.id_entity =:id_entity;`
     await sequelize
         .query(query, {
             replacements: {
