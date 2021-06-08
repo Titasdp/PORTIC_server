@@ -219,9 +219,9 @@ const simplifyFileFetch = async (path) => {
     let processResp = {}
 
     let exist = await simplifyCheckFileExistence(path)
+    return await new Promise((resolve, reject) => {
+        if (exist) {
 
-    if (exist) {
-        return await new Promise((resolve, reject) => {
             fs.readFile(path, function (err, data) {
                 let functionSuccess = false
                 if (err) {
@@ -247,20 +247,21 @@ const simplifyFileFetch = async (path) => {
                 }
                 resolve(processResp);
             });
-        })
-    } else {
 
-        processResp = {
-            processRespCode: 400,
-            toClient: {
-                processResult: null,
-                processError: null,
-                processMsg: "The file was successfully fetched.",
+        } else {
+
+            processResp = {
+                processRespCode: 400,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "The file was successfully fetched.",
+                }
             }
-        }
-        return processResp;
+            return processResp;
 
-    }
+        }
+    })
 
 
 }
