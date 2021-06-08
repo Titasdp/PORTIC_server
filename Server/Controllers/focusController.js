@@ -45,17 +45,17 @@ const fetchEntityFocusByIdEntity = async (dataObj, callback) => {
             if (data[0].length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
-            } else {
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: data[0],
-                        processError: null,
-                        processMsg: respMsg,
-                    }
-                }
-                return callback(true, processResp)
             }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);

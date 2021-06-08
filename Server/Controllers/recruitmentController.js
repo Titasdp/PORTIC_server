@@ -79,17 +79,19 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
 
                     availablePositions.push(positionObj)
                 }
-
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: availablePositions,
-                        processError: null,
-                        processMsg: respMsg,
-                    }
-                }
-                return callback(true, processResp)
             }
+
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: availablePositions,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);

@@ -11,7 +11,6 @@ const {
 
 //!About us page
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
@@ -25,9 +24,7 @@ Entity_areas_focus.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_Focus')
-        },
+
     },
     description_pt: {
         type: DataTypes.STRING,
@@ -85,7 +82,7 @@ UserModel.User.hasMany(Entity_areas_focus, {
         type: DataTypes.STRING,
     }
 });
-Entity_Areas_focus.belongsTo(UserModel.User, {
+Entity_areas_focus.belongsTo(UserModel.User, {
     foreignKey: {
         name: "id_creator",
         type: DataTypes.STRING,
@@ -95,14 +92,14 @@ Entity_Areas_focus.belongsTo(UserModel.User, {
 //Picture connection
 PictureModel.Picture.hasMany(Entity_areas_focus, {
     foreignKey: {
-        name: "id_picture",
+        name: "id_icon",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
 Entity_areas_focus.belongsTo(PictureModel.Picture, {
     foreignKey: {
-        name: "id_picture",
+        name: "id_icon",
         type: DataTypes.STRING,
         allowNull: false,
     }

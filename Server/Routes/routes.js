@@ -22,6 +22,7 @@ const focusController = require("../Controllers/focusController")
 const principalController = require("../Controllers/principalController")
 const hiringTipsController = require("../Controllers/hiringTipsController")
 const courseFocusController = require("../Controllers/courseFocusController")
+const areaFocusController = require("../Controllers/areaFocusController")
 //
 
 //
@@ -817,7 +818,7 @@ router.post("/init/entities/areas", async (req, res) => {
 
 //*<Course Routes
 
-router.get("/:lng/entities/:id/course", async (req, res) => {
+router.get("/:lng/entities/:id/courses", async (req, res) => {
     courseController.fetchCourseByIdEntity({
         req: req
     }, (fetchSuccess, fetchResult) => {
@@ -826,7 +827,7 @@ router.get("/:lng/entities/:id/course", async (req, res) => {
 })
 
 
-router.post("/init/entities/course", async (req, res) => {
+router.post("/init/entities/courses", async (req, res) => {
     let idEntity = null
     let idUser = null
     let idDataStatus = null
@@ -1349,8 +1350,6 @@ router.post("/init/entities/hiring_tips", async (req, res) => {
 
 
 //*< Course Focus Models
-
-
 router.get("/:lng/entities/:id/course_focus", async (req, res) => {
     courseFocusController.fetchCourseFocusByIdEntity({
         req: req
@@ -1425,6 +1424,87 @@ router.post("/init/entities/course_focus", async (req, res) => {
 
 
 //*Course Focus Models >
+
+
+
+
+
+//*< Area Focus Models
+
+
+router.get("/:lng/entities/:id/area_focus", async (req, res) => {
+    areaFocusController.fetchAreaFocusByIdEntity({
+        req: req
+    }, (fetchSuccess, fetchResult) => {
+        console.log(fetchResult.toClient);
+        res.status(204).send(fetchResult.toClient)
+    })
+})
+
+
+router.post("/init/entities/area_focus", async (req, res) => {
+    let idEntity = null
+    let idUser = null
+    //#0
+    await areaFocusController.fetchAreaFocus(req, async (focusFetchSuccess, focusFetchResult) => {
+        if (!focusFetchSuccess) {
+            res.status(focusFetchResult.processRespCode).send(focusFetchResult.toClient)
+        } else if (focusFetchSuccess) {
+            if (focusFetchResult.processRespCode === 200) {
+                res.status(409).send({
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+                })
+            } else {
+                //#1
+                entityController.fetchEntityIdByName(`Porto Research, Technology & Innovation Center`, (entityFetchSuccess, entityFetchResult) => {
+                    if (!entityFetchSuccess) {
+                        res.status(entityFetchResult.processRespCode).send(entityFetchResult.toClient)
+                    }
+
+                    if (entityFetchResult.processRespCode === 200) {
+                        idEntity = entityFetchResult.toClient.processResult[0].id_entity
+                    }
+                    //#2
+                    userController.fetchUsedDataByUsername("superAdmin", (fetchUserSuccess, fetchUserResult) => {
+                        if (!fetchUserSuccess) {
+                            res.status(fetchUserResult.processRespCode).send(fetchUserResult.toClient)
+                        }
+
+                        if (fetchUserResult.processRespCode === 200) {
+                            idUser = fetchUserResult.toClient.processResult[0].id_user
+                        }
+                        // #3
+                        pictureController.initAddMultipleImgs({
+                            insertArray: [`${process.cwd()}/Server/Images/Icons/search.svg`, `${process.cwd()}/Server/Images/Icons/tech.svg`, `${process.cwd()}/Server/Images/Icons/creativity.svg`, `${process.cwd()}/Server/Images/Icons/business.svg`, `${process.cwd()}/Server/Images/Icons/incubator.svg`, `${process.cwd()}/Server/Images/Icons/startup.svg`]
+                        }, (imgAddSuccess, imgAddResult) => {
+                            if (!imgAddSuccess) {
+                                res.status(imgAddResult.processRespCode).send(imgAddResult.toClient)
+                            } else {
+                                //#6
+                                areaFocusController.initAreaFocus({
+                                    idEntity: idEntity,
+                                    idCreator: idUser,
+                                    imgsIds: imgAddResult.toClient.processResult.generatedIds,
+                                }, (success, result) => {
+                                    res.status(result.processRespCode).send(result.toClient)
+                                });
+                            }
+
+                        })
+                    })
+                })
+            }
+        }
+    })
+});
+
+
+//*Area Models >
+
+
+
 
 
 

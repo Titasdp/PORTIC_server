@@ -70,16 +70,16 @@ const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
                     }
                     unities.push(unityObj)
                 }
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: unities,
-                        processError: null,
-                        processMsg: respMsg,
-                    }
-                }
-                return callback(true, processResp)
             }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: unities,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);

@@ -76,8 +76,9 @@ const fetchCourseByIdEntity = async (dataObj, callback) => {
                         processMsg: respMsg,
                     }
                 }
-                return callback(true, processResp)
+
             }
+            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
