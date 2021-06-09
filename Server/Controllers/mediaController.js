@@ -44,12 +44,11 @@ const fetchMediaByIdEntity = async (dataObj, callback) => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
 
             processResp = {
-                processRespCode: 200,
+                processRespCode: respCode,
                 toClient: {
                     processResult: data[0],
                     processError: null,

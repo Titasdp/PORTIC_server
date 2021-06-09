@@ -49,7 +49,6 @@ const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {

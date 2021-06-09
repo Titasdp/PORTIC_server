@@ -149,7 +149,6 @@ const fetchHiringTips = (req, callback) => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data.length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
             let processResp = {

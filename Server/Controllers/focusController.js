@@ -39,11 +39,9 @@ const fetchEntityFocusByIdEntity = async (dataObj, callback) => {
             model: FocusModel.Focus
         })
         .then(async data => {
-            let areas = []
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
             processResp = {

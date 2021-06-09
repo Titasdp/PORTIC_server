@@ -44,7 +44,6 @@ const fetchCourseFocusByIdEntity = async (dataObj, callback) => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
@@ -53,22 +52,20 @@ const fetchCourseFocusByIdEntity = async (dataObj, callback) => {
                     let courseFocusObj = {
                         id_courses_focus: el.id_courses_focus,
                         description: el.description,
-                        description: el.description,
                         img: await (imgFetch.processRespCode === 200) ? imgFetch.toClient.processResult : [],
-
                     }
                     coursesFocus.push(courseFocusObj)
                 }
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: coursesFocus,
-                        processError: null,
-                        processMsg: respMsg,
-                    }
-                }
-                return callback(true, processResp)
             }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: coursesFocus,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);

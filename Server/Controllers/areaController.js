@@ -45,7 +45,6 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
@@ -66,16 +65,16 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
 
                     areas.push(areaObj)
                 }
+            }
 
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: areas,
-                        processError: null,
-                        processMsg: respMsg,
-                    }
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: areas,
+                    processError: null,
+                    processMsg: respMsg,
                 }
-
             }
             return callback(true, processResp)
         })

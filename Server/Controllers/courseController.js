@@ -45,7 +45,6 @@ const fetchCourseByIdEntity = async (dataObj, callback) => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
@@ -67,16 +66,14 @@ const fetchCourseByIdEntity = async (dataObj, callback) => {
 
                     courses.push(courseObj)
                 }
-
-                processResp = {
-                    processRespCode: respCode,
-                    toClient: {
-                        processResult: courses,
-                        processError: null,
-                        processMsg: respMsg,
-                    }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: courses,
+                    processError: null,
+                    processMsg: respMsg,
                 }
-
             }
             return callback(true, processResp)
         })
