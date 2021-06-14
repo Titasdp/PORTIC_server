@@ -2,41 +2,26 @@ const CategoryModel = require("../Models/Category")
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
-/**
- * fetch all Category from the Database
- * Status:Completed
- * @param {obj} dataObj Obj with info
- * @param {callback} callback 
- */
-const fetchAllCategory = (dataObj, callback) => {
-    sequelize
-        .query("SELECT * FROM Category", {
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_category FROM Category", {
             model: CategoryModel.Category
         })
         .then(data => {
-            let processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "Fetched successfully",
-                }
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
+            respCode = 500
         });
+    return respCode
 };
+
 
 
 /**
@@ -44,14 +29,39 @@ const fetchAllCategory = (dataObj, callback) => {
  * @param {*} req 
  * @param {*} callback 
  */
-const initCategory = (req, callback) => {
+const initCategory = async () => {
+
+    let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
     let insertArray = [
         [uniqueIdPack.generateRandomId('_Category'), 'Digital Systems for Health and Telehealth'],
         [uniqueIdPack.generateRandomId('_Category'), 'Cibersecurity'],
         [uniqueIdPack.generateRandomId('_Category'), 'Health Technologies'],
 
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Category (id_category, designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -63,32 +73,32 @@ const initCategory = (req, callback) => {
             let processResp = {
                 processRespCode: 201,
                 toClient: {
-                    processResult: data,
+                    processResult: true,
                     processError: null,
                     processMsg: "All the data were successfully created.",
                 }
             }
-            return callback(false, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
-                    processResult: null,
+                    processResult: false,
                     processError: error,
                     processMsg: "Something went wrong please try again later.",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 /**
  * Function that returns Category id based on designation
  * Done
  */
-const fetchCategoryIdByDesignation = async (designation, callback) => {
-
+const fetchCategoryIdByDesignation = async (designation) => {
+    let processResp = {}
     await sequelize
         .query("SELECT id_category FROM Category where designation = :designation", {
             replacements: {
@@ -98,7 +108,7 @@ const fetchCategoryIdByDesignation = async (designation, callback) => {
             model: CategoryModel.Category
         })
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 200,
                 toClient: {
                     processResult: data,
@@ -106,11 +116,10 @@ const fetchCategoryIdByDesignation = async (designation, callback) => {
                     processMsg: "Fetched successfully",
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -118,8 +127,10 @@ const fetchCategoryIdByDesignation = async (designation, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+
+    return processResp
 };
 
 /**
@@ -297,7 +308,7 @@ const fetchCategoryByIdAvailablePosition = async (id_available_position) => {
 
 module.exports = {
     addCategory,
-    fetchAllCategory,
+
     initCategory,
     fetchCategoryIdByDesignation,
     simpleFetchCategoryIdByDesignation,

@@ -1,3 +1,4 @@
+// To delete
 const {
     Model,
     DataTypes

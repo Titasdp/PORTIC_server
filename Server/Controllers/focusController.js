@@ -7,6 +7,25 @@ const uniqueIdPack = require("../Middleware/uniqueId")
 
 
 
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_focus FROM Focus", {
+            model: FocusModel.Focus
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
 /**
  * 
  * @param {Object} dataObject 
@@ -86,13 +105,34 @@ const fetchEntityFocusByIdEntity = async (dataObj, callback) => {
  * Initialize the table Focus by introducing predefined data to it.
  * Status:Completed
  * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
  */
-const initFocus = async (dataObj, callback) => {
+const initFocus = async (dataObj) => {
     let processResp = {}
-    if (dataObj.idUser === null || dataObj.idEntity === null) {
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
 
+
+    if (dataObj.idUser === null || dataObj.idEntity === null) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -101,7 +141,7 @@ const initFocus = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
     //If success returns the hashed password
     let insertArray = [
@@ -129,11 +169,11 @@ const initFocus = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -141,9 +181,8 @@ const initFocus = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
         });
-
+    return processResp
 }
 
 

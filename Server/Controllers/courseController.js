@@ -7,7 +7,24 @@ const CourseUnityModel = require("../Models/CourseUnity") // done
 const ProjectCourseModel = require("../Models/ProjectCourse") //
 const RecruitmentCourseModel = require("../Models/RecruitmentCourse") // 
 
-
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_course FROM Course", {
+            model: CourseModel.Course
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
 
 /**
  * 
@@ -93,15 +110,32 @@ const fetchCourseByIdEntity = async (dataObj, callback) => {
 
 
 
-/**
- * Initialize the table Course by introducing predefined data to it.
- * Status:Completed
- * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
- */
-const initCourse = async (dataObj, callback) => {
+
+const initCourse = async (dataObj) => {
     let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
     if (dataObj.idUser === null || dataObj.idEntity === null || dataObj.idDataStatus == null) {
 
         processResp = {
@@ -112,7 +146,7 @@ const initCourse = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
     //If success returns the hashed password
     let insertArray = [
@@ -390,7 +424,7 @@ const initCourse = async (dataObj, callback) => {
         </p>`, dataObj.idUser, dataObj.idEntity, dataObj.idDataStatus],
 
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Course(id_course,designation,html_structure_eng,html_structure_pt,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -407,11 +441,10 @@ const initCourse = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -419,8 +452,9 @@ const initCourse = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 
 }
 

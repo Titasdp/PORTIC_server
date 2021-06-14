@@ -2,16 +2,17 @@ const RecruitmentCategoryModel = require("../Models/RecruitmentCategory")
 const sequelize = require("../Database/connection")
 
 const addRecruitmentCategory = async (dataObj) => {
-    let processResult = {}
+    let processResp = {}
     if (dataObj.exist) {
-        return callback(true, processResp = {
+        processResp = {
             processRespCode: 409,
             toClient: {
                 processResult: null,
                 processError: null,
                 processMsg: "The recruitment already has that category associated",
             }
-        })
+        }
+        processResp
     }
 
     await sequelize
@@ -38,7 +39,7 @@ const addRecruitmentCategory = async (dataObj) => {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something went wrong please try again later.",
                 }
             }

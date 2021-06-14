@@ -1,16 +1,58 @@
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 const MenuModel = require("../Models/Menu")
-//!Working here
-/**
- * Initialize the table Menu by introducing predefined data to it.
- * Status:Completed
- * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
- */
-const initMenu = async (dataObj, callback) => {
+
+
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_menu FROM Menu", {
+            model: MenuModel.Menu
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
+
+
+
+const initMenu = async (dataObj) => {
     let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+
+
     if (dataObj.idDataStatus === null || dataObj.idEntity === null) {
 
         processResp = {
@@ -21,7 +63,7 @@ const initMenu = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
     //If success returns the hashed password
     let insertArray = [
@@ -33,7 +75,7 @@ const initMenu = async (dataObj, callback) => {
         [uniqueIdPack.generateRandomId('_Menu'), "Media", "Medias", `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Nada</h3> <p>Nada</p>`, `<h3>Nada</h3> <p>Nada</p>`, "Nothing", "Nada", `Media`, dataObj.idDataStatus, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_Menu'), "Careers", "Recrutamento", `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Nada</h3> <p>Nada</p>`, `<h3>Nada</h3> <p>Nada</p>`, "Nothing", "Nada", `Positions`, dataObj.idDataStatus, dataObj.idEntity],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Menu (id_menu,designation_eng,designation_pt,spotlight_1_eng ,spotlight_2_eng,spotlight_1_pt,spotlight_2_pt,page_description_eng,page_description_pt,router_link,id_status,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -50,11 +92,11 @@ const initMenu = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -62,9 +104,9 @@ const initMenu = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
-        });
 
+        });
+    return processResp
 }
 
 

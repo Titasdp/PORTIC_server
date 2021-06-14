@@ -6,6 +6,36 @@ const menuController = require("./menuController")
 const entityEmailController = require("./entityEmailController")
 const entityContactController = require("./entityContactController")
 const socialMediaController = require("./socialMediaController")
+const pictureController = require("../Controllers/pictureController")
+
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_entity FROM Entity", {
+            model: EntityModel.Entity
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
+
+
+
+
+
+
+
+
 /**
  * Todo
  */
@@ -237,25 +267,63 @@ const fetchEntityIdByName = (designation, callback) => {
  * @param {Callback} callback 
  * @returns 
  */
-const initEntity = async (dataObj, callback) => {
+const initEntity = async () => {
     let processResp = {}
-    if (dataObj.idDataStatus === null || dataObj.idEntityLevel === null || dataObj.idLogo === null) {
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
 
+    let idLogoFetchResult = await pictureController.initAddMultipleImgs({
+        insertArray: [`${process.cwd()}/Server/Images/Logos/logoPortic.png`]
+    })
+
+    if (idLogoFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+    if (dataObj.idDataStatus === null || dataObj.idEntityLevel === null || idLogoFetchResult.toClient.processResult.generateRandomId.length === 0) {
         processResp = {
             processRespCode: 400,
             toClient: {
-                processResult: null,
+                processResult: false,
                 processError: null,
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
 
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Entity'), `Porto Research, Technology & Innovation Center`, `PORTIC`, `<p><span wfd-id="217">O PORTIC -Porto Research, Technology &amp; Innovation Center </span>visa agregar vários centros e grupos de investigação das escolas do P.PORTO num único espaço físico, configurando uma superestrutura dedicada à investigação, transferência de tecnologia, inovação e empreendedorismo. Alojará ainda a Porto Global Hub que integra a Porto Design Factory, a Porto Business Innovation e a Startup Porto e que tem como visão ajudar a criação de projetos locais sustentáveis para uma vida melhor.</p>`, `<p> <span wfd-id = "217"> THE PORTIC -Porto Research, Technology & amp; Innovation Center </span> aims to bring together several research centers and groups from the schools of P.PORTO in a single physical space, configuring a superstructure dedicated to research, technology transfer, innovation and entrepreneurship. It will also host the Porto Global Hub that integrates Porto Design Factory, Porto Business Innovation and Startup Porto and that aims to help create sustainable local projects for a better life. </p>`, `An open door towards the future`, `Uma porta aberta para o futuro`, dataObj.idEntityLevel, dataObj.idLogo, dataObj.idDataStatus],
+        [uniqueIdPack.generateRandomId('_Entity'), `Porto Research, Technology & Innovation Center`, `PORTIC`, `<p><span wfd-id="217">O PORTIC -Porto Research, Technology &amp; Innovation Center </span>visa agregar vários centros e grupos de investigação das escolas do P.PORTO num único espaço físico, configurando uma superestrutura dedicada à investigação, transferência de tecnologia, inovação e empreendedorismo. Alojará ainda a Porto Global Hub que integra a Porto Design Factory, a Porto Business Innovation e a Startup Porto e que tem como visão ajudar a criação de projetos locais sustentáveis para uma vida melhor.</p>`, `<p> <span wfd-id = "217"> THE PORTIC -Porto Research, Technology & amp; Innovation Center </span> aims to bring together several research centers and groups from the schools of P.PORTO in a single physical space, configuring a superstructure dedicated to research, technology transfer, innovation and entrepreneurship. It will also host the Porto Global Hub that integrates Porto Design Factory, Porto Business Innovation and Startup Porto and that aims to help create sustainable local projects for a better life. </p>`, `An open door towards the future`, `Uma porta aberta para o futuro`, dataObj.idEntityLevel, idLogoFetchResult.toClient.processResult.generateRandomId[0], dataObj.idDataStatus],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Entity (id_entity,designation,initials,desc_html_pt,desc_html_eng,slogan_eng,slogan_pt,id_entity_level,id_logo,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -272,11 +340,10 @@ const initEntity = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -284,8 +351,9 @@ const initEntity = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 }
 
 
@@ -295,9 +363,10 @@ const initEntity = async (dataObj, callback) => {
  * @param {Object} dataObject 
  * @param {*} callback 
  */
-const fetchMainEntityId = (dataObj, callback) => {
+const fetchMainEntityId = async () => {
+    let processResp = {}
     let query = `SELECT id_entity  FROM (Entity inner join Entity_level on Entity_level.id_entity_level = Entity.id_entity_level) Where Entity_level.designation= 'Primary' ;`
-    sequelize
+    await sequelize
         .query(query, {
             model: EntityModel.Entity
         })
@@ -310,7 +379,7 @@ const fetchMainEntityId = (dataObj, callback) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
 
-            let processResp = {
+            processResp = {
                 processRespCode: respCode,
                 toClient: {
                     processResult: data[0],
@@ -318,25 +387,69 @@ const fetchMainEntityId = (dataObj, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 
 
+// Todo New
+const fetchEntityIdByDesignation = async (designation) => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT id_entity FROM Entity where designation =:designation", {
+            replacements: {
+                designation: designation
+            }
+        }, {
+            model: EntityModel.Entity
+        })
+        .then(data => {
 
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+
+
+    return processResp
+};
 
 
 
@@ -348,5 +461,6 @@ module.exports = {
     fetchMainEntityId,
     initEntity,
     fetchEntityIdByName,
-    fetchFullEntityDataById
+    fetchFullEntityDataById,
+    fetchEntityIdByDesignation
 }

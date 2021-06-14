@@ -1,50 +1,67 @@
 const UserStatusModel = require("../Models/UserStatus")
 const sequelize = require("../Database/connection")
-const uniqueIdPack = require("../Middleware/uniqueId")
+const uniqueIdPack = require("../Middleware/uniqueId");
 
 /**
- * Function that fetch all UserStatus from the Database
- * Done
+ * gets User Status ids to confirm if there is data inside the table
+ * @returns (200 if exists, 204 if data doesn't exist and 500 if there has been an error)
  */
-getAllUserStatus = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM User_status", {
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_status FROM User_status", {
             model: UserStatusModel.User_status
         })
         .then(data => {
-            let processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "Fetched successfully",
-                }
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
             }
-            return callback(true, processResp)
         })
         .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
+            console.log(error);
+            respCode = 500
         });
+    return respCode
 };
+
+
+
 /**
- * Function that adds predefined UserStratus elements to the table
- * Done
+ * inits the user StatusTable by adding predefine data
+ * @returns (data obj with multiple params )
  */
-const initUserStatus = (req, callback) => {
+const initUserStatus = async () => {
+    let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Normal'],
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Blocked'],
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Archived'],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO User_status (id_status,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -53,28 +70,29 @@ const initUserStatus = (req, callback) => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
-                    processResult: data,
+                    processResult: true,
                     processError: null,
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(false, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something went wrong please try again later.",
+                    processResult: false,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again.",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 
@@ -83,10 +101,10 @@ const initUserStatus = (req, callback) => {
  * Fetch userStatus id based on his name
  * Status:Completed
  * @param {String} designation Name of the status
- * @param {Callback} callback 
+
  */
-const fetchUserStatusIdByName = (designation, callback) => {
-    sequelize
+const fetchUserStatusIdByDesignation = async (designation) => {
+    await sequelize
         .query("SELECT id_status FROM User_status where designation = :designation", {
             replacements: {
                 designation: designation
@@ -102,7 +120,7 @@ const fetchUserStatusIdByName = (designation, callback) => {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
-            let processResp = {
+            processResp = {
                 processRespCode: respCode,
                 toClient: {
                     processResult: data[0],
@@ -110,11 +128,10 @@ const fetchUserStatusIdByName = (designation, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -122,14 +139,14 @@ const fetchUserStatusIdByName = (designation, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 
 
 module.exports = {
-    getAllUserStatus,
     initUserStatus,
-    fetchUserStatusIdByName
+    fetchUserStatusIdByDesignation
 }

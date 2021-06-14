@@ -7,7 +7,7 @@ const {
  * //// Connection (completed)
  */
 const sequelize = require("../Database/connection");
-const uniqueIdPack = require("../Middleware/uniqueId")
+
 
 const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
@@ -33,10 +33,10 @@ Project.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    reference: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
+    // reference: {
+    //     type: DataTypes.STRING,
+    //     allowNull: false
+    // },
     desc_html_structure_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
@@ -45,11 +45,23 @@ Project.init({
         type: DataTypes.TEXT('long'),
         allowNull: false,
     },
-    total_budget: {
-        type: DataTypes.FLOAT,
+    start_date: {
+        type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 0
     },
+    end_date: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    project_contact: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    project_email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,

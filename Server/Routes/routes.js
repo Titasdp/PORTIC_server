@@ -23,6 +23,7 @@ const principalController = require("../Controllers/principalController")
 const hiringTipsController = require("../Controllers/hiringTipsController")
 const courseFocusController = require("../Controllers/courseFocusController")
 const areaFocusController = require("../Controllers/areaFocusController")
+const projectController = require("../Controllers/projectController")
 //
 
 //
@@ -1501,6 +1502,167 @@ router.post("/init/entities/area_focus", async (req, res) => {
 
 
 //*Area Models >
+
+
+
+
+
+// !!!!!!!!!!!!!!!!!!Init test  
+router.post("/init/entities/data", async (req, res) => {
+    //First wave
+    let firstWaveInitResult = await firstInitWave()
+    if (firstWaveInitResult.error_five_hundred) {
+        res.status(500).send({
+            initSuccess: false,
+            processError: true,
+            processMsg: "Something went wrong, please try again later.",
+        })
+    } else {
+        // Second wave
+        let entityLevelFetchResult = (await entityLevelController.fetchEntityLevelIdByDesignation("Primary"))
+        let dataStatusFetchResult = (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+
+        if (entityLevelFetchResult.processRespCode === 500 || dataStatusFetchResult.processRespCode === 500) {
+            res.status(500).send({
+                initSuccess: false,
+                processError: true,
+                processMsg: "Something went wrong, please try again later.",
+            })
+        } else {
+            // console.log("Good");
+            // console.log(entityLevelFetchResult.toClient.processResult[0].id_entity_level);
+            // console.log(dataStatusFetchResult.toClient.processResult[0].id_status);
+
+            let entityInitResult = await entityController.initEntity({
+                idEntityLevel: entityLevelFetchResult.toClient.processResult[0].id_entity_level,
+                idDataStatus: dataStatusFetchResult.toClient.processResult[0].id_status,
+            })
+
+            if (entityInitResult.processRespCode === 500) {
+                res.status(500).send({
+                    initSuccess: false,
+                    processError: true,
+                    processMsg: "Something went wrong, please try again later.",
+                })
+            } else {
+                //Third Wave
+                let entityFetchResult = await entityController.fetchEntityIdByDesignation(`Porto Research, Technology & Innovation Center`)
+                let userStatusFetchResult = await userStatusController.fetchUserStatusIdByDesignation('Normal')
+                let userLevelFetchResult = await userLevelController.fetchUserLevelIdByDesignation("Super Admin");
+                let userTitleFetchResult = await userTitleController.fetchTitleIdByDesignationInit('Indefinido')
+
+                if (entityFetchResult.processRespCode === 500 || userStatusFetchResult.processRespCode === 500 || userLevelFetchResult.processRespCode === 500 || userTitleFetchResult.processRespCode === 500) {
+                    res.status(500).send({
+                        initSuccess: false,
+                        processError: true,
+                        processMsg: "Something went wrong, please try again later.",
+                    })
+                } else {
+                    let idEntity = entityFetchResult.toClient.processResult[0].id_entity
+
+                    let userInitResult = await userController.initUser({
+                        idUserLevel: userLevelFetchResult.toClient.processResult[0].id_user_level,
+                        idDataStatus: userStatusFetchResult.toClient.processResult[0].id_status,
+                        idEntity: idEntity,
+                        idTitle: userTitleFetchResult.toClient.processResult[0].id_title,
+                    })
+                    if (userInitResult.processRespCode === 500) {
+                        res.status(500).send({
+                            initSuccess: false,
+                            processError: true,
+                            processMsg: "Something went wrong, please try again later.",
+                        })
+                    } else {
+                        let userFetchResult = await userController.fetchUsedDataByUsername("superAdmin")
+
+                        if (userFetchResult.processRespCode === 500) {
+                            res.status(500).send({
+                                initSuccess: false,
+                                processError: true,
+                                processMsg: "Something went wrong, please try again later.",
+                            })
+                        }
+                        let idUser = userFetchResult.toClient.processResult[0].id_user
+                        let idDataStatus = dataStatusFetchResult.toClient.processResult[0].id_status
+
+
+                        ///Fourth Wave Init
+                        let initMenusResult = await menuController.initMenu({
+                            idEntity: idEntity,
+                            idDataStatus: idDataStatus
+                        })
+
+                        let initAreasResult = await areaController.initAreas({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        })
+
+                        let initCourseResult = await courseController.initCourse({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                            idDataStatus: idDataStatus,
+                        })
+
+
+                        let initMediaResult = await mediaController.initMedia({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                            idDataStatus: idDataStatus,
+                        })
+
+                        let initRecruitmentResult = await recruitmentController.initAvailablePosition({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        })
+
+
+                        let initFocusResult = await focusController.initFocus({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        })
+
+                        console.log(initFocusResult);
+
+                    }
+
+
+
+
+                }
+            }
+
+        }
+
+
+
+    }
+
+});
+
+
+const firstInitWave = async () => {
+    //#1-First inits (User Status, User Level, User title, Social media type, categories, entity Level) 
+    let firstInitWaveResults = {
+        error_five_hundred: false,
+        data: {
+            user_status_initResult: await userStatusController.initUserStatus(),
+            user_level_initResult: await userLevelController.initUserLevel(),
+            user_title_init_result: await userTitleController.initUserTitle(),
+            social_media_type_init_result: await socialMediaTypeController.initSocialMediaType(),
+            entity_level_init_result: await entityLevelController.initEntityLevel(),
+            communication_level_init_result: await communicationLevelController.initCommunicationLevel(),
+            categories_init_result: await categoryController.initCategory(),
+        }
+    }
+
+
+
+    if (firstInitWaveResults.data.user_status_initResult.processRespCode === 500 || firstInitWaveResults.data.user_level_initResult.processRespCode === 500 || firstInitWaveResults.data.user_title_init_result.processRespCode === 500 || firstInitWaveResults.data.social_media_type_init_result.processRespCode === 500 || firstInitWaveResults.data.entity_level_init_result.processRespCode === 500 || firstInitWaveResults.data.communication_level_init_result.processRespCode === 500 || firstInitWaveResults.data.categories_init_result.processRespCode === 500) {
+        firstInitWaveResults.error_five_hundred = true
+    }
+
+    return firstInitWaveResults
+}
 
 
 

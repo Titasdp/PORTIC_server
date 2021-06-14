@@ -58,6 +58,11 @@ News.init({
         allowNull: false,
         defaultValue: "2021-01-01"
     },
+    project_only: {
+        type: DataTypes.INTEGER(1),
+        allowNull: false,
+        defaultValue: 1,
+    },
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,

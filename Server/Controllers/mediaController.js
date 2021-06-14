@@ -5,6 +5,26 @@ const uniqueIdPack = require("../Middleware/uniqueId");
 
 
 
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_media FROM Media", {
+            model: MediaModel.Media
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
+
 
 /**
  * 
@@ -74,15 +94,30 @@ const fetchMediaByIdEntity = async (dataObj, callback) => {
 
 
 
-/**
- * Initialize the table Media by introducing predefined data to it.
- * Status:Completed
- * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
- */
-const initMedia = async (dataObj, callback) => {
+const initMedia = async (dataObj) => {
     let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
     if (dataObj.idUser === null || dataObj.idEntity === null || dataObj.idDataStatus == null) {
 
         processResp = {
@@ -93,7 +128,7 @@ const initMedia = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
     //If success returns the hashed password
     let insertArray = [
@@ -102,7 +137,7 @@ const initMedia = async (dataObj, callback) => {
         [uniqueIdPack.generateRandomId('_Media'), `Video 03`, `Vídeo 03`, `Welcome to PORTIC`, `Bem-vindo to PORTIC`, `https://youtu.be/U0CxhBa4XWw`, dataObj.idUser, dataObj.idEntity, dataObj.idDataStatus],
         [uniqueIdPack.generateRandomId('_Media'), `Video 04`, `Vídeo 04`, `PORTIC's deed of grant video`, `PORTIC's deed of grant video`, `https://youtu.be/io-5NSsoXqQ`, dataObj.idUser, dataObj.idEntity, dataObj.idDataStatus],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Media(id_media,title_eng,title_pt,description_eng,description_pt,youtube_path,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -119,7 +154,7 @@ const initMedia = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
@@ -131,9 +166,9 @@ const initMedia = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
-        });
 
+        });
+    return processResp
 }
 
 

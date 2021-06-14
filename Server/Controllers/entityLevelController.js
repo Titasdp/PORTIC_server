@@ -2,46 +2,64 @@ const EntityLevelModel = require("../Models/EntityLevel")
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
+
+
 /**
- * Function that fetch all entity levels from the Database
- * Done
+ * gets entityLevel ids to confirm if there is data inside the table
+ * @returns (200 if exists, 204 if data doesn't exist and 500 if there has been an error)
  */
-fetchAllEntityLevel = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM Entity_level", {
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_entity_level FROM Entity_level", {
             model: EntityLevelModel.Entity_level
         })
         .then(data => {
-            let processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "Fetched successfully",
-                }
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
             }
-            return callback(true, processResp)
         })
         .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
+            console.log(error);
+            respCode = 500
         });
+    return respCode
 };
 
+
 /**
- * initialize entity level table by introducing default values
+ * 
  * Status:Completed
- * @param {Object} req request sended by the client
- * @param {callback} callback 
+ * @returns 
  */
-const initEntityLevel = async (req, callback) => {
+const initEntityLevel = async () => {
+    let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+
+
     let insertArray = [
         [uniqueIdPack.generateRandomId('_EntityLevel'), 'Primary'],
         [uniqueIdPack.generateRandomId('_EntityLevel'), 'Secondary'],
@@ -55,38 +73,33 @@ const initEntityLevel = async (req, callback) => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
-                    processResult: data,
+                    processResult: true,
                     processError: null,
                     processMsg: "All the data were successfully created.",
                 }
             }
-            return callback(false, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
-                    processResult: null,
+                    processResult: false,
                     processError: error,
                     processMsg: "Something went wrong please try again later.",
                 }
             }
-            return callback(false, processResp)
         });
+    return processResp
+
 };
 
-/**
- * fetches the id of a entityLevel based on his designation  
- * Status:Completed
- * @param {String} designation designation denominated to the entityLevel
- * @param {Callback} callback 
- */
-const fetchEntityLevelIdByDesignation = (designation, callback) => {
-    sequelize
+const fetchEntityLevelIdByDesignation = async (designation) => {
+    await sequelize
         .query("SELECT id_entity_level FROM Entity_level where designation = :designation", {
             replacements: {
                 designation: designation
@@ -102,7 +115,7 @@ const fetchEntityLevelIdByDesignation = (designation, callback) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
 
-            let processResp = {
+            processResp = {
                 processRespCode: respCode,
                 toClient: {
                     processResult: data[0],
@@ -110,26 +123,26 @@ const fetchEntityLevelIdByDesignation = (designation, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
-                    processResult: null,
+                    processResult: false,
                     processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 
 
 module.exports = {
-    fetchAllEntityLevel,
     initEntityLevel,
     fetchEntityLevelIdByDesignation
 }

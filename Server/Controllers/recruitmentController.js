@@ -11,9 +11,40 @@ const RecruitmentAreaModel = require("../Models/RecruitmentAreas") // done
 const RecruitmentUnityModel = require("../Models/RecruitmentUnity")
 const RecruitmentCourseModel = require("../Models/RecruitmentCourse")
 const ProjectRecruitmentModel = require("../Models/ProjectRecruitment")
-// const CourseAreaModel = require("../Models/CourseArea") // done
-// const ProjectAreaModel = require("../Models/ProjectArea")
-// const RecruitmentAreaModel = require("../Models/RecruitmentAreas") // 
+
+
+
+
+/**
+ * gets User ids to confirm if there is data inside the table
+ * @returns (200 if exists, 204 if data doesn't exist and 500 if there has been an error)
+ */
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_available_position FROM Available_position", {
+            model: AvailablePositionModel.Available_position
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
+
+
+
+
+
+
+
 
 
 
@@ -115,9 +146,32 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
  * @param {Callback} callback 
  * @returns 
  */
-const initAvailablePosition = async (dataObj, callback) => {
-    let randomIds = [uniqueIdPack.generateRandomId('_AvailablePos'), uniqueIdPack.generateRandomId('_AvailablePos')]
+const initAvailablePosition = async (dataObj) => {
     let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+    let randomIds = [uniqueIdPack.generateRandomId('_AvailablePos'), uniqueIdPack.generateRandomId('_AvailablePos')]
+
     if (dataObj.idUser === null || dataObj.idEntity === null) {
 
         processResp = {
@@ -128,7 +182,7 @@ const initAvailablePosition = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
     //If success returns the hashed password
     let insertArray = [
@@ -230,32 +284,34 @@ const initAvailablePosition = async (dataObj, callback) => {
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "All data Where created successfully.",
+                    processMsg: "All data Where created successfully",
                 }
             }
-            await categoryController.fetchAllCategory({}, async (fetchSuccess, fetchResult) => {
-                if (fetchSuccess) {
-                    console.log(fetchResult.toClient.processResult[0].dataValues.id_category);
-                    let insertArray = await [
-                        [randomIds[0], fetchResult.toClient.processResult[0].dataValues.id_category],
-                        [randomIds[0], fetchResult.toClient.processResult[1].dataValues.id_category],
-                        [randomIds[1], fetchResult.toClient.processResult[1].dataValues.id_category],
-                        [randomIds[1], fetchResult.toClient.processResult[2].dataValues.id_category],
-                    ]
-                    let result = await recruitmentCategoryController.addRecruitmentCategory({
-                        insertArray: insertArray,
-                        exist: false
-                    })
-                    return callback(true, processResp)
-                } else {
-                    // console.log("bad news");
-                    return callback(true, processResp)
-                }
+            let firstCatId = (await categoryController.fetchCategoryIdByDesignation("Digital Systems for Health and Telehealth")).toClient.processResult[0].id_category
+            let secondCatId = await categoryController.fetchCategoryIdByDesignation("Cibersecurity").toClient.processResult[0].id_category
+            let thirdCatId = await categoryController.fetchCategoryIdByDesignation("Health Technologies").toClient.processResult[0].id_category
+
+            let insertArray = await [
+                [randomIds[0], firstCatId],
+                [randomIds[0], secondCatId],
+                [randomIds[1], secondCatId],
+                [randomIds[1], thirdCatId],
+            ]
+            let result = await recruitmentCategoryController.addRecruitmentCategory({
+                insertArray: insertArray,
+                exist: false
             })
+
+            if (result.processRespCode !== 201) {
+                processResp.toClient.processMsg += ` ,except the available positions categories.`
+
+            } else {
+                processResp.toClient.processMsg += `.`
+            }
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -263,9 +319,9 @@ const initAvailablePosition = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
-        });
 
+        });
+    return processResp
 }
 
 
@@ -353,7 +409,7 @@ const selectAvailablePositionRelatedUnity = async (id_available_position, lng) =
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,

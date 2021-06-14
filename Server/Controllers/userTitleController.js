@@ -3,43 +3,61 @@ const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
 /**
- * Function that fetch all UserTitle from the Database
- * Done
+ * gets userTitle ids to confirm if there is data inside the table
+ * @returns (200 if exists, 204 if data doesn't exist and 500 if there has been an error)
  */
-fetchAllUserStatus = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM User_title", {
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_title FROM User_title", {
             model: UserTitleModel.User_title
         })
         .then(data => {
-            let processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "Fetched successfully",
-                }
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
             }
-            return callback(true, processResp)
         })
         .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
+            console.log(error);
+            respCode = 500
         });
+    return respCode
 };
+
+
+
+
 /**
- * initialize userTitle by adding to the table predefine data
- * @param {req} req Request sended by the user
- * @param {Callback} callback 
+ * inits the user userTitle by adding predefine data
+ * @returns (data obj with multiple params )
  */
-const initUserTitle = async (req, callback) => {
+const initUserTitle = async () => {
+    let processResp = {};
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserTitle'), 'Indefinido', 'Not Defined']
     ]
@@ -52,7 +70,7 @@ const initUserTitle = async (req, callback) => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: data,
@@ -60,10 +78,9 @@ const initUserTitle = async (req, callback) => {
                     processMsg: "All the data were successfully created",
                 }
             }
-            return callback(false, processResp)
         })
         .catch(error => {
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -71,67 +88,19 @@ const initUserTitle = async (req, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
         });
+    return processResp
 };
 
 
+const fetchTitleIdByDesignationInit = async (designation) => {
+    let processResp = {}
+    let query = `SELECT id_title FROM User_title where designation_pt = :designation`;
 
-/**
- * Function that adds a new user title elements to the system
- * Done
- */
-addUserTitle = (req, callback) => {
-    let insertArray = [
-        [uniqueIdPack.generateRandomId('_UserTitle'), req.sanitize(req.body.designation_pt), req.sanitize(req.body.designation_eng)]
-    ]
-    sequelize
-        .query(
-            `INSERT INTO User_title (id_title,designation_pt,designation_eng) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
-                replacements: insertArray
-            }, {
-                model: UserTitleModel.User_title
-            }
-        )
-        .then(data => {
-            let processResp = {
-                processRespCode: 201,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "A new user title was added to the system.",
-                }
-            }
-            return callback(false, processResp)
-        })
-        .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something went wrong please try again later.",
-                }
-            }
-            return callback(false, processResp)
-        });
-};
-
-/**
- * fetch userLevel id by designation
- * Status:Completed
- * @param {Object} dataObj Object that contains a bunch of data needed to complete this function
- * @param {Callback} callback 
- */
-const fetchTitleIdByDesignation = (dataObj, callback) => {
-
-    let query = (dataObj.selectedLang === "eng") ? `SELECT id_title FROM User_title where designation_eng = :designation_eng` : `SELECT id_title FROM User_title where designation_pt = :designation_pt`;
-
-    sequelize
+    await sequelize
         .query(query, {
             replacements: {
-                designation_pt: dataObj.designationPt,
-                designation_eng: dataObj.designationEng
+                designation: designation,
             }
         }, {
             model: UserTitleModel.User_title
@@ -143,7 +112,7 @@ const fetchTitleIdByDesignation = (dataObj, callback) => {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
-            let processResp = {
+            processResp = {
                 processRespCode: respCode,
                 toClient: {
                     processResult: data[0],
@@ -151,11 +120,11 @@ const fetchTitleIdByDesignation = (dataObj, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -163,11 +132,9 @@ const fetchTitleIdByDesignation = (dataObj, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
-
-
-
+    return processResp
 };
 
 
@@ -177,10 +144,6 @@ const fetchTitleIdByDesignation = (dataObj, callback) => {
 
 
 module.exports = {
-    fetchAllUserStatus,
     initUserTitle,
-
-    // 
-    addUserTitle,
-    fetchTitleIdByDesignation
+    fetchTitleIdByDesignationInit
 }

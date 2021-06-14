@@ -7,6 +7,29 @@ const ProjectAreaModel = require("../Models/ProjectArea")
 const RecruitmentAreaModel = require("../Models/RecruitmentAreas") // 
 
 
+/**
+ * gets areas ids to confirm if there is data inside the table
+ * @returns (200 if exists, 204 if data doesn't exist and 500 if there has been an error)
+ */
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_area FROM Area", {
+            model: AreaModel.Area
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
 
 /**
  * 
@@ -94,15 +117,31 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
 
 
 
-/**
- * Initialize the table Area by introducing predefined data to it.
- * Status:Completed
- * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
- */
-const initAreas = async (dataObj, callback) => {
+
+const initAreas = async (dataObj) => {
     let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
     if (dataObj.idUser === null || dataObj.idEntity === null) {
 
         processResp = {
@@ -113,7 +152,7 @@ const initAreas = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
     //If success returns the hashed password
     let insertArray = [
@@ -126,7 +165,7 @@ const initAreas = async (dataObj, callback) => {
         [uniqueIdPack.generateRandomId('_Area'), "Entrepreneurship and Incubation", "Entrepreneurship and Incubation", `Through Startup Porto (@Porto Global Hub), we promote and develop a new generation of business through entrepreneurship programs and support for startups. The objective is to facilitate the process between imagining a product and taking it to the market, through programs such as pre-acceleration, acceleration and events to connect entrepreneurs and investors, at different stages of development.`, `Through Startup Porto (@Porto Global Hub), we promote and develop a new generation of business through entrepreneurship programs and support for startups. The objective is to facilitate the process between imagining a product and taking it to the market, through programs such as pre-acceleration, acceleration and events to connect entrepreneurs and investors, at different stages of development.`, dataObj.idUser, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_Area'), "Innovation Services", "Innovation Services", `Through Porto Business Innovation (@Porto Global Hub) we link academia, business and society. Based on knowledge and innovation, Porto Business Innovation promotes new business opportunities and supports the development of new products and services, benefiting from the different areas of activity of PORTIC to promote consultancy services to companies.`, `Through Porto Business Innovation (@Porto Global Hub) we link academia, business and society. Based on knowledge and innovation, Porto Business Innovation promotes new business opportunities and supports the development of new products and services, benefiting from the different areas of activity of PORTIC to promote consultancy services to companies.`, dataObj.idUser, dataObj.idEntity],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Area(id_area,designation_pt,designation_eng,description_pt,description_eng,id_publisher,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -143,11 +182,11 @@ const initAreas = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -155,8 +194,8 @@ const initAreas = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
         });
+    return processResp
 
 }
 

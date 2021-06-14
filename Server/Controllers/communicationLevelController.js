@@ -2,47 +2,26 @@ const CommunicationLevelModel = require("../Models/CommunicationLevel")
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
-/**
- * Function that fetch all CommunicationLevel from the Database
- * Status: Completed
- * @param {Req} req Request sended by the client to the server
- * @param {Callback} callback 
- */
-const fetchCommunicationLevels = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM Communication_level", {
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_title FROM User_title", {
             model: CommunicationLevelModel.Communication_level
         })
         .then(data => {
-
-            let respCode = 200;
-            let respMsg = "Fetched successfully."
-            if (data.length === 0) {
+            respCode = 200;
+            if (data[0].length === 0) {
                 respCode = 204
-                respMsg = "Fetch process completed successfully, but there is no content."
             }
-            let processResp = {
-                processRespCode: respCode,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: respMsg,
-                }
-            }
-            return callback(true, processResp)
         })
         .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
+            console.log(error);
+            respCode = 500
         });
+    return respCode
 };
+
+
 
 
 
@@ -52,12 +31,35 @@ const fetchCommunicationLevels = (req, callback) => {
  * @param {Object} dataObj 
  * @param {Callback} callback 
  */
-const initCommunicationLevel = (dataObj, callback) => {
+const initCommunicationLevel = async () => {
+    let processResp = {};
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
     let insertArray = [
         [uniqueIdPack.generateRandomId('_ComLevel'), 'Primary'],
         [uniqueIdPack.generateRandomId('_ComLevel'), 'Secondary'],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Communication_level (id_communication_level,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -66,36 +68,33 @@ const initCommunicationLevel = (dataObj, callback) => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
-                    processResult: data,
+                    processResult: true,
                     processError: null,
                     processMsg: "All the data were successfully created.",
                 }
             }
-            return callback(false, processResp)
         })
         .catch(error => {
-            let processResp = {
+            console.log(error);
+            processResp = {
                 processRespCode: 500,
                 toClient: {
-                    processResult: null,
-                    processError: error,
+                    processResult: false,
+                    processError: null,
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
-/**
- * Fetches Communication level data based on the designation 
- * Status: Completed
- * @param {Object} req Request sended by the client 
- * @param {Callback} callback 
- */
-const fetchCommunicationLevelByDesignation = (designation, callback) => {
-    sequelize
+
+const fetchCommunicationLevelByDesignation = async (designation) => {
+    let processResp = {}
+    await sequelize
         .query("SELECT * FROM Communication_level where designation = :designation", {
             replacements: {
                 designation: designation
@@ -110,7 +109,7 @@ const fetchCommunicationLevelByDesignation = (designation, callback) => {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
-            let processResp = {
+            processResp = {
                 processRespCode: respCode,
                 toClient: {
                     processResult: data,
@@ -118,25 +117,27 @@ const fetchCommunicationLevelByDesignation = (designation, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
+            console.log(error);
             let processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+
+    return processResp
 };
 
 
 
 module.exports = {
-    fetchCommunicationLevels,
     initCommunicationLevel,
     fetchCommunicationLevelByDesignation
 }

@@ -2,49 +2,67 @@ const UserLevelModel = require("../Models/UserLevel")
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
+
 /**
- * Function that fetch all UserLevel from the Database
- * Done
+ * gets UserLevel ids to confirm if there is data inside the table
+ * @returns (200 if exists, 204 if data doesn't exist and 500 if there has been an error)
  */
-fetchUserStatus = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM User_status", {
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_user_level FROM User_level", {
             model: UserLevelModel.User_level
         })
         .then(data => {
-            let processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "Fetched successfully",
-                }
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
             }
-            return callback(true, processResp)
         })
         .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
+            console.log(error);
+            respCode = 500
         });
+    return respCode
 };
+
+
 /**
- * Function that adds predefined UserLevel elements to the table
- * Done
+ * inits the user UserLevel by adding predefine data
+ * Status:Completed
+ * @returns (data obj with multiple params )
  */
-initUserLevel = (req, callback) => {
+const initUserLevel = async () => {
+    let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Super Admin'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Entity Admin'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Collaborator'],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO User_level (id_user_level,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -53,18 +71,17 @@ initUserLevel = (req, callback) => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
-                    processResult: data,
+                    processResult: true,
                     processError: null,
                     processMsg: "All the data were successfully created.",
                 }
             }
-            return callback(false, processResp)
         })
         .catch(error => {
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -72,15 +89,20 @@ initUserLevel = (req, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
         });
+    return processResp
 };
+
+
+
+
 /**
  * Function that returns UserLevel id based on designation
  * Done
  */
-const fetchUserLevelIdByName = (designation, callback) => {
-    sequelize
+const fetchUserLevelIdByDesignation = async (designation) => {
+    let processResp = {}
+    await sequelize
         .query("SELECT id_user_level FROM User_level where designation = :designation", {
             replacements: {
                 designation: designation
@@ -95,7 +117,7 @@ const fetchUserLevelIdByName = (designation, callback) => {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
-            let processResp = {
+            processResp = {
                 processRespCode: respCode,
                 toClient: {
                     processResult: data[0],
@@ -103,11 +125,11 @@ const fetchUserLevelIdByName = (designation, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -115,14 +137,14 @@ const fetchUserLevelIdByName = (designation, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 
 
 module.exports = {
-    fetchUserStatus,
     initUserLevel,
-    fetchUserLevelIdByName
+    fetchUserLevelIdByDesignation
 }

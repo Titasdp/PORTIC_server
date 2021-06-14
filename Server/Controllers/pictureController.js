@@ -10,7 +10,7 @@ const uniqueIdPack = require("../Middleware/uniqueId");
  * @param {Object} dataObj Object that contains multiple elements in it
  * @param {Callback} callback 
  */
-const addImgOnInit = async (dataObj, callback) => {
+const addImgOnInit = async (dataObj) => {
 
     let generatedId = uniqueIdPack.generateRandomId('_Picture')
 
@@ -63,7 +63,7 @@ const addImgOnInit = async (dataObj, callback) => {
  * @param {Object} dataObj Object that contains multiple elements in it
  * @param {Callback} callback 
  */
-const initAddMultipleImgs = async (dataObj, callback) => {
+const initAddMultipleImgs = async (dataObj) => {
 
     let generatedIds = [];
     let insertArray = [];
@@ -95,11 +95,10 @@ const initAddMultipleImgs = async (dataObj, callback) => {
                     processMsg: "Data created successfully.",
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -107,8 +106,9 @@ const initAddMultipleImgs = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 }
 
 

@@ -10,8 +10,8 @@ const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
 
 const UserModel = require("../Models/User")
-const EntityModel = require("../Models/Entity")
-const DataStatusModel = require("../Models/DataStatus")
+// const EntityModel = require("../Models/Entity")
+const ProjectModel = require("../Models/Project")
 const PictureModel = require("../Models/Picture")
 
 class Outside_investor extends Model {}
@@ -22,9 +22,9 @@ Outside_investor.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        defaultValue: function () {
-            return uniqueIdPack.generateRandomId('_OutsideInvestor')
-        },
+        // defaultValue: function () {
+        //     return uniqueIdPack.generateRandomId('_OutsideInvestor')
+        // },
     },
     designation: {
         type: DataTypes.STRING,
@@ -33,7 +33,7 @@ Outside_investor.init({
     page_url: {
         type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: "No URL link",
+        defaultValue: null,
     },
     created_at: {
         type: 'TIMESTAMP',
@@ -59,22 +59,6 @@ Outside_investor.init({
 });
 
 
-//Entity connection
-EntityModel.Entity.hasMany(Outside_investor, {
-    foreignKey: {
-        name: "id_entity",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Outside_investor.belongsTo(EntityModel.Entity, {
-    foreignKey: {
-        name: "id_entity",
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-});
-
 //User connection
 UserModel.User.hasMany(Outside_investor, {
     foreignKey: {
@@ -90,6 +74,25 @@ Outside_investor.belongsTo(UserModel.User, {
         allowNull: false,
     }
 });
+
+
+
+//User connection
+ProjectModel.Project.hasMany(Outside_investor, {
+    foreignKey: {
+        name: "id_project",
+        allowNull: false,
+        type: DataTypes.STRING,
+    }
+});
+Outside_investor.belongsTo(ProjectModel.Project, {
+    foreignKey: {
+        name: "id_project",
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
+});
+
 
 
 //Picture connection
@@ -108,23 +111,6 @@ Outside_investor.belongsTo(PictureModel.Picture, {
     }
 });
 
-
-
-//DataStatus connection
-DataStatusModel.Data_status.hasMany(Outside_investor, {
-    foreignKey: {
-        name: "id_status",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Outside_investor.belongsTo(DataStatusModel.Data_status, {
-    foreignKey: {
-        name: "id_status",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
 
 
 

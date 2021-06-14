@@ -10,7 +10,11 @@ const UserModel = require("../Models/User");
 class Project_team extends Model {}
 
 Project_team.init({
-
+    can_edit = {
+        type: DataTypes.INTEGER(1),
+        allowNull: false,
+        defaultValue: 0,
+    }
 }, {
     sequelize,
     modelName: "Project_team",
