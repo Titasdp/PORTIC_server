@@ -1,17 +1,66 @@
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 const EntityContactModel = require("../Models/EntityContact")
+//Controllers
+const communicationLevelController = require("../Controllers/communicationLevelController")
+
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_contact FROM Entity_contact", {
+            model: EntityContactModel.Entity_contact
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
+
+
+
+
 
 /**
  * Initialize the table Entity_contact by introducing predefined data to it.
  * Status:Completed
  * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
  */
-const initEntityContact = async (dataObj, callback) => {
+const initEntityContact = async (dataObj) => {
+    let primaryLevelId = (await communicationLevelController.fetchCommunicationLevelByDesignation("Primary")).toClient.processResult[0].id_communication_level;
     let processResp = {}
-    if (dataObj.communicationLevels.length === 0 || dataObj.idEntity === null || dataObj.idUser === null) {
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+    if (dataObj.idEntity === null || dataObj.idUser === null || primaryLevelId == null || secondaryLevelId == null) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -20,15 +69,12 @@ const initEntityContact = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
-
-
-    console.log(dataObj.communicationLevels[1].dataValues.id_communication_level);
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Contact'), "(+351) 22 557 1020", dataObj.idEntity, dataObj.idUser, dataObj.communicationLevels[0].dataValues.id_communication_level],
+        [uniqueIdPack.generateRandomId('_Contact'), "(+351) 22 557 1020", dataObj.idEntity, dataObj.idUser, primaryLevelId],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Entity_contact (id_contact , number , id_entity , id_creator , id_communication_level) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -45,11 +91,11 @@ const initEntityContact = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -57,8 +103,9 @@ const initEntityContact = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 }
 
 /**

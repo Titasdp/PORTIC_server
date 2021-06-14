@@ -5,6 +5,24 @@ const sequelize = require("../Database/connection")
 // Middleware
 const uniqueIdPack = require("../Middleware/uniqueId")
 
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_hiring_tip FROM Hiring_tip", {
+            model: HiringTipModel.Hiring_tip
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
 
 
 /**
@@ -77,8 +95,32 @@ const fetchHiringTipsByIdEntity = async (dataObj, callback) => {
  * @param {Callback} callback 
  * @returns 
  */
-const initHiringTip = async (dataObj, callback) => {
+const initHiringTip = async (dataObj) => {
+
     let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
     if (dataObj.idUser === null || dataObj.idEntity === null) {
 
         processResp = {
@@ -116,11 +158,10 @@ const initHiringTip = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -128,9 +169,9 @@ const initHiringTip = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
-        });
 
+        });
+    return processResp
 }
 
 

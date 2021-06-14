@@ -1621,7 +1621,51 @@ router.post("/init/entities/data", async (req, res) => {
                             idUser: idUser,
                         })
 
-                        console.log(initFocusResult);
+
+                        let iniPrincipleResult = await principalController.initPrincipal({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        })
+                        // console.log(iniPrincipleResult);
+
+
+                        let initHiringTipResult = await hiringTipsController.initHiringTip({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        })
+                        // console.log(initHiringTipResult);
+
+
+                        let initEntityEmailResult = await entityEmailController.initEntityEmail({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        })
+                        // console.log(initEntityEmailResult);
+
+                        let initEntityContactResult = await entityContactController.initEntityContact({
+                            idEntity: idEntity,
+                            idUser: idUser,
+                        })
+                        // console.log(initEntityContactResult);
+
+
+                        let initEntitySocialMediasResult = await socialMediaController.initSocialMediaType({
+                            idEntity: idEntity,
+                        })
+
+                        let intiUnityResult = await unityController.initUnity({
+                            idEntity: idEntity,
+                            idCreator: idUser,
+                            idDataStatus: idDataStatus
+                        })
+
+
+
+                        let initCourseFocusResult = await courseFocusController.initCorseFocus({
+                            idEntity: idEntity,
+                            idCreator: idUser,
+                        })
+                        console.log(initCourseFocusResult);
 
                     }
 

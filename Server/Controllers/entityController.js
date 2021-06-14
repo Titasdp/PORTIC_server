@@ -1,7 +1,9 @@
 const EntityModel = require("../Models/Entity")
 const sequelize = require("../Database/connection")
+// Middleware
 const uniqueIdPack = require("../Middleware/uniqueId");
 const fsPack = require("../Middleware/fsFunctions")
+// Controllers
 const menuController = require("./menuController")
 const entityEmailController = require("./entityEmailController")
 const entityContactController = require("./entityContactController")
@@ -17,7 +19,7 @@ const confTableFilled = async () => {
         })
         .then(data => {
             respCode = 200;
-            if (data[0].length === 0) {
+            if (data.length === 0) {
                 respCode = 204
             }
         })
@@ -27,12 +29,6 @@ const confTableFilled = async () => {
         });
     return respCode
 };
-
-
-
-
-
-
 
 
 
@@ -292,6 +288,20 @@ const initEntity = async () => {
         return processResp
     }
 
+    if (dataObj.idDataStatus === null || dataObj.idEntityLevel === null) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Something went wrong please try again later.",
+            }
+        }
+        return processResp
+    }
+
+
+
     let idLogoFetchResult = await pictureController.initAddMultipleImgs({
         insertArray: [`${process.cwd()}/Server/Images/Logos/logoPortic.png`]
     })
@@ -308,20 +318,10 @@ const initEntity = async () => {
         return processResp
     }
 
-    if (dataObj.idDataStatus === null || dataObj.idEntityLevel === null || idLogoFetchResult.toClient.processResult.generateRandomId.length === 0) {
-        processResp = {
-            processRespCode: 400,
-            toClient: {
-                processResult: false,
-                processError: null,
-                processMsg: "Something went wrong please try again later.",
-            }
-        }
-        return processResp
-    }
+
 
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Entity'), `Porto Research, Technology & Innovation Center`, `PORTIC`, `<p><span wfd-id="217">O PORTIC -Porto Research, Technology &amp; Innovation Center </span>visa agregar vários centros e grupos de investigação das escolas do P.PORTO num único espaço físico, configurando uma superestrutura dedicada à investigação, transferência de tecnologia, inovação e empreendedorismo. Alojará ainda a Porto Global Hub que integra a Porto Design Factory, a Porto Business Innovation e a Startup Porto e que tem como visão ajudar a criação de projetos locais sustentáveis para uma vida melhor.</p>`, `<p> <span wfd-id = "217"> THE PORTIC -Porto Research, Technology & amp; Innovation Center </span> aims to bring together several research centers and groups from the schools of P.PORTO in a single physical space, configuring a superstructure dedicated to research, technology transfer, innovation and entrepreneurship. It will also host the Porto Global Hub that integrates Porto Design Factory, Porto Business Innovation and Startup Porto and that aims to help create sustainable local projects for a better life. </p>`, `An open door towards the future`, `Uma porta aberta para o futuro`, dataObj.idEntityLevel, idLogoFetchResult.toClient.processResult.generateRandomId[0], dataObj.idDataStatus],
+        [uniqueIdPack.generateRandomId('_Entity'), `Porto Research, Technology & Innovation Center`, `PORTIC`, `<p><span wfd-id="217">O PORTIC -Porto Research, Technology &amp; Innovation Center </span>visa agregar vários centros e grupos de investigação das escolas do P.PORTO num único espaço físico, configurando uma superestrutura dedicada à investigação, transferência de tecnologia, inovação e empreendedorismo. Alojará ainda a Porto Global Hub que integra a Porto Design Factory, a Porto Business Innovation e a Startup Porto e que tem como visão ajudar a criação de projetos locais sustentáveis para uma vida melhor.</p>`, `<p> <span wfd-id = "217"> THE PORTIC -Porto Research, Technology & amp; Innovation Center </span> aims to bring together several research centers and groups from the schools of P.PORTO in a single physical space, configuring a superstructure dedicated to research, technology transfer, innovation and entrepreneurship. It will also host the Porto Global Hub that integrates Porto Design Factory, Porto Business Innovation and Startup Porto and that aims to help create sustainable local projects for a better life. </p>`, `An open door towards the future`, `Uma porta aberta para o futuro`, dataObj.idEntityLevel, idLogoFetchResult.toClient.processResult.generatedIds[0], dataObj.idDataStatus],
     ]
     await sequelize
         .query(

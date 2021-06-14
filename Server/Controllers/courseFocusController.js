@@ -5,6 +5,31 @@ const sequelize = require("../Database/connection")
 // Middleware
 const uniqueIdPack = require("../Middleware/uniqueId")
 const fsPack = require("../Middleware/fsFunctions")
+// Controllers 
+const pictureController = require("../Controllers/pictureController")
+
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_courses_focus FROM Entity_courses_focus", {
+            model: EntityCourseFocusModel.Entity_courses_focus
+        })
+        .then(data => {
+            respCode = 200;
+            if (data.length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
+
+
 
 
 
@@ -85,12 +110,32 @@ const fetchCourseFocusByIdEntity = async (dataObj, callback) => {
  * Initialize the table CorseFocus by introducing predefined data to it.
  * Status:Completed
  * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
  */
-const initCorseFocus = async (dataObj, callback) => {
+const initCorseFocus = async (dataObj) => {
     let processResp = {}
-    if (dataObj.idCreator === null || dataObj.idEntity === null || dataObj.imgsIds.length !== 5) {
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+    if (dataObj.idCreator === null || dataObj.idEntity === null) {
 
         processResp = {
             processRespCode: 400,
@@ -102,13 +147,31 @@ const initCorseFocus = async (dataObj, callback) => {
         }
         return callback(false, processResp)
     }
-    //If success returns the hashed password
+
+    let imgsInitResult = await pictureController.initAddMultipleImgs({
+        insertArray: [`${process.cwd()}/Server/Images/Icons/student.svg`, `${process.cwd()}/Server/Images/Icons/diversity.svg`, `${process.cwd()}/Server/Images/Icons/international.svg`, `${process.cwd()}/Server/Images/Icons/companies.png`, `${process.cwd()}/Server/Images/Icons/prototype.svg`]
+    })
+
+    if (imgsInitResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+
+
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_CourseFocus'), `Licenciatura, mestrado, pós-graduação, doutoramento e pós-doc.`, `Undergraduate, master's, graduate, doctorate and post-doc.`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[0]],
-        [uniqueIdPack.generateRandomId('_CourseFocus'), `Engenharia, design, comunicação, ciências empresariais, educação, etc.`, `Engineering, design, communication, business sciences, education, etc.`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[1]],
-        [uniqueIdPack.generateRandomId('_CourseFocus'), `Propostas feitas por parceiros empresariais nacionais e internacionais.`, `Proposals made by national and international business partners.`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[2]],
-        [uniqueIdPack.generateRandomId('_CourseFocus'), `Contacto com empresas e clientes.`, `Contact with companies and clients.`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[3]],
-        [uniqueIdPack.generateRandomId('_CourseFocus'), `Processos de needfinding, idealização e prototipagem.`, `Processes of needfinding, idealization and prototyping.`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[4]],
+        [uniqueIdPack.generateRandomId('_CourseFocus'), `Licenciatura, mestrado, pós-graduação, doutoramento e pós-doc.`, `Undergraduate, master's, graduate, doctorate and post-doc.`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[0]],
+        [uniqueIdPack.generateRandomId('_CourseFocus'), `Engenharia, design, comunicação, ciências empresariais, educação, etc.`, `Engineering, design, communication, business sciences, education, etc.`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[1]],
+        [uniqueIdPack.generateRandomId('_CourseFocus'), `Propostas feitas por parceiros empresariais nacionais e internacionais.`, `Proposals made by national and international business partners.`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[2]],
+        [uniqueIdPack.generateRandomId('_CourseFocus'), `Contacto com empresas e clientes.`, `Contact with companies and clients.`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[3]],
+        [uniqueIdPack.generateRandomId('_CourseFocus'), `Processos de needfinding, idealização e prototipagem.`, `Processes of needfinding, idealization and prototyping.`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[4]],
 
     ]
     await sequelize
@@ -128,11 +191,10 @@ const initCorseFocus = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -140,8 +202,10 @@ const initCorseFocus = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+
+    return processResp
 
 }
 

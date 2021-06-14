@@ -71,7 +71,7 @@ const initSocialMediaType = async () => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: true,
@@ -139,8 +139,57 @@ const fetchSocialMediaTypes = (req, callback) => {
 };
 
 
+const fetchSocialMediaTypeIdByDesignation = async (designation) => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT id_type FROM Social_media_type where designation = :designation", {
+            replacements: {
+                designation: designation
+            }
+        }, {
+            model: SocialMediaTypeModel.Social_media_type
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
+
+
 
 module.exports = {
     initSocialMediaType,
-    fetchSocialMediaTypes
+    fetchSocialMediaTypes,
+    fetchSocialMediaTypeIdByDesignation
 }

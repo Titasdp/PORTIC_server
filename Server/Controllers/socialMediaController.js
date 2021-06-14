@@ -1,5 +1,27 @@
 const EntitySocialMediaModel = require("../Models/EntitySocialMedia")
 const sequelize = require("../Database/connection")
+//Controllers 
+const socialMediaTypeController = require("../Controllers/socialMediaTypeController")
+
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_social_media FROM Entity_social_media", {
+            model: EntitySocialMediaModel.Entity_social_media
+        })
+        .then(data => {
+            respCode = 200;
+            if (data[0].length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
 
 
 /**
@@ -7,9 +29,60 @@ const sequelize = require("../Database/connection")
  * @param {Req} req The request sended by the client
  * @param {Callback} callback 
  */
-const initSocialMediaType = async (dataObj, callback) => {
+const initSocialMediaType = async (dataObj) => {
 
-    if (dataObj.idEntity === null || dataObj.socialMediaTypes.length === 0) {
+    // let processResp = {}
+
+    let facebookId = (await socialMediaTypeController.fetchSocialMediaTypeIdByDesignation("Facebook"))
+    let instagramId = (await socialMediaTypeController.fetchSocialMediaTypeIdByDesignation("Instagram"))
+    let linkedInId = (await socialMediaTypeController.fetchSocialMediaTypeIdByDesignation("LinkedIn"))
+    let twitterId = (await socialMediaTypeController.fetchSocialMediaTypeIdByDesignation("Twitter"))
+    let youtubeId = (await socialMediaTypeController.fetchSocialMediaTypeIdByDesignation("Youtube"))
+
+    if (facebookId.processRespCode === 200 || instagramId.processRespCode === 200 || linkedInId.processRespCode === 200 || twitterId.processRespCode === 200 || youtubeId.processRespCode === 200) {
+        facebookId = facebookId.toClient.processResult[0].id_type;
+        instagramId = instagramId.toClient.processResult[0].id_type;
+        linkedInId = linkedInId.toClient.processResult[0].id_type;
+        twitterId = twitterId.toClient.processResult[0].id_type;
+        youtubeId = youtubeId.toClient.processResult[0].id_type;
+
+    } else {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Something went wrong",
+            }
+        }
+        return processResp
+    }
+
+
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+    if (dataObj.idEntity === null) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -18,14 +91,14 @@ const initSocialMediaType = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp;
     }
     let insertArray = [
-        ['https://www.facebook.com/porticpporto', dataObj.socialMediaTypes[0].dataValues.id_type, dataObj.idEntity],
-        ['https://www.instagram.com/politecnicodoporto/', dataObj.socialMediaTypes[1].dataValues.id_type, dataObj.idEntity],
-        ['https://www.youtube.com/channel/UCa0njrkoyEd8kwjIVPE5pNg', dataObj.socialMediaTypes[2].dataValues.id_type, dataObj.idEntity],
-        ['https://twitter.com/politecnico', dataObj.socialMediaTypes[3].dataValues.id_type, dataObj.idEntity],
-        ['https://www.linkedin.com/company/portic-pporto', dataObj.socialMediaTypes[4].dataValues.id_type, dataObj.idEntity],
+        ['https://www.facebook.com/porticpporto', facebookId, dataObj.idEntity],
+        ['https://www.instagram.com/politecnicodoporto/', instagramId, dataObj.idEntity],
+        ['https://www.youtube.com/channel/UCa0njrkoyEd8kwjIVPE5pNg', youtubeId, dataObj.idEntity],
+        ['https://twitter.com/politecnico', twitterId, dataObj.idEntity],
+        ['https://www.linkedin.com/company/portic-pporto', linkedInId, dataObj.idEntity],
     ]
     await sequelize
         .query(
@@ -36,7 +109,7 @@ const initSocialMediaType = async (dataObj, callback) => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: data,
@@ -44,11 +117,11 @@ const initSocialMediaType = async (dataObj, callback) => {
                     processMsg: "All the data were successfully created.",
                 }
             }
-            return callback(false, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -56,8 +129,9 @@ const initSocialMediaType = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later.",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp;
 };
 
 /**

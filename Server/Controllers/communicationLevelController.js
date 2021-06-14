@@ -5,7 +5,7 @@ const uniqueIdPack = require("../Middleware/uniqueId")
 const confTableFilled = async () => {
     let respCode = null
     await sequelize
-        .query("SELECT id_title FROM User_title", {
+        .query("SELECT id_communication_level FROM Communication_level", {
             model: CommunicationLevelModel.Communication_level
         })
         .then(data => {
@@ -105,14 +105,14 @@ const fetchCommunicationLevelByDesignation = async (designation) => {
         .then(data => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
-            if (data.length === 0) {
+            if (data[0].length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
             processResp = {
                 processRespCode: respCode,
                 toClient: {
-                    processResult: data,
+                    processResult: data[0],
                     processError: null,
                     processMsg: respMsg,
                 }
@@ -121,7 +121,7 @@ const fetchCommunicationLevelByDesignation = async (designation) => {
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
