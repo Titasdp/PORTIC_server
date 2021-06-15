@@ -1531,7 +1531,12 @@ router.post("/init/entities/data", async (req, res) => {
     let firstWaveInitResult = await firstInitWave()
     if (firstWaveInitResult.error_five_hundred) {
         res.status(500).send({
-            initSuccess: false,
+            initSuccessResult: {
+                firstWave: false,
+                secondWave: false,
+                thirdWave: false,
+                fourthWave: false
+            },
             processError: true,
             processMsg: "Something went wrong, please try again later.",
         })
@@ -1542,15 +1547,16 @@ router.post("/init/entities/data", async (req, res) => {
 
         if (entityLevelFetchResult.processRespCode === 500 || dataStatusFetchResult.processRespCode === 500) {
             res.status(500).send({
-                initSuccess: false,
+                initSuccessResult: {
+                    firstWave: true,
+                    secondWave: false,
+                    thirdWave: false,
+                    fourthWave: false
+                },
                 processError: true,
                 processMsg: "Something went wrong, please try again later.",
             })
         } else {
-            // console.log("Good");
-            // console.log(entityLevelFetchResult.toClient.processResult[0].id_entity_level);
-            // console.log(dataStatusFetchResult.toClient.processResult[0].id_status);
-
             let entityInitResult = await entityController.initEntity({
                 idEntityLevel: entityLevelFetchResult.toClient.processResult[0].id_entity_level,
                 idDataStatus: dataStatusFetchResult.toClient.processResult[0].id_status,
@@ -1558,7 +1564,12 @@ router.post("/init/entities/data", async (req, res) => {
 
             if (entityInitResult.processRespCode === 500) {
                 res.status(500).send({
-                    initSuccess: false,
+                    initSuccessResult: {
+                        firstWave: true,
+                        secondWave: false,
+                        thirdWave: false,
+                        fourthWave: false
+                    },
                     processError: true,
                     processMsg: "Something went wrong, please try again later.",
                 })
@@ -1571,7 +1582,12 @@ router.post("/init/entities/data", async (req, res) => {
 
                 if (entityFetchResult.processRespCode === 500 || userStatusFetchResult.processRespCode === 500 || userLevelFetchResult.processRespCode === 500 || userTitleFetchResult.processRespCode === 500) {
                     res.status(500).send({
-                        initSuccess: false,
+                        initSuccessResult: {
+                            firstWave: true,
+                            secondWave: true,
+                            thirdWave: false,
+                            fourthWave: false
+                        },
                         processError: true,
                         processMsg: "Something went wrong, please try again later.",
                     })
@@ -1586,18 +1602,28 @@ router.post("/init/entities/data", async (req, res) => {
                     })
                     if (userInitResult.processRespCode === 500) {
                         res.status(500).send({
-                            initSuccess: false,
+                            initSuccessResult: {
+                                firstWave: true,
+                                secondWave: true,
+                                thirdWave: true,
+                                fourthWave: false
+                            },
                             processError: true,
-                            processMsg: "Something went wrong, please try again later.",
+                            processMsg: "Something went wrong, please try again.",
                         })
                     } else {
                         let userFetchResult = await userController.fetchUsedDataByUsername("superAdmin")
 
                         if (userFetchResult.processRespCode === 500) {
                             res.status(500).send({
-                                initSuccess: false,
+                                initSuccessResult: {
+                                    firstWave: true,
+                                    secondWave: true,
+                                    thirdWave: true,
+                                    fourthWave: false
+                                },
                                 processError: true,
-                                processMsg: "Something went wrong, please try again later.",
+                                processMsg: "Something went wrong, please try again.",
                             })
                         }
                         let idUser = userFetchResult.toClient.processResult[0].id_user
@@ -1634,23 +1660,23 @@ router.post("/init/entities/data", async (req, res) => {
                         })
 
 
-                        let initFocusResult = await focusController.initFocus({
-                            idEntity: idEntity,
-                            idUser: idUser,
-                        })
+                        // let initFocusResult = await focusController.initFocus({
+                        //     idEntity: idEntity,
+                        //     idUser: idUser,
+                        // })
 
 
-                        let iniPrincipleResult = await principalController.initPrincipal({
-                            idEntity: idEntity,
-                            idUser: idUser,
-                        })
+                        // let iniPrincipleResult = await principalController.initPrincipal({
+                        //     idEntity: idEntity,
+                        //     idUser: idUser,
+                        // })
                         // console.log(iniPrincipleResult);
 
 
-                        let initHiringTipResult = await hiringTipsController.initHiringTip({
-                            idEntity: idEntity,
-                            idUser: idUser,
-                        })
+                        // let initHiringTipResult = await hiringTipsController.initHiringTip({
+                        //     idEntity: idEntity,
+                        //     idUser: idUser,
+                        // })
                         // console.log(initHiringTipResult);
 
 
@@ -1658,13 +1684,12 @@ router.post("/init/entities/data", async (req, res) => {
                             idEntity: idEntity,
                             idUser: idUser,
                         })
-                        // console.log(initEntityEmailResult);
 
                         let initEntityContactResult = await entityContactController.initEntityContact({
                             idEntity: idEntity,
                             idUser: idUser,
                         })
-                        // console.log(initEntityContactResult);
+
 
 
                         let initEntitySocialMediasResult = await socialMediaController.initSocialMediaType({
@@ -1683,38 +1708,38 @@ router.post("/init/entities/data", async (req, res) => {
                             idDataStatus: idDataStatus
                         })
 
-
-
                         let initAreaFocusResult = await areaFocusController.initAreaFocus({
                             idEntity: idEntity,
                             idCreator: idUser,
                         })
-
-                        console.log(initAreaFocusResult);
-
-
-
-                        // let initCourseFocusResult = await courseFocusController.initCorseFocus({
-                        //     idEntity: idEntity,
-                        //     idCreator: idUser,
-                        // })
-                        // console.log(initCourseFocusResult);
-
-
-
-
+                        if (initAreaFocusResult.processRespCode === 500 || initProjectResult.processRespCode === 500 || intiUnityResult.processRespCode === 500 || initEntitySocialMediasResult.processRespCode === 500 || initEntityContactResult.processRespCode === 500 || initEntityEmailResult.processRespCode === 500 || initRecruitmentResult.processRespCode === 500 || initMediaResult.processRespCode === 500 || initMenusResult.processRespCode === 500 || initAreasResult.processRespCode === 500 || initCourseResult.processRespCode === 500) {
+                            res.status(500).send({
+                                initSuccessResult: {
+                                    firstWave: true,
+                                    secondWave: true,
+                                    thirdWave: true,
+                                    fourthWave: false
+                                },
+                                processError: true,
+                                processMsg: "Something went wrong, not all data where added, please try again!",
+                            })
+                        } else {
+                            res.status(201).send({
+                                initSuccessResult: {
+                                    firstWave: true,
+                                    secondWave: true,
+                                    thirdWave: true,
+                                    fourthWave: true
+                                },
+                                processError: true,
+                                processMsg: "All init made successfully",
+                            })
+                        }
                     }
-
-
-
-
                 }
             }
 
         }
-
-
-
     }
 
 });
@@ -1733,12 +1758,13 @@ const firstInitWave = async () => {
             entity_level_init_result: await entityLevelController.initEntityLevel(),
             communication_level_init_result: await communicationLevelController.initCommunicationLevel(),
             categories_init_result: await categoryController.initCategory(),
+            data_status_init_result: await dataStatusController.initDataStatus(),
         }
     }
 
 
 
-    if (firstInitWaveResults.data.user_status_initResult.processRespCode === 500 || firstInitWaveResults.data.user_level_initResult.processRespCode === 500 || firstInitWaveResults.data.user_title_init_result.processRespCode === 500 || firstInitWaveResults.data.social_media_type_init_result.processRespCode === 500 || firstInitWaveResults.data.entity_level_init_result.processRespCode === 500 || firstInitWaveResults.data.communication_level_init_result.processRespCode === 500 || firstInitWaveResults.data.categories_init_result.processRespCode === 500) {
+    if (firstInitWaveResults.data.user_status_initResult.processRespCode === 500 || firstInitWaveResults.data.user_level_initResult.processRespCode === 500 || firstInitWaveResults.data.user_title_init_result.processRespCode === 500 || firstInitWaveResults.data.social_media_type_init_result.processRespCode === 500 || firstInitWaveResults.data.entity_level_init_result.processRespCode === 500 || firstInitWaveResults.data.communication_level_init_result.processRespCode === 500 || firstInitWaveResults.data.categories_init_result.processRespCode === 500 || firstInitWaveResults.data.data_status_init_result.processRespCode === 500) {
         firstInitWaveResults.error_five_hundred = true
     }
 

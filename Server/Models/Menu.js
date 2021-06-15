@@ -30,10 +30,6 @@ Menu.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    page_description: {
-        type: DataTypes.TEXT('long'),
-        allowNull: true,
-    },
     page_description_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: true,
@@ -57,29 +53,6 @@ Menu.init({
         defaultValue: 1,
         allowNull: false
     },
-
-    spotlight_1_eng: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        //
-    },
-    spotlight_2_eng: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        //
-    },
-
-    spotlight_1_pt: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        //
-    },
-    spotlight_2_pt: {
-        type: DataTypes.TEXT('medium'),
-        allowNull: true,
-        //
-    },
-
     info_html_pt: {
         type: DataTypes.TEXT('long'),
         allowNull: true,

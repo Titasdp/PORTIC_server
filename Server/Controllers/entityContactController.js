@@ -13,7 +13,7 @@ const confTableFilled = async () => {
         })
         .then(data => {
             respCode = 200;
-            if (data[0].length === 0) {
+            if (data.length === 0) {
                 respCode = 204
             }
         })
@@ -60,7 +60,7 @@ const initEntityContact = async (dataObj) => {
         return processResp
     }
 
-    if (dataObj.idEntity === null || dataObj.idUser === null || primaryLevelId == null || secondaryLevelId == null) {
+    if (dataObj.idEntity === null || dataObj.idUser === null || primaryLevelId == null) {
         processResp = {
             processRespCode: 400,
             toClient: {

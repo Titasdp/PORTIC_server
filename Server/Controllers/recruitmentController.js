@@ -27,7 +27,7 @@ const confTableFilled = async () => {
         })
         .then(data => {
             respCode = 200;
-            if (data[0].length === 0) {
+            if (data.length === 0) {
                 respCode = 204
             }
         })
@@ -288,8 +288,8 @@ const initAvailablePosition = async (dataObj) => {
                 }
             }
             let firstCatId = (await categoryController.fetchCategoryIdByDesignation("Digital Systems for Health and Telehealth")).toClient.processResult[0].id_category
-            let secondCatId = await categoryController.fetchCategoryIdByDesignation("Cibersecurity").toClient.processResult[0].id_category
-            let thirdCatId = await categoryController.fetchCategoryIdByDesignation("Health Technologies").toClient.processResult[0].id_category
+            let secondCatId = (await categoryController.fetchCategoryIdByDesignation("Cibersecurity")).toClient.processResult[0].id_category
+            let thirdCatId = (await categoryController.fetchCategoryIdByDesignation("Health Technologies")).toClient.processResult[0].id_category
 
             let insertArray = await [
                 [randomIds[0], firstCatId],

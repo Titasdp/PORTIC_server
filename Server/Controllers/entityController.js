@@ -64,11 +64,7 @@ fetchAllEntity = (receivedObj, callback) => {
         });
 };
 
-/**
- * 
- * @param {Object} dataObject 
- * @param {*} callback 
- */
+
 const fetchFullEntityDataById = (dataObj, callback) => {
     let processResp = {}
 
@@ -84,9 +80,6 @@ const fetchFullEntityDataById = (dataObj, callback) => {
         }
 
     }
-
-
-
 
     let query = (dataObj.req.sanitize(dataObj.req.params.lng === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
         Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)

@@ -12,7 +12,7 @@ const confTableFilled = async () => {
         })
         .then(data => {
             respCode = 200;
-            if (data[0].length === 0) {
+            if (data.length === 0) {
                 respCode = 204
             }
         })
@@ -22,8 +22,6 @@ const confTableFilled = async () => {
         });
     return respCode
 };
-
-
 
 
 const initMenu = async (dataObj) => {
@@ -67,17 +65,16 @@ const initMenu = async (dataObj) => {
     }
     //If success returns the hashed password
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Menu'), "Contacts", "Sobre Nós", null, null, null, null, null, null, `Contacts`, dataObj.idDataStatus, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_Menu'), "Unities", "Unidades", `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Nada</h3> <p>Nada</p>`, `<h3>Nada</h3> <p>Nada</p>`, "Nothing", "Nada", `Unities`, dataObj.idDataStatus, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_Menu'), "Areas", "Áreas", `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Nada</h3> <p>Nada</p>`, `<h3>Nada</h3> <p>Nada</p>`, "Nothing", "Nada", `Areas`, dataObj.idDataStatus, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_Menu'), "Courses", "Cursos", `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Nada</h3> <p>Nada</p>`, `<h3>Nada</h3> <p>Nada</p>`, "Nothing", "Nada", `Courses`, dataObj.idDataStatus, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_Menu'), "Projects", "Projetos", null, null, null, null, null, null, `ProjectsCatalog`, dataObj.idDataStatus, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_Menu'), "Media", "Medias", `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Nada</h3> <p>Nada</p>`, `<h3>Nada</h3> <p>Nada</p>`, "Nothing", "Nada", `Media`, dataObj.idDataStatus, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_Menu'), "Careers", "Recrutamento", `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Noting</h3> <p>Nothing</p>`, `<h3>Nada</h3> <p>Nada</p>`, `<h3>Nada</h3> <p>Nada</p>`, "Nothing", "Nada", `Positions`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Contacts", "Sobre Nós", null, null, `Contacts`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Units", "Unidades", `PORTIC integrates several research, development and innovation units, either internal or making space available for external units and entities.`, `O PORTIC integra diversas unidades de investigação, desenvolvimento e inovação, seja internas, seja disponibilizando espaço para unidades e entidades externas.`, `Unities`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Courses", "Cursos", `Research and development, technology and knowledge transfer, innovation and creativity, entrepreneurship, incubation, spin-offs, startups – these are all part of Research, Technology & Innovation, a holistic chain of interrelated activities. PORTIC includes units and groups with activities in different stages of the knowledge and innovation chain, in several areas of knowledge.`, `Investigação e desenvolvimento, transferência de tecnologia e conhecimento, inovação e criatividade, empreendedorismo, incubação, spin-offs, start-ups - tudo isto faz parte da Investigação, Tecnologia & Inovação, uma cadeia holística de actividades inter-relacionadas. PORTIC inclui unidades e grupos com actividades em diferentes fases da cadeia do conhecimento e da inovação, em várias áreas do conhecimento.`, `Courses`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Projects", "Projetos", null, null, `ProjectsCatalog`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Media", "Media", `Research and development, technology and knowledge transfer, innovation and creativity, entrepreneurship, incubation, spin-offs, startups – these are all part of Research, Technology & Innovation, a holistic chain of interrelated activities. PORTIC includes units and groups with activities in different stages of the knowledge and innovation chain, in several areas of knowledge.`, `Investigação e desenvolvimento, transferência de tecnologia e conhecimento, inovação e criatividade, empreendedorismo, incubação, spin-offs, start-ups - tudo isto faz parte da Investigação, Tecnologia & Inovação, uma cadeia holística de actividades inter-relacionadas. PORTIC inclui unidades e grupos com actividades em diferentes fases da cadeia do conhecimento e da inovação, em várias áreas do conhecimento.`, `Media`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Positions", "Recrutamento", `nothing`, `nada`, `Positions`, dataObj.idDataStatus, dataObj.idEntity],
     ]
     await sequelize
         .query(
-            `INSERT INTO Menu (id_menu,designation_eng,designation_pt,spotlight_1_eng ,spotlight_2_eng,spotlight_1_pt,spotlight_2_pt,page_description_eng,page_description_pt,router_link,id_status,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Menu (id_menu,designation_eng,designation_pt,page_description_eng,page_description_pt,router_link,id_status,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: MenuModel.Menu

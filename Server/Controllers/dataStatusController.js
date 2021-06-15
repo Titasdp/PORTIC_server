@@ -2,6 +2,35 @@ const DataStatusModel = require("../Models/DataStatus")
 const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 
+
+
+
+
+
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_status FROM Data_Status", {
+            model: DataStatusModel.Data_status
+        })
+        .then(data => {
+            respCode = 200;
+            if (data.length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
+
+
+
+
+
 /**
  * Function that fetch all dataStatus from the Database
  * Done
@@ -38,13 +67,40 @@ getAllDataStatus = (req, callback) => {
  * Function that adds predefined DataStratus elements to the table
  * Done
  */
-initDataStatus = (req, callback) => {
+initDataStatus = async () => {
+
+    let processResp = {}
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+
+
+
     let insertArray = [
         [uniqueIdPack.generateRandomId('_DataStatus'), 'Created'],
         [uniqueIdPack.generateRandomId('_DataStatus'), 'Published'],
         [uniqueIdPack.generateRandomId('_DataStatus'), 'Archived'],
     ]
-    sequelize
+    await sequelize
         .query(
             `INSERT INTO Data_Status (id_status,designation) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
@@ -53,7 +109,7 @@ initDataStatus = (req, callback) => {
             }
         )
         .then(data => {
-            let processResp = {
+            processResp = {
                 processRespCode: 201,
                 toClient: {
                     processResult: data,
@@ -61,11 +117,11 @@ initDataStatus = (req, callback) => {
                     processMsg: "All data Where created successfully",
                 }
             }
-            return callback(false, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -73,8 +129,9 @@ initDataStatus = (req, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 /**
  * fetches the id of a dataStatus based on his designation  

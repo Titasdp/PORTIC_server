@@ -14,7 +14,7 @@ const confTableFilled = async () => {
         })
         .then(data => {
             respCode = 200;
-            if (data[0].length === 0) {
+            if (data.length === 0) {
                 respCode = 204
             }
         })
