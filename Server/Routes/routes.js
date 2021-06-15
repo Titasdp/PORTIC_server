@@ -242,12 +242,11 @@ router.get("/:lng/entities/:id", (req, res) => {
  * Fetch an entity and his data based on an id
  * Status:Completed
  */
-router.get("/entities/main", (req, res) => {
-    entityController.fetchMainEntityId({
-        req: req
-    }, (fetchSuccess, fetchResult) => {
-        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
-    })
+router.get("/entities/main", async (req, res) => {
+    let fetchResult = await entityController.fetchMainEntityId()
+
+    res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+
 })
 
 
