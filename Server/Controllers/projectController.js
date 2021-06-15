@@ -12,9 +12,10 @@ const ProjectAreaModel = require("../Models/ProjectArea")
 const ProjectCourseModel = require("../Models/ProjectCourse")
 const ProjectUnityModel = require("../Models/ProjectUnity")
 const ProjectRecruitmentModel = require("../Models/ProjectRecruitment")
-const ProjectNewsModel = require("../Models/ProjectNews")
+
 const insideInvestorModel = require("../Models/ProjectInsideInvestor")
 const ProjectGalleryModel = require("../Models/ProjectGallery")
+const ProjectNewsModel = require("../Models/ProjectNews")
 
 
 //Aux Controllers
