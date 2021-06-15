@@ -530,7 +530,7 @@ const selectProjectRelatedArea = async (id_project, lng) => {
 // Working
 const selectProjectInsideInvestor = async (id_project) => {
     let processResp = {}
-    let query = `SELECT Entity.id_entity, Entity.initials FROM(((Project_inside_investor  inner Join 
+    let query = `SELECT Entity.id_entity, Entity.initials as designation FROM(((Project_inside_investor  inner Join 
         Project on Project.id_project= Project_inside_investor.id_project)
         Inner Join
         Entity on Entity.id_entity= Project_inside_investor.id_entity) INNER JOIN  
