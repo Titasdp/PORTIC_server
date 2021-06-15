@@ -4,8 +4,8 @@ const {
 } = require("sequelize");
 const sequelize = require("../Database/connection");
 
-const ProjectModel = require("../Models/Project");
-const NewsModel = require("../Models/News");
+const ProjectModel = require("./Project");
+const NewsModel = require("./News");
 
 class Project_news extends Model {}
 
@@ -35,7 +35,7 @@ NewsModel.News.belongsToMany(ProjectModel.Project, {
     }
 });
 
-
+// as
 module.exports = {
     Project_news
 };
