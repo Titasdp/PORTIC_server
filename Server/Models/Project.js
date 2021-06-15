@@ -21,9 +21,6 @@ Project.init({
         allowNull: false,
         primaryKey: true,
         unique: true,
-        // defaultValue: function () {
-        //     return uniqueIdPack.generateRandomId('_Project')
-        // },
     },
     title: {
         type: DataTypes.STRING,
@@ -32,6 +29,11 @@ Project.init({
     initials: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    reference: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
     },
     desc_html_structure_eng: {
         type: DataTypes.TEXT('long'),

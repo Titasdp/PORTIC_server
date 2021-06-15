@@ -59,6 +59,16 @@ User.init({
         allowNull: false,
         unique: true
     },
+    facebook_url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+    },
+    linkedIn_url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+    },
 
     //id_entity , id_profile_pic
     created_at: {

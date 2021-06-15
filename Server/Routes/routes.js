@@ -1434,11 +1434,11 @@ router.post("/init/entities/course_focus", async (req, res) => {
 
 
 router.get("/:lng/entities/:id/area_focus", async (req, res) => {
-    areaFocusController.fetchAreaFocusByIdEntity({
+    let fetchResult = await areaFocusController.fetchAreaFocusByIdEntity({
         req: req
-    }, (fetchSuccess, fetchResult) => {
-        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
     })
+    res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+
 })
 
 
@@ -1685,7 +1685,12 @@ router.post("/init/entities/data", async (req, res) => {
 
 
 
+                        let initAreaFocusResult = await areaFocusController.initAreaFocus({
+                            idEntity: idEntity,
+                            idCreator: idUser,
+                        })
 
+                        console.log(initAreaFocusResult);
 
 
 

@@ -6,6 +6,30 @@ const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId")
 const fsPack = require("../Middleware/fsFunctions")
 
+//Aux Controller 
+const pictureController = require("../Controllers/pictureController")
+
+
+
+
+const confTableFilled = async () => {
+    let respCode = null
+    await sequelize
+        .query("SELECT id_areas_focus FROM Entity_Areas_focus", {
+            model: EntityAreasFocusModel.Entity_areas_focus
+        })
+        .then(data => {
+            respCode = 200;
+            if (data.length === 0) {
+                respCode = 204
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            respCode = 500
+        });
+    return respCode
+};
 
 
 /**
@@ -13,9 +37,8 @@ const fsPack = require("../Middleware/fsFunctions")
  * @param {Object} dataObject 
  * @param {*} callback 
  */
-const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
+const fetchAreaFocusByIdEntity = async (dataObj) => {
     let processResp = {}
-
     if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
 
         processResp = {
@@ -26,7 +49,7 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
                 processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
 
     let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_pt as description, Picture.img_path from  (Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) WHERE Entity_Areas_focus.id_entity =:id_entity;` : `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng as description, Picture.img_path from  (Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) WHERE Entity_Areas_focus.id_entity =:id_entity;`
@@ -47,7 +70,7 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
             } else {
                 for (const el of data[0]) {
                     let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
-
+                    console.log(el.img_path);
                     let areaFocusObj = {
                         id_areas_focus: el.id_areas_focus,
                         description: el.description,
@@ -57,6 +80,7 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
                     areasFocus.push(areaFocusObj)
                 }
             }
+            console.log(areasFocus.length);
             processResp = {
                 processRespCode: respCode,
                 toClient: {
@@ -65,7 +89,6 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
@@ -77,20 +100,40 @@ const fetchAreaFocusByIdEntity = async (dataObj, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
         });
+    return processResp
 };
+
 
 /**
  * Initialize the table CorseFocus by introducing predefined data to it.
  * Status:Completed
- * @param {Object} dataObj 
- * @param {Callback} callback 
- * @returns 
  */
-const initAreaFocus = async (dataObj, callback) => {
+const initAreaFocus = async (dataObj) => {
     let processResp = {}
-    if (dataObj.idCreator === null || dataObj.idEntity === null || dataObj.imgsIds.length !== 6) {
+    let confTableFilledEns = await confTableFilled()
+    if (confTableFilledEns === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: false,
+                processError: null,
+                processMsg: "Cannot complete the process this function can only be Triggered one time, and it has been already done.",
+            }
+        }
+        return processResp
+    } else if (confTableFilledEns === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
+    }
+    if (dataObj.idCreator === null || dataObj.idEntity === null) {
 
         processResp = {
             processRespCode: 400,
@@ -100,16 +143,31 @@ const initAreaFocus = async (dataObj, callback) => {
                 processMsg: "Something went wrong please try again later.",
             }
         }
-        return callback(false, processResp)
+        return processResp
+    }
+    let imgsInitResult = await pictureController.initAddMultipleImgs({
+        insertArray: [`${process.cwd()}/Server/Images/Icons/search.png`, `${process.cwd()}/Server/Images/Icons/tech.png`, `${process.cwd()}/Server/Images/Icons/creativity.png`, `${process.cwd()}/Server/Images/Icons/business.png`, `${process.cwd()}/Server/Images/Icons/incubation.png`, `${process.cwd()}/Server/Images/Icons/startups.png`]
+    })
+
+    if (imgsInitResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                initSuccess: false,
+                processError: null,
+                processMsg: "Something went wrong, please try again later.",
+            }
+        }
+        return processResp
     }
     //If success returns the hashed password
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Procura e desenvolvimento`, `Search and development`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[0]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Tecnologia e partilha de conhecimentos`, `Technology and knowledge sharing`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[1]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Inovação e criatividade`, `Innovation and creativity`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[2]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Empreendedorismo`, `Entrepreneurship`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[3]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Incubação tecnológica`, `Technology incubation`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[4]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Startups e spin-offs`, `Startups and spin-offs`, dataObj.idCreator, dataObj.idEntity, dataObj.imgsIds[5]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Procura e desenvolvimento`, `Search and development`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[0]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Tecnologia e partilha de conhecimentos`, `Technology and knowledge sharing`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[1]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Inovação e criatividade`, `Innovation and creativity`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[2]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Empreendedorismo`, `Entrepreneurship`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[3]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Incubação tecnológica`, `Technology incubation`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[4]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Startups e spin-offs`, `Startups and spin-offs`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[5]],
     ]
     await sequelize
         .query(
@@ -128,11 +186,10 @@ const initAreaFocus = async (dataObj, callback) => {
                     processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -140,9 +197,8 @@ const initAreaFocus = async (dataObj, callback) => {
                     processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
         });
-
+    return processResp
 }
 
 

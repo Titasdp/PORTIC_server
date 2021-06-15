@@ -51,8 +51,8 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
 
     }
 
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT Project.id_project, Project.title,Project.initials, desc_html_structure_pt as desc_html_structure, Project.start_date, Project.end_date, project_contact,project_email  FROM( Project INNER JOIN 
-        Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Project.id_leader_entity =:id_entity;` : ` SELECT Project.id_project, Project.title,Project.initials, desc_html_structure_eng as desc_html_structure, Project.start_date, Project.end_date, project_contact,project_email  FROM( Project INNER JOIN 
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT Project.id_project, Project.title,Project.initials, desc_html_structure_pt as desc_html_structure, Project.start_date, Project.end_date, Project.project_contact,Project.project_email, Project.pdf_path  FROM( Project INNER JOIN 
+        Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Project.id_leader_entity =:id_entity;` : ` SELECT Project.id_project, Project.title,Project.initials, desc_html_structure_eng as desc_html_structure, Project.start_date, Project.end_date, Project.project_contact,Project.project_email,Project.pdf_path  FROM( Project INNER JOIN 
         Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Project.id_leader_entity =:id_entity `
     await sequelize
         .query(query, {
@@ -79,8 +79,7 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                     let news = await selectProjectNews(el.id_project, dataObj.req.sanitize(dataObj.req.params.lng))
                     let galleryImgs = await selectProjectGallery(el.id_project)
                     let projectTeam = await selectProjectTeam(el.id_project)
-
-
+                    let pdf = await fsPack.simplifyFileFetch(el.pdf_path)
 
                     let projectObj = {
                         id_project: el.id_project,
@@ -96,11 +95,12 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
                         news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
                         gallery_imgs: ((galleryImgs.processRespCode === 200) ? galleryImgs.toClient.processResult : []),
-                        project_team: ((projectTeam.processRespCode === 200) ? projectTeam.toClient.processResult : "bostou"),
+                        project_team: ((projectTeam.processRespCode === 200) ? projectTeam.toClient.processResult : []),
                         course_tags: courseTags,
                         area_tags: areaTags,
                         recruitment_tags: recruitmentTags,
                         unity_tags: unityTags,
+                        project_sheet: await (pdf.processRespCode === 200) ? pdf.toClient.processResult : [],
 
                     }
                     project.push(projectObj)

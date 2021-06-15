@@ -177,7 +177,7 @@ const initUnity = async (dataObj) => {
         return processResp
     }
 
-    if (dataObj.idCreator === null || dataObj.idDataStatus === null || dataObj.idEntity === null || dataObj.imgsIds.length !== 3) {
+    if (dataObj.idCreator === null || dataObj.idDataStatus === null || dataObj.idEntity === null) {
         processResp = {
             processRespCode: 400,
             toClient: {

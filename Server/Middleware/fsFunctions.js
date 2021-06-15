@@ -218,6 +218,20 @@ const fileFetch = (dataObj, callback) => {
 const simplifyFileFetch = async (path) => {
     let processResp = {}
 
+
+
+    if (path === null) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Missing file.",
+            }
+        }
+        return processResp
+    }
+
     let exist = await simplifyCheckFileExistence(path)
 
     if (!exist) {
