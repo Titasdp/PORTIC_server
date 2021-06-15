@@ -24,6 +24,7 @@ const hiringTipsController = require("../Controllers/hiringTipsController")
 const courseFocusController = require("../Controllers/courseFocusController")
 const areaFocusController = require("../Controllers/areaFocusController")
 const projectController = require("../Controllers/projectController")
+const newController = require("../Controllers/newsController")
 //
 
 //
@@ -1506,6 +1507,24 @@ router.post("/init/entities/area_focus", async (req, res) => {
 
 
 
+//* Project models>
+router.get("/:lng/entities/:id/projects", async (req, res) => {
+    let fetchResult = await projectController.fetchEntityProjectByIdEntity({
+        req: req
+    })
+    res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+})
+
+
+//* Project Models>
+
+
+
+
+
+
+
+
 
 // !!!!!!!!!!!!!!!!!!Init test  
 router.post("/init/entities/data", async (req, res) => {
@@ -1659,13 +1678,26 @@ router.post("/init/entities/data", async (req, res) => {
                             idDataStatus: idDataStatus
                         })
 
-
-
-                        let initCourseFocusResult = await courseFocusController.initCorseFocus({
+                        let initProjectResult = await projectController.initProject({
                             idEntity: idEntity,
                             idCreator: idUser,
+                            idDataStatus: idDataStatus
                         })
-                        console.log(initCourseFocusResult);
+
+
+
+
+
+
+
+                        // let initCourseFocusResult = await courseFocusController.initCorseFocus({
+                        //     idEntity: idEntity,
+                        //     idCreator: idUser,
+                        // })
+                        // console.log(initCourseFocusResult);
+
+
+
 
                     }
 
@@ -1682,6 +1714,7 @@ router.post("/init/entities/data", async (req, res) => {
     }
 
 });
+
 
 
 const firstInitWave = async () => {

@@ -39,5 +39,5 @@ PictureModel.Picture.belongsToMany(ProjectModel.Project, {
 
 
 module.exports = {
-    Project_team
+    Project_gallery
 };

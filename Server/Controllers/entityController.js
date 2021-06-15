@@ -263,7 +263,7 @@ const fetchEntityIdByName = (designation, callback) => {
  * @param {Callback} callback 
  * @returns 
  */
-const initEntity = async () => {
+const initEntity = async (dataObj) => {
     let processResp = {}
     let confTableFilledEns = await confTableFilled()
     if (confTableFilledEns === 200) {

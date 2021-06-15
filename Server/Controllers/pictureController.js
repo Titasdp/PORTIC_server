@@ -1,8 +1,8 @@
 const PictureModel = require("../Models/Picture");
 const sequelize = require("../Database/connection")
+// Middleware
 const uniqueIdPack = require("../Middleware/uniqueId");
-
-
+const fsPack = require("../Middleware/fsFunctions")
 
 
 /**
@@ -53,10 +53,6 @@ const addImgOnInit = async (dataObj) => {
             return callback(false, processResp)
         });
 }
-
-
-
-
 
 /**
  * Introduce predefine images path based in other init functions
@@ -112,10 +108,77 @@ const initAddMultipleImgs = async (dataObj) => {
 }
 
 
+const fetchPictureInSystemById = async (id_picture) => {
+    let processResp = {}
+    if (id_picture === null) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: `No id received.`,
+            }
+        }
+        return processResp
+    }
+    let query = `Select Picture.img_path from Picture where Picture.id_picture =:id_picture;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_picture: id_picture
+            }
+        }, {
+            model: PictureModel.Picture
+        })
+        .then(async data => {
+            let picture = null
+            let respCode = 200
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
+                    if (imgFetch.processRespCode === 200) {
+                        picture = imgFetch.toClient.processResult
+                    }
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: picture,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: picture,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+
+}
+
+
+
+
+
 
 
 module.exports = {
     addImgOnInit,
     initAddMultipleImgs,
-
+    fetchPictureInSystemById
 }

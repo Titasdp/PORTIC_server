@@ -33,10 +33,6 @@ Project.init({
         type: DataTypes.STRING,
         allowNull: false,
     },
-    // reference: {
-    //     type: DataTypes.STRING,
-    //     allowNull: false
-    // },
     desc_html_structure_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: false,
@@ -60,6 +56,11 @@ Project.init({
     project_email: {
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    pdf_path: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
     },
 
     created_at: {
