@@ -35,6 +35,7 @@ NewsModel.News.belongsToMany(ProjectModel.Project, {
     }
 });
 
+
 module.exports = {
     Project_news
 };
