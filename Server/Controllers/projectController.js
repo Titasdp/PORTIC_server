@@ -16,7 +16,7 @@ const ProjectRecruitmentModel = require("../Models/ProjectRecruitment")
 const insideInvestorModel = require("../Models/ProjectInsideInvestor")
 const ProjectGalleryModel = require("../Models/ProjectGallery")
 
-const ProjectNewsModel = require("../Models/ProjectNews")
+const ProjectNewsModel = require("../Models/NewsProject")
 
 
 //Aux Controllers
