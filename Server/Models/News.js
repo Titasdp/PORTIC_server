@@ -45,14 +45,7 @@ News.init({
         type: DataTypes.TEXT('long'),
         allowNull: false,
     },
-    resume_eng: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    resume_pt: {
-        type: DataTypes.TEXT(),
-        allowNull: false
-    },
+
     published_date: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -61,7 +54,7 @@ News.init({
     project_only: {
         type: DataTypes.INTEGER(1),
         allowNull: false,
-        defaultValue: 1,
+        defaultValue: 0,
     },
     created_at: {
         type: 'TIMESTAMP',

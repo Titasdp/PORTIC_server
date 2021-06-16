@@ -26,12 +26,8 @@ const confTableFilled = async () => {
     return respCode
 };
 
-/**
- * 
- * @param {Object} dataObject 
- * @param {*} callback 
- */
-const fetchCourseByIdEntity = async (dataObj, callback) => {
+
+const fetchCourseByIdEntity = async (dataObj) => {
     let processResp = {}
 
     if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
@@ -44,7 +40,7 @@ const fetchCourseByIdEntity = async (dataObj, callback) => {
                 processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
             }
         }
-        return callback(false, processResp)
+        return processResp
     }
 
     let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `select Course.id_course, Course.designation,Course.html_structure_pt as html_structure ,Course.candidacy_link, Course.pdf_url from (Course INNER JOIN Data_Status ON Data_Status.id_status = Course.id_status) WHERE  Data_Status.designation = 'Published' And Course.id_entity=:id_entity;` : `select Course.id_course, Course.designation,Course.html_structure_eng as html_structure ,Course.candidacy_link, Course.pdf_url from (Course INNER JOIN Data_Status ON Data_Status.id_status = Course.id_status) WHERE  Data_Status.designation = 'Published' And Course.id_entity=:id_entity;`;
@@ -92,7 +88,6 @@ const fetchCourseByIdEntity = async (dataObj, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
@@ -104,8 +99,10 @@ const fetchCourseByIdEntity = async (dataObj, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
+
 };
 
 

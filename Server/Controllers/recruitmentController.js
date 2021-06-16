@@ -53,9 +53,8 @@ const confTableFilled = async () => {
  * @param {Object} dataObject 
  * @param {*} callback 
  */
-const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
+const fetchAvailablePositionByIdEntity = async (dataObj) => {
     let processResp = {}
-
     if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
 
         processResp = {
@@ -66,7 +65,7 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
                 processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
             }
         }
-        return callback(false, processResp)
+        return processResp
 
     }
 
@@ -120,7 +119,7 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
+
 
         })
         .catch(error => {
@@ -133,8 +132,9 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 
@@ -147,6 +147,7 @@ const fetchAvailablePositionByIdEntity = async (dataObj, callback) => {
  * @returns 
  */
 const initAvailablePosition = async (dataObj) => {
+
     let processResp = {}
     let confTableFilledEns = await confTableFilled()
     if (confTableFilledEns === 200) {
@@ -287,10 +288,12 @@ const initAvailablePosition = async (dataObj) => {
                     processMsg: "All data Where created successfully",
                 }
             }
+
+
             let firstCatId = (await categoryController.fetchCategoryIdByDesignation("Digital Systems for Health and Telehealth")).toClient.processResult[0].id_category
             let secondCatId = (await categoryController.fetchCategoryIdByDesignation("Cibersecurity")).toClient.processResult[0].id_category
             let thirdCatId = (await categoryController.fetchCategoryIdByDesignation("Health Technologies")).toClient.processResult[0].id_category
-
+            console.log(firstCatId);
             let insertArray = await [
                 [randomIds[0], firstCatId],
                 [randomIds[0], secondCatId],

@@ -31,12 +31,7 @@ const confTableFilled = async () => {
 };
 
 
-/**
- * 
- * @param {Object} dataObject 
- * @param {*} callback 
- */
-const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
+const fetchEntityAreaByIdEntity = async (dataObj) => {
     let processResp = {}
 
     if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
@@ -49,7 +44,7 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
                 processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
             }
         }
-        return callback(false, processResp)
+        return processResp
 
     }
 
@@ -99,7 +94,6 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
@@ -111,8 +105,9 @@ const fetchEntityAreaByIdEntity = async (dataObj, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 

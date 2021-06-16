@@ -111,7 +111,7 @@ const fetchCategoryIdByDesignation = async (designation) => {
             processResp = {
                 processRespCode: 200,
                 toClient: {
-                    processResult: data,
+                    processResult: data[0],
                     processError: null,
                     processMsg: "Fetched successfully",
                 }

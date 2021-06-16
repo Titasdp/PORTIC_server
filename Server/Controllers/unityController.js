@@ -35,7 +35,7 @@ const confTableFilled = async () => {
  * @param {Object} dataObject 
  * @param {*} callback 
  */
-const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
+const fetchEntityUnityByIdEntity = async (dataObj) => {
     let processResp = {}
 
     if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
@@ -48,7 +48,7 @@ const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
                 processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
             }
         }
-        return callback(false, processResp)
+        return processResp
 
     }
 
@@ -69,7 +69,12 @@ const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
+
+                    console.log(el.img_path);
                     let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
+
+
+
                     let projectTags = await selectUnityRelatedProjects(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng));
                     let courseTags = await selectUnityRelatedCourses(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
                     let recruitmentTags = await selectUnityRelatedRecruitment(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
@@ -95,7 +100,7 @@ const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
@@ -107,8 +112,9 @@ const fetchEntityUnityByIdEntity = async (dataObj, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+    return processResp
 };
 
 const fetchAllUnities = (dataObj, callback) => {
@@ -190,7 +196,7 @@ const initUnity = async (dataObj) => {
     }
 
     let imgsInitResult = await pictureController.initAddMultipleImgs({
-        insertArray: [`${process.cwd()}/Server/Images/UnitiesGalley/portoDesignFactory.jpg`, `${process.cwd()}/Server/Images/UnitiesGalley/startupPorto.jpg`, `${process.cwd()}/Server/Images/UnitiesGalley/portoBusinessInnovation.jpg`]
+        insertArray: [`${process.cwd()}/Server/Images/UnitiesGalley/portoDesignFactory.jpeg`, `${process.cwd()}/Server/Images/UnitiesGalley/startupPorto.jpeg`, `${process.cwd()}/Server/Images/UnitiesGalley/portoBusinessInnovation.jpg`]
     })
 
     if (imgsInitResult.processRespCode === 500) {

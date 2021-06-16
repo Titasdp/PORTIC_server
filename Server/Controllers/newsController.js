@@ -1,5 +1,14 @@
 const NewsModel = require("../Models/News")
+const sequelize = require("../Database/connection")
 
+// Middleware
+const uniqueIdPack = require("../Middleware/uniqueId");
+const fsPack = require("../Middleware/fsFunctions")
+
+//Controllers
+const pictureController = require("../Controllers/pictureController")
+//Models
+const ProjectNewsModel = require("../Models/NewsProject")
 
 /**
  * gets news ids to confirm if there is data inside the table
@@ -8,7 +17,7 @@ const NewsModel = require("../Models/News")
 const confTableFilled = async () => {
     let respCode = null
     await sequelize
-        .query("SELECT id_area FROM Area", {
+        .query("SELECT id_news FROM News", {
             model: NewsModel.News
         })
         .then(data => {
@@ -55,7 +64,7 @@ const initNews = async (dataObj) => {
         return processResp
     }
 
-    if (dataObj.idCreator === null || dataObj.idDataStatus === null || dataObj.idEntity === null || dataObj.imgsIds.length !== 3) {
+    if (dataObj.idCreator === null || dataObj.idDataStatus === null || dataObj.idEntity === null) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -68,7 +77,7 @@ const initNews = async (dataObj) => {
     }
 
     let imgsInitResult = await pictureController.initAddMultipleImgs({
-        insertArray: [`${process.cwd()}/Server/Images/UnitiesGalley/portoDesignFactory.jpg`, `${process.cwd()}/Server/Images/UnitiesGalley/startupPorto.jpg`, `${process.cwd()}/Server/Images/UnitiesGalley/startupPorto.jpg`, ]
+        insertArray: [`${process.cwd()}/Server/Images/NewsImgesGallery/labMister.jpg`, `${process.cwd()}/Server/Images/NewsImgesGallery/labourTech.png`, `${process.cwd()}/Server/Images/NewsImgesGallery/turismoNews.png`]
     })
 
     if (imgsInitResult.processRespCode === 500) {
@@ -84,16 +93,16 @@ const initNews = async (dataObj) => {
     }
 
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Unity'), `Porto Design Factory`, `A Porto Design Factory é um laboratório de ideias com base no trabalho interdisciplinar, na investigação aplicada e na colaboração industrial. Aqui, os alunos das mais diferentes áreas cooperam no desenvolvimento de projetos inovadores com a ambição de promover uma mentalidade empreendedora através de um modelo de educação baseado na aprendizagem orientada para a resolução de problemas. Nos nossos programas educativos, equipas internacionais interdisciplinares (misturando estudantes de engenharia, design, comunicação, ciências empresariais, educação, etc do P.PORTO e estudantes de um vasto conjunto de universidades internacionais parceiras) trabalham em conjunto para responder a desafios de inovação propostos por parceiros empresariais nacionais e internacionais, desde startups e PME a grandes multinacionais. Através dos projetos, os estudantes passam por um processo intenso e iterativo de needfinding, idealização e prototipagem rápida, para criar e desenvolver novas ideias de produto ou serviço e provas de conceito. Ponto de encontro das oito Escolas, a Porto Design Factory (PDF) integra a Design Factory Global Network (DFGN), composta por 20 instituições de quatro continentes. Esta rede possibilita o intercâmbio de alunos e docentes entre os diferentes núcleos, além da troca e partilha de conhecimentos e a colaboração em projetos. A DFGN está instalada em todos os continentes, de Helsínquia a Xangai, de Melbourne a Santiago do Chile, passando pela Holanda, Genebra ou Nova Iorque. Ao encorajar um ecossistema inovador centrado no diálogo interdisciplinar e no trabalho em equipa acreditamos dar as ferramentas necessárias para criar a capacidade de resposta e ajustamento ao tecido socioeconómico da região, designadamente junto das indústrias de maior significado.`, `A Porto Design Factory é um laboratório de ideias com base no trabalho interdisciplinar, na investigação aplicada e na colaboração industrial. Aqui, os alunos das mais diferentes áreas cooperam no desenvolvimento de projetos inovadores com a ambição de promover uma mentalidade empreendedora através de um modelo de educação baseado na aprendizagem orientada para a resolução de problemas. Nos nossos programas educativos, equipas internacionais interdisciplinares (misturando estudantes de engenharia, design, comunicação, ciências empresariais, educação, etc do P.PORTO e estudantes de um vasto conjunto de universidades internacionais parceiras) trabalham em conjunto para responder a desafios de inovação propostos por parceiros empresariais nacionais e internacionais, desde startups e PME a grandes multinacionais. Através dos projetos, os estudantes passam por um processo intenso e iterativo de needfinding, idealização e prototipagem rápida, para criar e desenvolver novas ideias de produto ou serviço e provas de conceito. Ponto de encontro das oito Escolas, a Porto Design Factory (PDF) integra a Design Factory Global Network (DFGN), composta por 20 instituições de quatro continentes. Esta rede possibilita o intercâmbio de alunos e docentes entre os diferentes núcleos, além da troca e partilha de conhecimentos e a colaboração em projetos. A DFGN está instalada em todos os continentes, de Helsínquia a Xangai, de Melbourne a Santiago do Chile, passando pela Holanda, Genebra ou Nova Iorque. Ao encorajar um ecossistema inovador centrado no diálogo interdisciplinar e no trabalho em equipa acreditamos dar as ferramentas necessárias para criar a capacidade de resposta e ajustamento ao tecido socioeconómico da região, designadamente junto das indústrias de maior significado.`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[0], dataObj.idDataStatus, dataObj.idCreator],
-        [uniqueIdPack.generateRandomId('_Unity'), `Startup Porto`, `A Startup Porto tem como objetivo promover o surgimento e o desenvolvimento de uma nova geração de negócios, promovendo programas de empreendedorismo, não apenas para o ecossistema do Porto, mas para todo o país. O nosso objetivo é facilitar o processo entre a imaginação de um produto e a inserção do mesmo no mercado. Para isso, oferecemos uma ampla gama de programas, como pré-aceleração, aceleração e eventos para interligar empreendedores e investidores, que terão como alvo diferentes estágios de desenvolvimento. É essencial haver um espaço de rede entre startups, indústria e educação, e por essa mesma razão, a Startup Porto ambiciona criar esse elo através do nosso processo de incubação e parcerias com outras redes similares tais como as Innovation Hubs. O que pretendemos atingir com a Startup Porto é: - Indústrias criativas; - Economia circular e CLEANTECH; - ETECH; - FINTECH; - Cuidados de saúde; - Hospitalidade e turismo (e novos alimentos); - Indústria 4.0; - Economia Social.`, `A Startup Porto tem como objetivo promover o surgimento e o desenvolvimento de uma nova geração de negócios, promovendo programas de empreendedorismo, não apenas para o ecossistema do Porto, mas para todo o país. O nosso objetivo é facilitar o processo entre a imaginação de um produto e a inserção do mesmo no mercado. Para isso, oferecemos uma ampla gama de programas, como pré-aceleração, aceleração e eventos para interligar empreendedores e investidores, que terão como alvo diferentes estágios de desenvolvimento. É essencial haver um espaço de rede entre startups, indústria e educação, e por essa mesma razão, a Startup Porto ambiciona criar esse elo através do nosso processo de incubação e parcerias com outras redes similares tais como as Innovation Hubs. O que pretendemos atingir com a Startup Porto é: - Indústrias criativas; - Economia circular e CLEANTECH; - ETECH; - FINTECH; - Cuidados de saúde; - Hospitalidade e turismo (e novos alimentos); - Indústria 4.0; - Economia Social.`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[1], dataObj.idDataStatus, dataObj.idCreator],
-        [uniqueIdPack.generateRandomId('_Unity'), `Porto Business Innovation`, `A Porto Business Innovation é a porta de entrada para uma conexão entre a academia, a realidade empresarial, a sociedade e as administrações públicas. Com base no conhecimento e inovação dos processos, a Porto Business Innovation tem como objetivo promover novas oportunidades de negócios e desenvolver novos produtos e serviços de forma a chegar rapidamente ao mercado. A Porto Business Innovation (PBI) beneficia-se das diversas áreas de atuação do Politécnico do Porto tais como os seus investigadores e unidades de pesquisa para fomentar os serviços de consultoria prestados às empresas. As áreas de atuação do PBI são engenharia em parceria com ISEP e ESTG, negócios com ISCAP e ESTG, saúde através da ESS, indústrias criativas com a ESMAD, ESE e ESMAE e, finalmente, hotelaria e turismo através da ESHT. Ao aproveitar as instalações do workshop do Porto Global Hub e da equipa especializada, a Porto Business Innovation oferece à comunidade os seguintes serviços: - Prototipagem à base de madeira; - Impressão 3D e 2D; - Oficinas de introdução a diversos assuntos; - Consultoria de projetos; - Eletrónicos; - Reserva de oficinas diárias; - Treino complementar.`, `A Porto Business Innovation é a porta de entrada para uma conexão entre a academia, a realidade empresarial, a sociedade e as administrações públicas. Com base no conhecimento e inovação dos processos, a Porto Business Innovation tem como objetivo promover novas oportunidades de negócios e desenvolver novos produtos e serviços de forma a chegar rapidamente ao mercado. A Porto Business Innovation (PBI) beneficia-se das diversas áreas de atuação do Politécnico do Porto tais como os seus investigadores e unidades de pesquisa para fomentar os serviços de consultoria prestados às empresas. As áreas de atuação do PBI são engenharia em parceria com ISEP e ESTG, negócios com ISCAP e ESTG, saúde através da ESS, indústrias criativas com a ESMAD, ESE e ESMAE e, finalmente, hotelaria e turismo através da ESHT. Ao aproveitar as instalações do workshop do Porto Global Hub e da equipa especializada, a Porto Business Innovation oferece à comunidade os seguintes serviços: - Prototipagem à base de madeira; - Impressão 3D e 2D; - Oficinas de introdução a diversos assuntos; - Consultoria de projetos; - Eletrónicos; - Reserva de oficinas diárias; - Treino complementar.`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[2], dataObj.idDataStatus, dataObj.idCreator],
+        [uniqueIdPack.generateRandomId('_News'), `P.PORTO realizou mais de 6500 testes à COVID-19`, `P.PORTO performed more than 6500 tests to COVID-19`, `Desde fins de maio que o laboratório licenciado de Análises Clínicas do P.PORTO já realizou 6500 testes à COVID-19, um número que cresceu significativamente a partir do momento em que se iniciou a colaboração do Politécnico do Porto com a Administração Regional de Saúde do Norte (ARS-Norte). No âmbito dessa cooperação foram realizados, desde outubro, 4600 testes protocolados à COVID-19. Os testes podem ser realizados no laboratório alocado no Porto Research, Technology & Innovation Center (PORTIC) do Politécnico do Porto, por indicação da ARS-Norte e do médico de família, ou recolhidas nas Áreas dedicadas a Doença Respiratória (ADR) dos Centros de Saúde, nas Áreas dedicadas à COVID-19 (ADC), e entregues no P.PORTO. “A partir do momento em que o laboratório molecular do Politécnico do Porto recebeu parecer favorável do Instituto Nacional de Saúde Doutor Ricardo Jorge | INSA para o diagnóstico SARS-CoV-2 integrado na Rede Nacional de Diagnóstico da COVID-19, fomos contatados, quase de imediato, pela ARS-Norte para apoiar os Centros de Saúde', explica Rúben Fernandes, investigador do PORTIC e coordenador do laboratório. 'De momento' - refere o investigador - ' abrangemos uma área regional que vai do Porto ocidental, zona de Aveiro Norte, São João da Madeira, Santa Maria da Feira, Vale de Cambra e Oliveira de Azeméis, apesar de já termos recebido e recolhido testes mais a sul.” A equipa é composta por 22 profissionais, entre investigadores, médicos e estudantes de licenciatura, mestrado e doutoramento da Escola Superior de Saúde do Politécnico do Porto que trabalham em regime de rotatividade, com turnos de seis horas. Há também uma equipa que faz deslocações, garantindo apoio a zonas fora da área de abrangência, tais como Setúbal ou Coimbra. Para além dos testes protocolados, 'estão a ser realizados testes à comunidade do Politécnico do Porto, a estudantes, à totalidade de estudantes Erasmus, a funcionários, docentes e ocasionalmente a familiares', garante Rúben Fernandes, sublinhando existir também serviços ao exterior a empresas e outros particulares. Num contexto severo de evolução significativa do número de casos, o investigador avalia uma percentagem diária de 30% de casos positivos, apesar de existir variáveis e oscilações. Recordamos que a região norte continua a ser a que regista mais casos e óbitos, com 2.284 novos casos e 50 óbitos só nas últimas 24 horas (dados de 24 de novembro). 'As medidas individuais continuam a ser a forma mais eficaz de ultrapassar este desafio, declara ainda em jeito de conclusão, só nós podemos colocar um travão a esta pandemia, respeitando as medidas de distanciamento social e as medidas individuais de higienização. Esta é a chave para parar esta pandemia.`, `Since the end of May, the licensed laboratory of Clinical Analysis of P.Porto has performed 6500 tests to COVID-19, a number that has grown significantly since the beginning of the collaboration between the Polytechnic of Porto and the Regional Health Administration of the North (ARS-Norte). In the scope of this cooperation, since October, 4600 tests were performed to COVID-19. The tests can be performed in the laboratory allocated in the Porto Research, Technology & Innovation Center (PORTIC) of the Polytechnic of Porto, by indication of the ARS-Norte and the family doctor, or collected in the Areas dedicated to Respiratory Disease (ADR) of the Health Centers, in the Areas dedicated to COVID-19 (ADC), and delivered to P.PORTO. "As soon as the molecular laboratory of the Polytechnic of Porto received a favorable opinion from the National Health Institute Doutor Ricardo Jorge | INSA for the SARS-CoV-2 diagnosis integrated in the National Diagnosis Network of COVID-19, we were contacted, almost immediately, by ARS-Norte to support the Health Centers", explains Rúben Fernandes, PORTIC researcher and coordinator of the laboratory. At the moment' - says the researcher - 'we cover a regional area that goes from western Porto, the Aveiro Norte area, São João da Madeira, Santa Maria da Feira, Vale de Cambra and Oliveira de Azeméis, although we have already received and collected tests further south. The team is made up of 22 professionals, including researchers, doctors and undergraduate, master's and doctoral students from the Escola Superior de Saúde do Politécnico do Porto who work on a rotating basis, with six-hour shifts. There is also a team that travels to ensure support to areas outside the area of coverage, such as Setúbal or Coimbra. Besides the protocoled tests, 'tests are being carried out for the Polytechnic of Porto community, students, all Erasmus students, employees, teachers and occasionally family members', guarantees Rúben Fernandes, stressing that there are also external services to companies and other individuals. In a severe context of significant evolution in the number of cases, the researcher evaluates a daily percentage of 30% of positive cases, although there are variables and oscillations. We recall that the northern region continues to be the one registering the most cases and deaths, with 2,284 new cases and 50 deaths in the last 24 hours alone (data from November 24th). Individual measures continue to be the most effective way to overcome this challenge," he concludes, "only we can put a stop to this pandemic by respecting the measures of social distancing and individual hygiene measures. This is the key to stopping this pandemic. Translated with www.DeepL.com/Translator (free version)`, `05-03-2021`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[0], dataObj.idDataStatus, dataObj.idCreator],
+        [uniqueIdPack.generateRandomId('_News'), `Reconhecidos especialistas discutem o impacto da indústria 4.0`, `Renowned experts discuss the impact of Industry 4.0`, `O objectivo do evento é discutir e compreender o impacto das tecnologias do futuro no mercado de trabalho, com especial atenção ao papel da inovação e às perspetivas das organizações, dos empregados e da sociedade. Technological advances can bring many benefits for our society with significant impact in the way we communicate, work and live. These advances had led us to the fourth industrial revolution or Industry 4.0, where technologies, such as large-scale machine-to-machine communication (M2M), the internet of things (IoT), artificial intelligence (AI) and automation have disrupted the labour market, making us more efficient, more productive and more cost-efficient. But, would these advances make us more dispensable? Would they increase the control over employees’ performance? How will they affect the decision-making process of an organisation? Os avanços tecnológicos podem trazer muitos benefícios para a sociedade com um impacto significativo na forma como comunicamos, trabalhamos e vivemos. Estes avanços levaram-nos à quarta revolução industrial ou Indústria 4.0, onde tecnologias como a comunicação em grande escala, a Internet das coisas (IoT) e a inteligência artificial (IA) alteraram o mercado de trabalho, tornando-nos mais eficientes, mais produtivos e mais rentáveis. Mas, será que estes avanços tornam os trabalhadores mais dispensáveis? Aumentariam eles o controlo sobre o desempenho dos empregados? Como irão afetar o processo de tomada de decisão de uma organização? A conferência LABOURTECH 2021, aborda os impactos positivos e negativos das tecnologias do futuro no mercado de trabalho e o papel da inovação na Indústria 4.0. Além do mais serão apresentados os resultados adquiridos durante os 30 meses de execução do projeto HubIT. A conferência LABOURTECH 2021 irá juntar reconhecidos especialistas das mais diversas áreas de atuação. Qualquer pessoa pode participar com uma inscrição online aqui (gratuita). Os participantes terão a oportunidade de fazer perguntas durante a sessão e até mesmo de trabalhar em rede com outros participantes.`, `The objective of the event is to discuss and understand the impact of future technologies on the labor market, with special attention to the role of innovation and the perspectives of organizations, employees and society. Technological advances can bring many benefits for our society with significant impact in the way we communicate, work and live. These advances had led us to the fourth industrial revolution or Industry 4.0, where technologies, such as large-scale machine-to-machine communication (M2M), the internet of things (IoT), artificial intelligence (AI) and automation have disrupted the labor market, making us more efficient, more productive and more cost-efficient. But, would these advances make us more expendable? Would they increase the control over employees' performance? How will they affect the decision-making process of an organization? Technological advances can bring many benefits to society with a significant impact on the way we communicate, work and live. These advances have led us to the fourth industrial revolution or Industry 4.0, where technologies such as large-scale communication, the Internet of Things (IoT) and artificial intelligence (AI) have changed the labor market, making us more efficient, more productive and more profitable. But, do these advances make workers more expendable? Would they increase control over employee performance? How will they affect an organization's decision-making process? The LABOURTECH 2021 conference addresses the positive and negative impacts of future technologies on the labor market and the role of innovation in Industry 4.0. Furthermore, the results acquired during the 30 months of implementation of the HubIT project will be presented. The LABOURTECH 2021 conference will bring together recognized experts from various fields. Anyone can participate with an online registration here (free of charge). Participants will have the opportunity to ask questions during the session and even network with other participants.`, `05-03-2021`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[1], dataObj.idDataStatus, dataObj.idCreator],
+        [uniqueIdPack.generateRandomId('_News'), `Programa Portugal Tourism Minds fecha a sua 1ª edição`, `Portugal Tourism Minds Program closes its 1st edition`, `O programa de aceleração Portugal Tourism Minds, promovido pela Startup Porto em parceria com o Turismo de Portugal, AHRESP, Turismo Porto e Norte de Portugal e Escola Superior de Hotelaria e Turismo do Porto, chegou ao fim da sua 1ª edição no passado dia 29 de Outubro com a apresentação dos empreendedores no evento Demo Day Virtual. Face à situação pandémica que assola o mundo inteiro, o evento teve lugar através de uma plataforma digital, contudo de nada desmoralizou a participação no Demo Day Virtual. Este contou com mais de 50 participantes de diversos setores do turismo, desde representantes do turismo de freguesias e concelhos do país, agentes de viagens, professores, investidores público e privados e empreendedores em busca de uma melhor resposta para a difícil situação que o turismo enfrenta. O Demo Day Virtual contou com uma apresentação Pitch das seguintes equipas participante no programa Portugal Tourism Minds: BestRide App, Personal2travel, Move4you, MakeitDouble e Saffe Payments. Para além dos pitch dos empreendedores, houve lugar a uma pequena apresentação por parte do Turismo de Portugal e da Portugal Ventures. No âmbito do programa Portugal Tourism Minds, a Startup Porto atribuiu um prémio MVP, para a melhor ideia, no valor de 2000€ à equipa BestRide App. A atribuição do prémio ficou a cargo de um júri constituído por elementos da Porto Global Hub, Turismo de Portugal e Portugal Ventures. O programa Portugal Tourism Minds foi criada para responder a desafios relacionados com o desenvolvimento sustentável do ecossistema de turismo em Portugal. Durante 4 meses os empreendedores contaram com apoio de especialistas das mais diversas áreas, de forma a sustentar um crescimento saudável da sua ideia/startup.`, `The acceleration program Portugal Tourism Minds, promoted by Startup Porto in partnership with Turismo de Portugal, AHRESP, Turismo Porto e Norte de Portugal and Escola Superior de Hotelaria e Turismo do Porto, reached the end of its 1st edition last October 29th with the presentation of the entrepreneurs in the event Virtual Demo Day. Given the pandemic situation that ravages the world, the event took place through a digital platform, however nothing demoralized the participation in the Virtual Demo Day. It was attended by more than 50 participants from various sectors of tourism, from tourism representatives from the country's parishes and municipalities, travel agents, teachers, public and private investors and entrepreneurs in search of a better response to the difficult situation facing tourism. The Virtual Demo Day included a Pitch presentation of the following teams participating in the Portugal Tourism Minds program: BestRide App, Personal2travel, Move4you, MakeitDouble and Saffe Payments. In addition to the entrepreneurs pitch, there was a short presentation by Turismo de Portugal and Portugal Ventures. Under the Portugal Tourism Minds program, Startup Porto awarded an MVP prize for the best idea, worth 2000€ to BestRide App team. The award was given by a jury composed by elements from Porto Global Hub, Turismo de Portugal and Portugal Ventures. The Portugal Tourism Minds program was created to respond to challenges related to the sustainable development of the tourism ecosystem in Portugal. For 4 months the entrepreneurs had the support of experts from various areas, in order to sustain a healthy growth of their idea/startup.`, `05-03-2021`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[2], dataObj.idDataStatus, dataObj.idCreator],
     ]
     await sequelize
         .query(
-            `INSERT INTO Unity (id_unity,designation,description_pt,description_eng,id_entity,id_photo,id_status, id_creator) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO News (id_news,title_pt,title_eng,description_pt,description_eng,published_date,id_entity,id_picture,id_status, id_publisher) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
-                model: UnityModel.Unity
+                model: NewsModel.News
             }
         )
         .then(data => {
@@ -123,9 +132,141 @@ const initNews = async (dataObj) => {
 }
 
 
+const fetchEntityNewsByIdEntity = async (dataObj) => {
+    let processResp = {}
 
+    if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
+
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
+            }
+        }
+        return processResp
+
+    }
+
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT News.id_news, News.title_pt as title, News.description_pt as description, News.published_date , Picture.img_path, User.full_name FROM((( News INNER JOIN 
+        Picture on Picture.id_picture = News.id_picture) INNER JOIN 
+        User on User.id_user = News.id_publisher) INNER JOIN  Data_Status on Data_Status.id_status = News.id_status )  
+        where Data_Status.designation= 'Published' and News.id_entity=:id_entity and News.project_only = 0;` : `SELECT News.id_news, News.title_eng as title, News.description_eng as description, News.published_date , Picture.img_path, User.full_name FROM((( News INNER JOIN 
+        Picture on Picture.id_picture = News.id_picture) INNER JOIN 
+        User on User.id_user = News.id_publisher) INNER JOIN  Data_Status on Data_Status.id_status = News.id_status )  
+        where Data_Status.designation= 'Published' and News.id_entity=:id_entity and News.project_only = 0;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+            }
+        }, {
+            model: NewsModel.News
+        })
+        .then(async data => {
+            let project = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let projectTags = await selectProjectNews(el.id_news, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let cover = await fsPack.simplifyFileFetch(el.img_path)
+                    let projectObj = {
+                        id_news: el.id_news,
+                        title: el.title,
+                        initials: el.initials,
+                        description: el.description,
+                        published_date: el.published_date,
+                        writer: el.full_name,
+                        cover: ((cover.processRespCode === 200) ? cover.toClient.processResult : []),
+                        project_tags: ((projectTags.processRespCode === 200) ? projectTags.toClient.processResult : []),
+                    }
+                    project.push(projectObj)
+                }
+            }
+
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: project,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+
+    return processResp
+};
+
+const selectProjectNews = async (id_news, lng) => {
+    let processResp = {}
+    let query = `SELECT Project.id_project, Project.initials FROM(((Project_news  inner Join 
+        Project on Project.id_project= Project_news.id_project)
+        Inner Join
+        News on News.id_news = Project_news.id_news) INNER JOIN  Data_Status on Data_Status.id_status = Project.id_status)
+         where News.id_news=:id_news and Data_Status.designation= 'Published'`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_news: id_news
+            }
+        }, {
+            model: ProjectNewsModel.Project_news
+        })
+        .then(data => {
+            let respCode = 200
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+}
+
+
+"soemnfdsa"
 
 module.exports = {
-    initNews
+    initNews,
+    fetchEntityNewsByIdEntity
 
 }

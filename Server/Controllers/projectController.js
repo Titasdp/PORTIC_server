@@ -90,7 +90,6 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                         end_date: el.end_date,
                         project_contact: el.project_contact,
                         project_email: el.project_email,
-
                         inside_investors: ((insideInvestors.processRespCode === 200) ? insideInvestors.toClient.processResult : []),
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
                         news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
@@ -583,15 +582,25 @@ const selectProjectInsideInvestor = async (id_project) => {
 
 const selectProjectNews = async (id_project, lng) => {
     let processResp = {}
-    let query = (lng == 'pt') ? `SELECT News.id_news, News.title_pt as title , News.resume_pt as resume , News.published_date FROM((Project_news  inner Join 
+    let query = (lng == 'pt') ? `  SELECT News.id_news, News.title_pt as title , News.description_pt as description , News.published_date , Picture.img_path, User.full_name  FROM(((((Project_news  inner Join 
         Project on Project.id_project= Project_news.id_project)
         Inner Join
         News on News.id_news = Project_news.id_news) 
-         where Project.id_project = :id_project` : `SELECT News.id_news, News.title_eng as title , News.resume_eng as resume , News.published_date FROM((Project_news  inner Join 
-        Project on Project.id_project= Project_news.id_project)
-        Inner Join
-        News on News.id_news = Project_news.id_news) 
-         where Project.id_project = :id_project;`
+        INNER JOIN 
+        Picture on Picture.id_picture = News.id_picture)
+        INNER JOIN  Data_Status on Data_Status.id_status = News.id_status )
+        INNER JOIN 
+        User on User.id_user = News.id_publisher)
+        where Project.id_project =:id_project and Data_Status.designation= 'Published';` : `SELECT News.id_news, News.title_eng as title , News.description_eng as description , News.published_date , Picture.img_path, User.full_name  FROM(((((Project_news  inner Join 
+            Project on Project.id_project= Project_news.id_project)
+            Inner Join
+            News on News.id_news = Project_news.id_news) 
+            INNER JOIN 
+            Picture on Picture.id_picture = News.id_picture)
+            INNER JOIN  Data_Status on Data_Status.id_status = News.id_status )
+            INNER JOIN 
+            User on User.id_user = News.id_publisher)
+            where Project.id_project = :id_project and Data_Status.designation= 'Published';`
     await sequelize
         .query(query, {
             replacements: {
@@ -600,18 +609,34 @@ const selectProjectNews = async (id_project, lng) => {
         }, {
             model: ProjectNewsModel.Project_news
         })
-        .then(data => {
+        .then(async data => {
+            let newsArray = []
             let respCode = 200
             let respMsg = "Fetch successfully."
             if (data[0].length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+
+
+                for (const el of data[0]) {
+                    let cover = await fsPack.simplifyFileFetch(el.img_path)
+                    let newsObj = {
+                        id_news: el.id_news,
+                        title: el.title,
+                        description: el.description,
+                        published_date: el.published_date,
+                        id_news: el.id_news,
+                        cover: ((cover.processRespCode === 200) ? cover.toClient.processResult : []),
+                    }
+                    newsArray.push(newsObj)
+                }
             }
 
             processResp = {
                 processRespCode: respCode,
                 toClient: {
-                    processResult: data[0],
+                    processResult: newsArray,
                     processError: null,
                     processMsg: respMsg,
                 }
@@ -622,7 +647,7 @@ const selectProjectNews = async (id_project, lng) => {
             processResp = {
                 processRespCode: 500,
                 toClient: {
-                    processResult: null,
+                    processResult: newsArray,
                     processError: error,
                     processMsg: "Something when wrong please try again later",
                 }

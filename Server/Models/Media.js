@@ -42,6 +42,11 @@ Media.init({
         type: DataTypes.TEXT('Long'),
         allowNull: false
     },
+    appearance_case: {
+        type: DataTypes.INTEGER(1),
+        allowNull: false,
+        defaultValue: 3
+    },
     youtube_path: {
         type: DataTypes.STRING,
         allowNull: false
