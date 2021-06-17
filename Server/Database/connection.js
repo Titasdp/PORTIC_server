@@ -26,3 +26,12 @@ sequelize
     });
 
 module.exports = sequelize;
+
+
+// DB_DESIGNATION=nunops_moitascars
+// DB_USERNAME=nunops_titas
+// DB_PASSWORD=PVk5]#;iZZRu
+// DB_HOST=nunops.com
+// DB_PORT=3306
+// DB_DIALECT=mysql
+// SECRET=mySecret
