@@ -147,11 +147,12 @@ router.get("/:lng/entities/:id", (req, res) => {
  * Status:Completed
  */
 router.get("/entities/main", async (req, res) => {
-    console.log(req);
+
     console.log("Presente no main");
     let fetchResult = await entityController.fetchMainEntityId()
     console.log(fetchResult);
-    res.status(fetchResult.processRespCode).json(fetchResult.toClient)
+    // fetchResult.toClient
+    res.status(fetchResult.processRespCode).json("It has return")
 
 })
 
