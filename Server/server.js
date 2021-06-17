@@ -1,4 +1,15 @@
 require("dotenv").config();
+
+const fs = require("../Server/Middleware/fsFunctions")
+var http = require('http');
+var https = require('https');
+// var privateKey = fs.readFileSync('sslcert/server.key', 'utf8');
+// var certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+
+// var credentials = {
+//     key: privateKey,
+//     cert: certificate
+// }
 const express = require("express")
 const app = express()
 const port = process.env.PORT || 3000
@@ -21,8 +32,10 @@ app.use(router);
 
 // 
 
+var httpServer = http.createServer(app);
+// var httpsServer = https.createServer(credentials, app);
 
-app.listen(port, async () => {
+httpServer.listen(port, async () => {
     await dbConnectionPack.testBdConnection();
     console.log(`PORTIC server is online and working on door: ${port}`);
 });

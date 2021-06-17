@@ -392,7 +392,7 @@ const fetchMainEntityId = async () => {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: null,
+                    processError: error,
                     processMsg: "Something when wrong please try again later",
                 }
             }
@@ -437,7 +437,7 @@ const fetchEntityIdByDesignation = async (designation) => {
             processResp = {
                 processRespCode: 500,
                 toClient: {
-                    processResult: null,
+                    processResult: error,
                     processError: null,
                     processMsg: "Something when wrong please try again later",
                 }
