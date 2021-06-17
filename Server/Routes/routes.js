@@ -243,10 +243,12 @@ router.post("/users/register", async (req, res) => {
             req: req,
             idUserLevel: userLevelFetchResult.toClient.processResult[0].id_user_level,
             idDataStatus: userStatusFetchResult.toClient.processResult[0].id_status,
-            idEntity: idEntity,
+            idEntity: entityFetchResult.toClient.processResult[0].id_entity,
             idTitle: userTitleFetchResult.toClient.processResult[0].id_title,
 
         })
+
+        console.log(addResult);
         res.status(addResult.processRespCode).send(addResult.toClient)
     }
 

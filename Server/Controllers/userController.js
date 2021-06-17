@@ -79,7 +79,7 @@ const confirmUserExistentByParams = async (dataObj) => {
 
 }
 
-const confirmParamsValueTaken = async () => {
+const confirmParamsValueTaken = async (dataObj) => {
     let processResp = {}
 
     let query = `SELECT id_user FROM User where ${dataObj.selectedField} =:substitute`
@@ -273,7 +273,11 @@ const proceedUserRegister = async (dataObj) => {
     }
 
 
-    let confirmUserExistentByParamsResult = await confirmUserExistentByParams()
+    let confirmUserExistentByParamsResult = await confirmUserExistentByParams({
+        paramsValueArray: [dataObj.req.sanitize(dataObj.req.body.username), dataObj.req.sanitize(dataObj.req.body.phone_numb), dataObj.req.sanitize(dataObj.req.body.email)]
+
+
+    })
     if (confirmUserExistentByParamsResult.processRespCode !== 204) {
         processResp = {
             processRespCode: confirmUserExistentByParamsResult.processRespCode,
@@ -289,7 +293,7 @@ const proceedUserRegister = async (dataObj) => {
 
 
     return await new Promise((resolve) => {
-        encryptPack.encryptPassword(dataObj.req.sanitize(dataObj.req.body.password), (encryptError, encryptResult) => {
+        encryptPack.encryptPassword(dataObj.req.sanitize(dataObj.req.body.password), async (encryptError, encryptResult) => {
             if (encryptError) {
                 processResp = {
                     processRespCode: 500,
@@ -304,7 +308,7 @@ const proceedUserRegister = async (dataObj) => {
                 let insertArray = [
                     [uniqueIdPack.generateRandomId('_User'), dataObj.req.sanitize(dataObj.req.body.username), encryptResult, `${ dataObj.req.sanitize(dataObj.req.body.first_name)} ${dataObj.req.sanitize(dataObj.req.body.last_name)}`, "", "", dataObj.req.sanitize(dataObj.req.body.email), dataObj.req.sanitize(dataObj.req.body.phone_numb), dataObj.idTitle, dataObj.idDataStatus, dataObj.idUserLevel, dataObj.idEntity],
                 ]
-                sequelize
+                await sequelize
                     .query(
                         `INSERT INTO User (id_user,username,password,full_name,description_pt,description_eng,email,phone_numb,id_title,id_status,id_user_level,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                             replacements: insertArray
