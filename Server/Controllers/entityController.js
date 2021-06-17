@@ -368,6 +368,8 @@ const fetchMainEntityId = async () => {
             model: EntityModel.Entity
         })
         .then(data => {
+
+            console.log(data);
             let returnArray = [];
             let respCode = 200;
             let respMsg = "Fetched successfully."
