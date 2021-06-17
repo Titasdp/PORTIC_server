@@ -377,6 +377,7 @@ const fetchMainEntityId = async () => {
             } else {
                 returnArray = data[0]
             }
+            console.log(returnArray);
 
             processResp = {
                 processRespCode: respCode,
@@ -386,6 +387,8 @@ const fetchMainEntityId = async () => {
                     processMsg: respMsg,
                 }
             }
+
+            console.log(processResp);
 
 
         })
