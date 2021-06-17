@@ -152,7 +152,7 @@ router.get("/entities/main", async (req, res) => {
     let fetchResult = await entityController.fetchMainEntityId()
     console.log(fetchResult);
     // fetchResult.toClient
-    res.status(fetchResult.processRespCode).json("It has return")
+    res.status(fetchResult.processRespCode).send("It has return")
 
 })
 
