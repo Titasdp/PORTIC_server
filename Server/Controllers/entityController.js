@@ -368,22 +368,25 @@ const fetchMainEntityId = async () => {
             model: EntityModel.Entity
         })
         .then(data => {
-
+            let returnArray = [];
             let respCode = 200;
             let respMsg = "Fetched successfully."
-            if (data[0].length === 0) {
+            if (data.length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                returnArray = data[0]
             }
 
             processResp = {
                 processRespCode: respCode,
                 toClient: {
-                    processResult: data[0],
+                    processResult: returnArray,
                     processError: null,
                     processMsg: respMsg,
                 }
             }
+
 
         })
         .catch(error => {
