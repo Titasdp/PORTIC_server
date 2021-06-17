@@ -60,7 +60,10 @@ const initUserLevel = async () => {
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Super Admin'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Entity Admin'],
-        [uniqueIdPack.generateRandomId('_UserLevel'), 'Collaborator'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Project manager'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Professor'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Investigator']
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Undefine'],
     ]
     await sequelize
         .query(
@@ -81,11 +84,12 @@ const initUserLevel = async () => {
             }
         })
         .catch(error => {
+            console.log(error);
             processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
-                    processError: error,
+                    processError: null,
                     processMsg: "Something went wrong please try again later",
                 }
             }

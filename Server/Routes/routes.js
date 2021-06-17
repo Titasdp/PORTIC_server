@@ -213,7 +213,45 @@ router.get("/:lng/entities/:id", (req, res) => {
 //*Entity Pages>
 
 // *<User
+router.post("/users/login", async (req, res) => {
+    let fetchResult = await userController.proceedUserLogin({
+        req: req
+    })
+    res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+})
 
+
+
+router.post("/users/register", async (req, res) => {
+    let processResp = {}
+    let entityFetchResult = await entityController.fetchEntityIdByDesignation(`Porto Research, Technology & Innovation Center`)
+    let userStatusFetchResult = await userStatusController.fetchUserStatusIdByDesignation('Pendent Creation')
+    let userLevelFetchResult = await userLevelController.fetchUserLevelIdByDesignation("Undefine");
+    let userTitleFetchResult = await userTitleController.fetchTitleIdByDesignationInit('Indefinido')
+    if (entityFetchResult.processRespCode === 500 || userStatusFetchResult.processRespCode === 500 || userLevelFetchResult.processRespCode === 500 || userTitleFetchResult.processRespCode === 500 || entityFetchResult.processRespCode === 204 || userStatusFetchResult.processRespCode === 204 || userLevelFetchResult.processRespCode === 204 || userTitleFetchResult.processRespCode === 204) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        res.status(processResp.processRespCode).send(processResp.toClient)
+    } else {
+        let addResult = await userController.proceedUserRegister({
+            req: req,
+            idUserLevel: userLevelFetchResult.toClient.processResult[0].id_user_level,
+            idDataStatus: userStatusFetchResult.toClient.processResult[0].id_status,
+            idEntity: idEntity,
+            idTitle: userTitleFetchResult.toClient.processResult[0].id_title,
+
+        })
+        res.status(addResult.processRespCode).send(addResult.toClient)
+    }
+
+
+})
 //*User>
 
 

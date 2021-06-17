@@ -20,19 +20,23 @@ const encryptPassword = (password, callback) => {
 /**
  * Compares a password sended by the client to an hash sended by the cliente
  * @param {Object} data Object that contains a password sended by the client and a hash fetched on inside the database
- * @param {Callback} callback 
  */
-const decryptPassword = async (data, callback) => {
-    // console.log(data);
-    // let compare = await bcrypt.compare(data.password, data.hash)
-    // console.log(compare);
-
-    bcrypt.compare(data.password, data.hash, function (err, result) {
-        if (err) {
-            return callback(true, err)
-        } else {
-            return callback(false, result)
+const decryptPassword = async (data) => {
+    return await new Promise((resolve, reject) => {
+        let returnObj = {
+            isError: false,
+            compareSame: false,
         }
+        bcrypt.compare(data.password, data.hash, function (err, result) {
+            if (err) {
+                console.log(err);
+                returnObj.isError = true
+                resolve(result)
+            } else {
+                returnObj.compareSame = result
+                resolve(returnObj)
+            }
+        })
     })
 }
 

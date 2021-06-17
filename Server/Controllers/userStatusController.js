@@ -60,6 +60,7 @@ const initUserStatus = async () => {
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Normal'],
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Blocked'],
         [uniqueIdPack.generateRandomId('_UserStatus'), 'Archived'],
+        [uniqueIdPack.generateRandomId('_UserStatus'), 'Pendent Creation'],
     ]
     await sequelize
         .query(
