@@ -62,7 +62,7 @@ const initUserLevel = async () => {
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Entity Admin'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Project manager'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Professor'],
-        [uniqueIdPack.generateRandomId('_UserLevel'), 'Investigator']
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Investigator'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Undefine'],
     ]
     await sequelize
