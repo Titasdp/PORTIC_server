@@ -372,7 +372,7 @@ const fetchMainEntityId = async () => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data.length === 0) {
-                respCode = 204
+                // respCode = 201
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 returnArray = data[0]
