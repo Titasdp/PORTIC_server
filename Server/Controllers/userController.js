@@ -6,7 +6,13 @@ const sequelize = require("../Database/connection")
 const tokenPack = require("../Middleware/tokenFunctions")
 const passwordPack = require("../Middleware/randomPasswordFunctions")
 const encryptPack = require("../Middleware/encrypt")
-const uniqueIdPack = require("../Middleware/uniqueId")
+const uniqueIdPack = require("../Middleware/uniqueId");
+const fsPack = require("../Middleware/fsFunctions")
+//Controllers
+const pictureController = require("../Controllers/pictureController")
+const {
+    Entity
+} = require("../Models/Entity")
 
 
 /**
@@ -32,7 +38,12 @@ const confTableFilled = async () => {
     return respCode
 };
 
-
+/**
+ * Confirms if params has been taken Assist the login , Register back up 
+ * Status :Completed 
+ * @param {Obj} dataObj Contains Multiple data
+ * @returns 
+ */
 const confirmUserExistentByParams = async (dataObj) => {
     let processResp = {}
     let arrayOfColumn = ['username', 'phone_numb', 'email']
@@ -78,7 +89,6 @@ const confirmUserExistentByParams = async (dataObj) => {
     }
 
 }
-
 const confirmParamsValueTaken = async (dataObj) => {
     let processResp = {}
 
@@ -161,6 +171,8 @@ const proceedUserLogin = async (dataObj) => {
     let username = fetchResult.toClient.processResult[0].username;
     let user_level = fetchResult.toClient.processResult[0].user_level;
     let user_status = fetchResult.toClient.processResult[0].user_status;
+    let id_user_level = fetchResult.toClient.processResult[0].id_user_level
+    let id_entity = fetchResult.toClient.processResult[0].id_entity
 
     let decryptResult = await encryptPack.decryptPassword({
         password: dataObj.req.sanitize(dataObj.req.body.password),
@@ -201,7 +213,9 @@ const proceedUserLogin = async (dataObj) => {
                         user_data: {
                             id_user: id_user,
                             user_level: user_level,
-                            user_code: "PORTIC_IPP_ASSOCIATION"
+                            user_code: "PORTIC_IPP_ASSOCIATION",
+                            id_user_level: id_user_level,
+                            id_entity: id_entity
                         }
                     },
                     token => {
@@ -237,9 +251,10 @@ const proceedUserLogin = async (dataObj) => {
 
 
 /**
- * Realizes Login that makes the login process
+ * Realizes the process to login an user 
+ * Status:Completed
  * @param {Obj} dataObj Object whit multiple data
- * @returns 
+ * @returns Obj
  */
 const proceedUserRegister = async (dataObj) => {
     let processResp = {}
@@ -345,15 +360,11 @@ const proceedUserRegister = async (dataObj) => {
 
 }
 
-
-
-
-
-
-
-
-
-
+/**
+ * Initialize the table user by adding to the table
+ * @param {*} dataObj 
+ * @returns 
+ */
 const initUser = async (dataObj) => {
     let processResp = {}
     let confTableFilledEns = await confTableFilled()
@@ -443,6 +454,154 @@ const initUser = async (dataObj) => {
     })
 
 }
+
+
+/**
+ * Fetch all users for de admin 
+ * Status:Completed
+ * @param {object} dataObj Object with multiple  Object whit multiple data 
+ * @returns 
+ */
+const fetchAllUsers = async (dataObj) => {
+    console.log(dataObj);
+    let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.username, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+        User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.username, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+            User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity) where Entity.id_entity = :id_entity`
+
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.id_entity,
+            }
+        }, {
+            model: UserModel.User
+        })
+        .then(async data => {
+            let users = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let userObj = {
+                        id_user: el.id_user,
+                        username: el.username,
+                        description_eng: el.description_eng,
+                        description_pt: el.description_pt,
+                        email: el.email,
+                        phone_numb: el.phone_numb,
+                        facebook_url: el.facebook_url,
+                        linkedIn_url: el.linkedIn_url,
+                        created_at: el.created_at,
+                        updated_at: el.updated_at,
+                        user_level: el.user_level,
+                        user_status: el.user_status,
+                        user_entity: el.entity_initials
+                    }
+                    if (el.id_picture === null) {
+                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                        userObj.picture = fetchImgResult.toClient.processResult
+                    }
+                    users.push(userObj)
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: users,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+    return processResp
+}
+
+
+/**
+ * Fetch Specific user data 
+ * Status:Completed
+ * @param {object} dataObj Object with multiple  Object whit multiple data 
+ * @returns 
+ */
+const fetchSpecificUserById = async (dataObj) => {
+    let query = `SELECT User.id_user,User.username, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_user: dataObj.id_user,
+            }
+        }, {
+            model: UserModel.User
+        })
+        .then(async data => {
+            let users = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let userObj = {
+                        id_user: el.id_user,
+                        username: el.username,
+                        description_eng: el.description_eng,
+                        description_pt: el.description_pt,
+                        email: el.email,
+                        phone_numb: el.phone_numb,
+                        facebook_url: el.facebook_url,
+                        linkedIn_url: el.linkedIn_url,
+                        created_at: el.created_at,
+                        updated_at: el.updated_at,
+                        user_level: el.user_level,
+                        user_status: el.user_status,
+                    }
+                    if (el.id_picture === null) {
+                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                        userObj.picture = fetchImgResult.toClient.processResult
+                    }
+                    users.push(userObj)
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: users,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+    return processResp
+}
+
+
+
+
+
 
 
 
@@ -559,7 +718,7 @@ const loginFetchUserData = async (username) => {
     console.log(username);
     let processResp = {}
     await sequelize
-        .query(`SELECT User.id_user,User.username,User.password, User_level.designation as user_level, User_status.designation as user_status FROM  ((User INNER JOIN 
+        .query(`SELECT User.id_user,User.username,User.password, User_level.designation as user_level, User_status.designation as user_status, User_level.id_user_level, User.id_entity  FROM  ((User INNER JOIN 
             User_status on User_status.id_status = User.id_status)INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) where User.username =:username`, {
             replacements: {
                 username: username
@@ -624,6 +783,9 @@ module.exports = {
     initUser,
     fetchIdUserByUsername,
     proceedUserLogin,
-    proceedUserRegister
+    proceedUserRegister,
+
+    // BackLog
+    fetchAllUsers
 
 }

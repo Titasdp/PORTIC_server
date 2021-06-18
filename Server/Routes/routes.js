@@ -18,10 +18,10 @@ const menuController = require("../Controllers/menuController")
 const entityEmailController = require("../Controllers/entityEmailController");
 const entityContactController = require("../Controllers/entityContactController")
 const socialMediaController = require("../Controllers/socialMediaController")
-const focusController = require("../Controllers/focusController")
-const principalController = require("../Controllers/principalController")
-const hiringTipsController = require("../Controllers/hiringTipsController")
-const courseFocusController = require("../Controllers/courseFocusController")
+// const focusController = require("../Controllers/focusController")
+// const principalController = require("../Controllers/principalController")
+// const hiringTipsController = require("../Controllers/hiringTipsController")
+// const courseFocusController = require("../Controllers/courseFocusController")
 const areaFocusController = require("../Controllers/areaFocusController")
 const projectController = require("../Controllers/projectController")
 const newsController = require("../Controllers/newsController")
@@ -38,6 +38,9 @@ const unityController = require("../Controllers/unityController")
 const pictureController = require("../Controllers/pictureController")
 //
 const entityController = require("../Controllers/entityController");
+
+//Middleware
+let tokenPack = require("../Middleware/tokenFunctions")
 
 
 
@@ -220,8 +223,6 @@ router.post("/users/login", async (req, res) => {
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
 
-
-
 router.post("/users/register", async (req, res) => {
     let processResp = {}
     let entityFetchResult = await entityController.fetchEntityIdByDesignation(`Porto Research, Technology & Innovation Center`)
@@ -254,6 +255,29 @@ router.post("/users/register", async (req, res) => {
 
 
 })
+
+router.get("/users", async (req, res) => {
+
+    console.log();
+
+    let tokenResult = await tokenPack.validateTokenForUsersFetch(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await userController.fetchAllUsers(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+
+
+
+    // console.log(addResult);
+
+
+
+
+})
+
+
 //*User>
 
 

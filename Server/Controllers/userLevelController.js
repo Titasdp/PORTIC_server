@@ -105,9 +105,10 @@ const initUserLevel = async () => {
  * Done
  */
 const fetchUserLevelIdByDesignation = async (designation) => {
+
     let processResp = {}
     await sequelize
-        .query("SELECT id_user_level FROM User_level where designation = :designation", {
+        .query("SELECT id_user_level FROM User_level where designation =:designation", {
             replacements: {
                 designation: designation
             }
