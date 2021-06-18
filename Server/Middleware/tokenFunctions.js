@@ -138,9 +138,6 @@ const validateTokenForUsersFetch = async (token) => {
 
 
 
-
-
-
 const validateTokenForProfileFetch = async (token) => {
     let processResp = {}
     if (!token) {

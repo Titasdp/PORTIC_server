@@ -45,9 +45,8 @@ const fetchMediaByIdEntity = async (dataObj) => {
     }
 
     let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? ` SELECT Media.id_media, Media.title_pt as title, Media.description_pt as description, Media.youtube_path FROM(  Media  inner Join 
-        Data_Status on Data_Status.id_status= Media.id_status) WHERE Data_Status.designation = 'Published' AND Media.id_entity =:id_entity;` : `SELECT Media.id_media, Media.title_eng as title, Media.description_eng as description, Media.youtube_path FROM(  Media  inner Join 
-            Data_Status on Data_Status.id_status= Media.id_status) WHERE Data_Status.designation = 'Published' AND Media.id_entity = :id_entity;`;
-
+        Data_Status on Data_Status.id_status= Media.id_status) WHERE Data_Status.designation = 'Published' AND Media.id_entity =:id_entity AND Media.appearance_case in (3,1);` : `SELECT Media.id_media, Media.title_eng as title, Media.description_eng as description, Media.youtube_path FROM(  Media  inner Join 
+            Data_Status on Data_Status.id_status= Media.id_status) WHERE Data_Status.designation = 'Published' AND Media.id_entity = :id_entity AND  Media.appearance_case in (3,2);`;
     await sequelize
         .query(query, {
             replacements: {

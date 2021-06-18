@@ -71,7 +71,7 @@ const initMenu = async (dataObj) => {
         [uniqueIdPack.generateRandomId('_Menu'), "Projects", "Projetos", null, null, `ProjectsCatalog`, dataObj.idDataStatus, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_Menu'), "Media", "Media", `Research and development, technology and knowledge transfer, innovation and creativity, entrepreneurship, incubation, spin-offs, startups – these are all part of Research, Technology & Innovation, a holistic chain of interrelated activities. PORTIC includes units and groups with activities in different stages of the knowledge and innovation chain, in several areas of knowledge.`, `Investigação e desenvolvimento, transferência de tecnologia e conhecimento, inovação e criatividade, empreendedorismo, incubação, spin-offs, start-ups - tudo isto faz parte da Investigação, Tecnologia & Inovação, uma cadeia holística de actividades inter-relacionadas. PORTIC inclui unidades e grupos com actividades em diferentes fases da cadeia do conhecimento e da inovação, em várias áreas do conhecimento.`, `Media`, dataObj.idDataStatus, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_Menu'), "Positions", "Recrutamento", `nothing`, `nada`, `Positions`, dataObj.idDataStatus, dataObj.idEntity],
-        [uniqueIdPack.generateRandomId('_Menu'), "Login", "SignIn", null, null, `SignIn`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Login", "Login", null, null, `SignIn`, dataObj.idDataStatus, dataObj.idEntity],
     ]
     await sequelize
         .query(
