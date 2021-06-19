@@ -596,10 +596,10 @@ const fetchAllUsers = async (dataObj) => {
  * @returns 
  */
 const fetchUserProfileById = async (dataObj) => {
-    var today = new Date();
-    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    console.log(`${date} ${time}`);
+    // var today = new Date();
+    // var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    // var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    // console.log(`${date} ${time}`);
     let query = `SELECT User.id_user,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
     await sequelize
         .query(query, {
@@ -1034,6 +1034,68 @@ const updateUserLevel = async () => {
     return processResp
 }
 
+const updateUserProfilePicture = async (dataObj) => {
+
+    let fetchResult = await fetchUserImgByUserId(dataObj.req.sanitize(dataObj.id_user))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let uploadResult = await pictureController.updatePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Server/Images/UserProfilePicture/`
+    })
+    if (uploadResult.processRespCode !== 201) {
+        console.log(uploadResult);
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `UPDATE User SET User.id_picture =:id_picture  Where User.id_user=:id_user `, {
+                    replacements: {
+                        id_picture: uploadResult.toClient.processResult.generatedId,
+                        id_user: dataObj.id_user
+                    }
+                }, {
+                    model: UserModel.User
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 201,
+                    toClient: {
+                        processResult: data[0],
+                        // {
+                        //     // pt_answer: "Perfil actualizado com sucesso!",
+                        //     // en_answer: "Profile updated Successfully"
+                        // },
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+
+
+
+    }
+
+
+}
 
 
 
@@ -1043,7 +1105,55 @@ const updateUserLevel = async () => {
 
 
 
+//*Complement
+/**
+ * Fetches user data based on his username 
+ * Status: Complete
+ */
+const fetchUserImgByUserId = async (id_user) => {
 
+
+    let processResp = {}
+    await sequelize
+        .query("SELECT id_picture FROM User where id_user =:id_user", {
+            replacements: {
+                id_user: id_user
+            }
+        }, {
+            model: UserModel.User
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: ((!data[0].id_picture) ? null : (!data[0].id_picture)),
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
 
 
 
@@ -1076,7 +1186,8 @@ module.exports = {
     // BackLog
     fetchAllUsers,
     fetchUserProfileById,
-    editUserProfileByAdminOrProfileOwner
+    editUserProfileByAdminOrProfileOwner,
+    updateUserProfilePicture,
 
 
 }

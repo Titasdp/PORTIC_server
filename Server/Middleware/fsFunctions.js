@@ -2,6 +2,9 @@ const {
     rejects
 } = require('assert');
 const fs = require('fs')
+
+const uniqueIdPack = require("./uniqueId")
+
 //Upload File
 fileUpload = async (dataObj, callback) => {
 
@@ -275,39 +278,7 @@ const simplifyFileFetch = async (path) => {
     })
 }
 
-//!May be deleted
-fileExtermination = (dataObj, callback) => {
 
-    let processResp = {}
-
-    fs.unlink(dataObj.path, function (err) {
-
-        let callbackSuccess = false
-
-        if (err) {
-            console.log(err);
-            processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "Something went wrong please ty again later.",
-                }
-            }
-        } else {
-            processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "The file was successfully deleted.",
-                }
-            }
-            callbackSuccess = true
-        }
-        return callback(callbackSuccess, processResp)
-    });
-}
 
 /**
  * Confirms if there is a file in a expecific path 
@@ -347,11 +318,11 @@ const confirmIsImg = async (fileMimeType) => {
  */
 const simplifyCheckFileExistence = async (imgPath) => {
     return await new Promise((resolve, reject) => {
-        fs.access(imgPath, (err) => {
+        fs.access(imgPath, (err, exit) => {
             if (err) {
-                resolve(false) //
+                resolve(true) //
             } else {
-                resolve(true)
+                resolve(exit)
             }
         })
     })
@@ -359,11 +330,109 @@ const simplifyCheckFileExistence = async (imgPath) => {
 
 
 
+
+/** 
+ * Simple file Upload
+ * */
+const simpleFileUpload = async (dataObj) => {
+    let processResp = {}
+
+    let uploadPath = process.cwd() + dataObj.folder + uniqueIdPack.generateRandomId('_') + dataObj.req.sanitize(dataObj.req.files.file.name)
+
+    return await new Promise(async (resolve) => {
+        await dataObj.req.files.file.mv(uploadPath, function (err) {
+            if (err) {
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong please ty again later.",
+                    }
+                }
+                resolve(processResp)
+            } else {
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: uploadPath,
+                        processError: null,
+                        processMsg: "Image uploaded successfully.",
+                    }
+                }
+                resolve(processResp)
+            }
+        })
+    })
+
+}
+
+
+
+
+
+/** 
+ * Simple file Upload
+ * */
+const simpleFileDelete = async (dataObj) => {
+    let processResp = {}
+    let fileExist = await simplifyCheckFileExistence(process.cwd() + '/Server/Images' + dataObj.folder + dataObj.req.files.img.name)
+    if (!fileExist) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "There is already an image with that name, please change the image name.",
+            }
+        }
+        return processResp
+    } else {
+        return await new Promise(async (resolve) => {
+            await fs.unlink(process.cwd() + '/Server/Images' + dataObj.folder + dataObj.req.files.img.name, function (err) {
+                if (err) {
+                    processResp = {
+                        processRespCode: 500,
+                        toClient: {
+                            processResult: null,
+                            processError: null,
+                            processMsg: "Something went wrong please ty again later.",
+                        }
+                    }
+                    resolve(processResp)
+                } else {
+                    processResp = {
+                        processRespCode: 200,
+                        toClient: {
+                            processResult: uploadPath,
+                            processError: null,
+                            processMsg: "The file was successfully deleted.",
+                        }
+                    }
+                    resolve(processResp)
+                }
+            })
+        })
+
+    }
+
+
+
+}
+
+
+
 // C:\Users\tiago\Documents\PersonalProjects\BackEnd\moitasCarsServer\moitasCarsServer\Server\images\adlisa.jpg
 
 module.exports = {
-    fileUpload,
-    fileDelete,
-    fileFetch,
-    simplifyFileFetch
+    // fileUpload,
+    // fileDelete,
+    // fileFetch,
+    simplifyFileFetch,
+    simpleFileDelete,
+    simpleFileUpload,
+
+    // Confirmations
+    simplifyCheckFileExistence,
+    confirmIsImg
 }

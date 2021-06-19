@@ -269,6 +269,7 @@ router.post("/users/register", async (req, res) => {
  * 
  */
 router.put("/users/:id/profile", async (req, res) => {
+
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -318,6 +319,20 @@ router.put("/users/selected_profile", async (req, res) => {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
     } else {
         let putResult = await userController.editUserProfileByAdminOrProfileOwner({
+            req: req,
+            id_user: req.sanitize(tokenResult.toClient.processResult.id_user)
+        })
+        res.status(putResult.processRespCode).send(putResult.toClient)
+    }
+})
+
+
+router.patch("/users/profile/picture", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let putResult = await userController.updateUserProfilePicture({
             req: req,
             id_user: req.sanitize(tokenResult.toClient.processResult.id_user)
         })
