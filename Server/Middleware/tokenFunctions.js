@@ -29,7 +29,7 @@ const validateToken = (token, callback) => {
 };
 
 
-const validateTokenForUsersFetch = async (token) => {
+const validateTokenForUsersMaxSecurity = async (token) => {
     let processResp = {}
     if (!token) {
         processResp = {
@@ -89,7 +89,7 @@ const validateTokenForUsersFetch = async (token) => {
                             }
                         }
                         let fetchResult = await userLevelController.fetchUserLevelIdByDesignation(decoded.data.user_data.user_level)
-                        console.log(fetchResult.toClient.processResult);
+
                         if (fetchResult.processRespCode === 500) {
                             resolve(fetchResult)
                         } else if (fetchResult.processRespCode === 204) {
@@ -156,6 +156,7 @@ const validateTokenForProfileFetch = async (token) => {
     return await new Promise((resolve, reject) => {
         jwt.verify(token.replace("Bearer ", ""), secret, async (error, decoded) => {
             if (error) {
+                console.log(error);
                 processResp = {
                     processRespCode: 500,
                     toClient: {
@@ -169,7 +170,6 @@ const validateTokenForProfileFetch = async (token) => {
                 // if (decoded ) {
 
                 if (!decoded.data.user_data) {
-
                     processResp = {
                         processRespCode: 401,
                         toClient: {
@@ -198,7 +198,7 @@ const validateTokenForProfileFetch = async (token) => {
                             }
                         }
                         let fetchResult = await userLevelController.fetchUserLevelIdByDesignation(decoded.data.user_data.user_level)
-                        console.log(fetchResult.toClient.processResult);
+
                         if (fetchResult.processRespCode === 500) {
                             resolve(fetchResult)
                         } else if (fetchResult.processRespCode === 204) {
@@ -221,19 +221,7 @@ const validateTokenForProfileFetch = async (token) => {
                                         processMsg: "Invalid token!",
                                     }
                                 }
-                            } else {
-                                if (decoded.data.user_data.user_level !== 'Entity Admin' && decoded.data.user_data.user_level !== 'Super Admin') {
-                                    processResp = {
-                                        processRespCode: 401,
-                                        toClient: {
-                                            processResult: null,
-                                            processError: null,
-                                            processMsg: "The user is unauthorized of completing this function.",
-                                        }
-                                    }
-                                }
                             }
-
                         }
 
                     }
@@ -247,5 +235,7 @@ const validateTokenForProfileFetch = async (token) => {
 
 module.exports = {
     generateToken,
-    validateTokenForUsersFetch,
+    validateTokenForUsersMaxSecurity,
+    validateTokenForProfileFetch
+
 };

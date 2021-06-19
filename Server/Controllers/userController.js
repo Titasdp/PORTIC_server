@@ -7,7 +7,7 @@ const tokenPack = require("../Middleware/tokenFunctions")
 const passwordPack = require("../Middleware/randomPasswordFunctions")
 const encryptPack = require("../Middleware/encrypt")
 const uniqueIdPack = require("../Middleware/uniqueId");
-const fsPack = require("../Middleware/fsFunctions")
+// const fsPack = require("../Middleware/fsFunctions")
 //Controllers
 const pictureController = require("../Controllers/pictureController")
 const {
@@ -45,15 +45,18 @@ const confTableFilled = async () => {
  * @returns 
  */
 const confirmUserExistentByParams = async (dataObj) => {
+
     let processResp = {}
     let arrayOfColumn = ['username', 'phone_numb', 'email']
     let responses = ['The username has already been taken.', 'The phone  number is already associated with another account.', 'The email is already associated with another account.']
-
     for (let i = 0; i < 3; i++) {
         let confirmExistenceResponse = await confirmParamsValueTaken({
             selectedField: arrayOfColumn[i],
             substitute: dataObj.paramsValueArray[i],
+            id_user: dataObj.id_user,
         })
+
+
 
         if (confirmExistenceResponse.processRespCode === 500) {
             processResp = {
@@ -92,11 +95,13 @@ const confirmUserExistentByParams = async (dataObj) => {
 const confirmParamsValueTaken = async (dataObj) => {
     let processResp = {}
 
-    let query = `SELECT id_user FROM User where ${dataObj.selectedField} =:substitute`
+    let query = (dataObj.id_user === null) ? `SELECT id_user FROM User where ${dataObj.selectedField} =:substitute` : `SELECT id_user FROM User where ${dataObj.selectedField} =:substitute and User.id_user !=:id_user`
+
     await sequelize
         .query(query, {
             replacements: {
-                substitute: dataObj.substitute
+                substitute: dataObj.substitute,
+                id_user: dataObj.id_user
             }
 
         }, {
@@ -140,8 +145,6 @@ const confirmParamsValueTaken = async (dataObj) => {
 
 
 }
-
-
 
 /**
  * Realizes Login that makes the login process
@@ -249,6 +252,59 @@ const proceedUserLogin = async (dataObj) => {
     }
 }
 
+/**
+ *  Supports the login main function
+ * @param {String} username Username unique to one user 
+ * @returns object with a response code, fetch result and response error
+ */
+const loginFetchUserData = async (username) => {
+    console.log(username);
+    let processResp = {}
+    await sequelize
+        .query(`SELECT User.id_user,User.username,User.password, User_level.designation as user_level, User_status.designation as user_status, User_level.id_user_level, User.id_entity  FROM  ((User INNER JOIN 
+            User_status on User_status.id_status = User.id_status)INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) where User.username =:username`, {
+            replacements: {
+                username: username
+            }
+        }, {
+            model: UserModel.User
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+
+
+}
+
+
 
 /**
  * Realizes the process to login an user 
@@ -289,9 +345,8 @@ const proceedUserRegister = async (dataObj) => {
 
 
     let confirmUserExistentByParamsResult = await confirmUserExistentByParams({
-        paramsValueArray: [dataObj.req.sanitize(dataObj.req.body.username), dataObj.req.sanitize(dataObj.req.body.phone_numb), dataObj.req.sanitize(dataObj.req.body.email)]
-
-
+        paramsValueArray: [dataObj.req.sanitize(dataObj.req.body.username), dataObj.req.sanitize(dataObj.req.body.phone_numb), dataObj.req.sanitize(dataObj.req.body.email)],
+        id_user: null
     })
     if (confirmUserExistentByParamsResult.processRespCode !== 204) {
         processResp = {
@@ -464,8 +519,8 @@ const initUser = async (dataObj) => {
  */
 const fetchAllUsers = async (dataObj) => {
     console.log(dataObj);
-    let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.username, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
-        User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.username, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+    let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.username, User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+        User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
             User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity) where Entity.id_entity = :id_entity`
 
     await sequelize
@@ -487,6 +542,7 @@ const fetchAllUsers = async (dataObj) => {
                     let userObj = {
                         id_user: el.id_user,
                         username: el.username,
+                        full_name: el.full_name,
                         description_eng: el.description_eng,
                         description_pt: el.description_pt,
                         email: el.email,
@@ -536,8 +592,12 @@ const fetchAllUsers = async (dataObj) => {
  * @param {object} dataObj Object with multiple  Object whit multiple data 
  * @returns 
  */
-const fetchSpecificUserById = async (dataObj) => {
-    let query = `SELECT User.id_user,User.username, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
+const fetchUserProfileById = async (dataObj) => {
+    var today = new Date();
+    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    console.log(`${date} ${time}`);
+    let query = `SELECT User.id_user,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
     await sequelize
         .query(query, {
             replacements: {
@@ -557,6 +617,7 @@ const fetchSpecificUserById = async (dataObj) => {
                     let userObj = {
                         id_user: el.id_user,
                         username: el.username,
+                        full_name: el.full_name,
                         description_eng: el.description_eng,
                         description_pt: el.description_pt,
                         email: el.email,
@@ -600,66 +661,10 @@ const fetchSpecificUserById = async (dataObj) => {
 
 
 
-
-
-
-
-
-
-/**
- * Fetches all users 
- * Status: Completed
- * @param {Object} req Request sended by the client 
- * @param {Callback} callback 
- */
-const fetchUsers = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM User", {
-            model: UserModel.User
-        })
-        .then(data => {
-            let respCode = 200;
-            let respMsg = "Fetched successfully."
-            if (data.length === 0) {
-                respCode = 204
-                respMsg = "Fetch process completed successfully, but there is no content."
-            }
-            let processResp = {
-                processRespCode: respCode,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: respMsg,
-                }
-            }
-            return callback(true, processResp)
-        })
-        .catch(error => {
-            console.log(error);
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
-        });
-};
-
-
-
-
-
-
-
 // Todo NEW 
 /**
  * Fetches user data based on his username 
- * Status: Completed
- * @param {Object} req Request sended by the client 
- * @param {Callback} callback 
+ * Status: Complete
  */
 const fetchIdUserByUsername = async (username) => {
 
@@ -707,38 +712,81 @@ const fetchIdUserByUsername = async (username) => {
 
 
 
-
-
-/**
- *  Supports the login main function
- * @param {String} username Username unique to one user 
- * @returns object with a response code, fetch result and response error
- */
-const loginFetchUserData = async (username) => {
-    console.log(username);
+const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
     let processResp = {}
+
+
+    if (!dataObj.id_user || !dataObj.req.sanitize(dataObj.req.body.username) || !dataObj.req.sanitize(dataObj.req.body.email) || !dataObj.req.sanitize(dataObj.req.body.phone_numb) || !dataObj.req.sanitize(dataObj.req.body.linkedIn_url) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.facebook_url) || !dataObj.req.sanitize(dataObj.req.body.full_name)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+    if (dataObj.req.sanitize(dataObj.req.body.username) === "" || dataObj.req.sanitize(dataObj.req.body.email) === "" || dataObj.req.sanitize(dataObj.req.body.phone_numb) === "") {
+        processResult = {
+            processRespCode: 409,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Process cannot be completed please fill the require field."
+            }
+        }
+        return processResult
+    }
+
+
+
+    let confirmUserExistentByParamsResult = await confirmUserExistentByParams({
+        paramsValueArray: [dataObj.req.sanitize(dataObj.req.body.username), dataObj.req.sanitize(dataObj.req.body.phone_numb), dataObj.req.sanitize(dataObj.req.body.email)],
+        id_user: dataObj.id_user,
+    })
+    if (confirmUserExistentByParamsResult.processRespCode !== 204) {
+        processResp = {
+            processRespCode: confirmUserExistentByParamsResult.processRespCode,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: confirmUserExistentByParamsResult.toClient.processMsg,
+            }
+        }
+        return processResp
+    }
+
     await sequelize
-        .query(`SELECT User.id_user,User.username,User.password, User_level.designation as user_level, User_status.designation as user_status, User_level.id_user_level, User.id_entity  FROM  ((User INNER JOIN 
-            User_status on User_status.id_status = User.id_status)INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) where User.username =:username`, {
-            replacements: {
-                username: username
+        .query(
+            `UPDATE User SET username = :username ,full_name =:full_name, description_eng =:description_eng, description_pt =:description_pt, email=:email,phone_numb=:phone_numb , facebook_url=:facebook_url,linkedIn_url =:linkedIn_url  Where User.id_user=:id_user `, {
+                replacements: {
+                    id_user: dataObj.id_user,
+                    username: dataObj.req.sanitize(dataObj.req.body.username),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                    email: dataObj.req.sanitize(dataObj.req.body.email),
+                    phone_numb: dataObj.req.sanitize(dataObj.req.body.phone_numb),
+                    facebook_url: dataObj.req.sanitize(dataObj.req.body.facebook_url),
+                    linkedIn_url: dataObj.req.sanitize(dataObj.req.body.linkedIn_url),
+                    full_name: dataObj.req.sanitize(dataObj.req.body.full_name),
+                }
+            }, {
+                model: UserModel.User
             }
-        }, {
-            model: UserModel.User
-        })
+        )
         .then(data => {
-            let respCode = 200;
-            let respMsg = "Fetched successfully."
-            if (data[0].length === 0) {
-                respCode = 204
-                respMsg = "Fetch process completed successfully, but there is no content."
-            }
             processResp = {
-                processRespCode: respCode,
+                processRespCode: 201,
                 toClient: {
                     processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
                     processError: null,
-                    processMsg: respMsg,
+                    processMsg: "The brand was updated successfully",
                 }
             }
 
@@ -750,16 +798,24 @@ const loginFetchUserData = async (username) => {
                 toClient: {
                     processResult: null,
                     processError: null,
-                    processMsg: "Something when wrong please try again later",
+                    processMsg: "Something went wrong, please try again later.",
                 }
             }
-
         });
 
     return processResp
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -786,6 +842,9 @@ module.exports = {
     proceedUserRegister,
 
     // BackLog
-    fetchAllUsers
+    fetchAllUsers,
+    fetchUserProfileById,
+    editUserProfileByAdminOrProfileOwner
+
 
 }

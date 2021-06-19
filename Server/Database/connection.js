@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
         dialect: `${process.env.DB_DIALECT}`,
         logging: false,
         define: {
-            timestamps: true
+
         }
     }
 );

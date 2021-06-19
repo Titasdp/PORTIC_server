@@ -216,6 +216,11 @@ router.get("/:lng/entities/:id", (req, res) => {
 //*Entity Pages>
 
 // *<User
+
+/**
+ * Login
+ * Status:Completed
+ */
 router.post("/users/login", async (req, res) => {
     let fetchResult = await userController.proceedUserLogin({
         req: req
@@ -223,6 +228,10 @@ router.post("/users/login", async (req, res) => {
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
 
+/**
+ * Register
+ * Status:Completed
+ */
 router.post("/users/register", async (req, res) => {
     let processResp = {}
     let entityFetchResult = await entityController.fetchEntityIdByDesignation(`Porto Research, Technology & Innovation Center`)
@@ -256,26 +265,66 @@ router.post("/users/register", async (req, res) => {
 
 })
 
+/**
+ * 
+ */
+router.put("/users/:id/profile", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let putResult = await userController.editUserProfileByAdminOrProfileOwner({
+            req: req,
+            id_user: req.sanitize(req.params.id)
+        })
+        res.status(putResult.processRespCode).send(putResult.toClient)
+    }
+})
+
+
+/**
+ * Fetch all users (restrict access only for Super admin or entity Admin)
+ * Status:Completed
+ */
 router.get("/users", async (req, res) => {
-
-    console.log();
-
-    let tokenResult = await tokenPack.validateTokenForUsersFetch(req.sanitize(req.headers.authorization))
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
     } else {
         let fetchResult = await userController.fetchAllUsers(tokenResult.toClient.processResult)
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
     }
-
-
-
-    // console.log(addResult);
-
-
-
-
 })
+/**
+ * Profile fetch
+ * Status:Completed
+ */
+router.get("/users/profile", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForProfileFetch(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await userController.fetchUserProfileById(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+/**
+ * Logged user profile edit, it knows with user to edit based on his url
+ * Status:Completed
+ */
+router.put("/users/selected_profile", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let putResult = await userController.editUserProfileByAdminOrProfileOwner({
+            req: req,
+            id_user: req.sanitize(tokenResult.toClient.processResult.id_user)
+        })
+        res.status(putResult.processRespCode).send(putResult.toClient)
+    }
+})
+
 
 
 //*User>
