@@ -4,12 +4,15 @@ const UserModel = require("../Models/User")
 const sequelize = require("../Database/connection")
 // Middleware
 const tokenPack = require("../Middleware/tokenFunctions")
-const passwordPack = require("../Middleware/randomPasswordFunctions")
+// const passwordPack = require("../Middleware/randomPasswordFunctions")
 const encryptPack = require("../Middleware/encrypt")
 const uniqueIdPack = require("../Middleware/uniqueId");
 // const fsPack = require("../Middleware/fsFunctions")
 //Controllers
 const pictureController = require("../Controllers/pictureController")
+const entityController = require("../Controllers/entityController")
+const userLevelController = require("../Controllers/userLevelController")
+const userStatusController = require("../Controllers/userStatusController")
 const {
     Entity
 } = require("../Models/Entity")
@@ -710,8 +713,10 @@ const fetchIdUserByUsername = async (username) => {
     return processResp
 };
 
-
-
+/**
+ * edit user profile fields present in  
+ * Status: Complete
+ */
 const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
     let processResp = {}
 
@@ -805,6 +810,233 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
 
     return processResp
 }
+
+/**
+ * Patch user Status
+ * StatusCompleted
+ */
+const updateUserStatus = async () => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    let fetchResult = await userStatusController.fetchUserStatusIdByDesignation(dataObj.req.sanitize(dataObj.req.body.new_status))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE User SET User.id_status =:id_status  Where User.id_user=:id_user `, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult.id_status,
+                    id_user: dataObj.id_user
+                }
+            }, {
+                model: UserModel.User
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
+                    processError: null,
+                    processMsg: "The brand was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+/**
+ * Patch user Entity
+ * StatusCompleted
+ */
+const updateUserEntity = async () => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.entity_initials)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    let fetchResult = await entityController.fetchEntityIdByDesignation(dataObj.req.sanitize(dataObj.req.body.entity_initials))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE User SET User.id_entity =:id_entity  Where User.id_user=:id_user `, {
+                replacements: {
+                    id_entity: fetchResult.toClient.processResult.id_entity,
+                    id_user: dataObj.id_user
+                }
+            }, {
+                model: UserModel.User
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
+                    processError: null,
+                    processMsg: "The brand was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+// userLevelController
+/**
+ * Patch user Entity
+ * StatusCompleted
+ */
+const updateUserLevel = async () => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.entity_initials)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    let fetchResult = await userLevelController.fetchUserLevelIdByDesignation(dataObj.req.sanitize(dataObj.req.body.entity_initials))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE User SET User.id_user_level =:id_user_level  Where User.id_user=:id_user `, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult.id_entity,
+                    id_user: dataObj.id_user
+                }
+            }, {
+                model: UserModel.User
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
+                    processError: null,
+                    processMsg: "The brand was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
 
 
 
