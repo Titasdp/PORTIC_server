@@ -313,7 +313,8 @@ router.get("/users/profile", async (req, res) => {
  * Logged user profile edit, it knows with user to edit based on his url
  * Status:Completed
  */
-router.put("/users/selected_profile", async (req, res) => {
+router.put("/users/profile", async (req, res) => {
+    console.log(req.headers);
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
