@@ -32,37 +32,7 @@ const confTableFilled = async () => {
 
 
 
-/**
- * Todo
- */
-fetchAllEntity = (receivedObj, callback) => {
-    sequelize
-        .query("SELECT * FROM User_title", {
-            model: UserTitleModel.User_title
-        })
-        .then(data => {
-            let processResp = {
-                processRespCode: 200,
-                toClient: {
-                    processResult: data,
-                    processError: null,
-                    processMsg: "Fetched successfully",
-                }
-            }
-            return callback(true, processResp)
-        })
-        .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: error,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
-        });
-};
+
 
 /**
  * 
@@ -205,51 +175,6 @@ const fetchFullEntityDataById = (dataObj, callback) => {
 };
 
 
-/**
- * Fetches an entity id based on a entity name
- * Status: Completed
- * @param {String} designation The name of the entity
- * @param {Callback} callback 
- */
-const fetchEntityIdByName = (designation, callback) => {
-    sequelize
-        .query("SELECT id_entity FROM Entity where designation =:designation", {
-            replacements: {
-                designation: designation
-            }
-        }, {
-            model: EntityModel.Entity
-        })
-        .then(data => {
-
-            let respCode = 200;
-            let respMsg = "Fetched successfully."
-            if (data[0].length === 0) {
-                respCode = 204
-                respMsg = "Fetch process completed successfully, but there is no content."
-            }
-            let processResp = {
-                processRespCode: respCode,
-                toClient: {
-                    processResult: data[0],
-                    processError: null,
-                    processMsg: respMsg,
-                }
-            }
-            return callback(true, processResp)
-        })
-        .catch(error => {
-            let processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-            return callback(false, processResp)
-        });
-};
 
 
 
@@ -357,8 +282,7 @@ const initEntity = async (dataObj) => {
 
 /**
  * Fetches id of the main entity
- * @param {Object} dataObject 
- * @param {*} callback 
+ * @returns object of data
  */
 const fetchMainEntityId = async () => {
     let processResp = {}
@@ -411,7 +335,11 @@ const fetchMainEntityId = async () => {
 
 
 
-// Todo New
+/**
+ * fetches the id of an entity based on a specific designation 
+ * @param {String} designation designation of an entity
+ * @returns object of data 
+ */
 const fetchEntityIdByDesignation = async (designation) => {
     let processResp = {}
     await sequelize
@@ -457,6 +385,104 @@ const fetchEntityIdByDesignation = async (designation) => {
 };
 
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!New!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/**
+ * Fetches all entities initials on the database
+ * Status:Completed
+ * @returns obj of data
+ */
+const fetchAllEntitiesInitials = async () => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT Entity.initials FROM Entity", {
+            model: EntityModel.Entity
+        })
+        .then(data => {
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+};
+
+
+
+
+/**
+ * Fetches the id of an specific entity based on his initials
+ * Status:Completed
+ * @returns obj of data
+ */
+const fetchEntityIdByInitials = async (initials) => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT id_entity FROM Entity where initials =:initials", {
+            replacements: {
+                initials: initials
+            }
+        }, {
+            model: EntityModel.Entity
+        })
+        .then(data => {
+
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+};
+
+
+
+
+
+
 
 
 
@@ -465,7 +491,66 @@ const fetchEntityIdByDesignation = async (designation) => {
 module.exports = {
     fetchMainEntityId,
     initEntity,
-    fetchEntityIdByName,
+    // fetchEntityIdByName,
     fetchFullEntityDataById,
-    fetchEntityIdByDesignation
+    fetchEntityIdByDesignation,
+    //
+    fetchAllEntitiesInitials,
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Fetches an entity id based on a entity name
+ * Status: Completed
+ * @param {String} designation The name of the entity
+ * @param {Callback} callback 
+ */
+//  const fetchEntityIdByName = (designation, callback) => {
+//     sequelize
+//         .query("SELECT id_entity FROM Entity where designation =:designation", {
+//             replacements: {
+//                 designation: designation
+//             }
+//         }, {
+//             model: EntityModel.Entity
+//         })
+//         .then(data => {
+
+//             let respCode = 200;
+//             let respMsg = "Fetched successfully."
+//             if (data[0].length === 0) {
+//                 respCode = 204
+//                 respMsg = "Fetch process completed successfully, but there is no content."
+//             }
+//             let processResp = {
+//                 processRespCode: respCode,
+//                 toClient: {
+//                     processResult: data[0],
+//                     processError: null,
+//                     processMsg: respMsg,
+//                 }
+//             }
+//             return callback(true, processResp)
+//         })
+//         .catch(error => {
+//             let processResp = {
+//                 processRespCode: 500,
+//                 toClient: {
+//                     processResult: null,
+//                     processError: null,
+//                     processMsg: "Something when wrong please try again later",
+//                 }
+//             }
+//             return callback(false, processResp)
+//         });
+// };

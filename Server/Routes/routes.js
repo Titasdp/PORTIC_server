@@ -50,13 +50,39 @@ let tokenPack = require("../Middleware/tokenFunctions")
 
 // DataStatus>
 
-//<UserStatus
+//*<UserStatus
+/**
+ * Fetch all user Status
+ * Status:Completed
+ */
+router.get("/user_status", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await userStatusController.fetchAllUserStatusDesignation()
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
 
-// UserStatus>
+//* UserStatus>
 
-//<UserLevel
+//*<UserLevel
+/**
+ * Fetch all user level
+ * Status:Completed
+ */
+router.get("/user_levels", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await userLevelController.fetchAllUserLevelDesignation()
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
 
-// UserLevel>
+//* UserLevel>
 
 //*<UserTitle
 //*UserTitle>
@@ -134,7 +160,6 @@ router.patch("/categories/:id", (req, res) => {
  * Status:Completed
  */
 router.get("/:lng/entities/:id", (req, res) => {
-
     entityController.fetchFullEntityDataById({
         req: req
     }, (fetchSuccess, fetchResult) => {
@@ -159,16 +184,17 @@ router.get("/entities/main", async (req, res) => {
 
 
 /**
- * Fetch an entity and his data based on an id
+ * Fetch all entities and his data based on an id
  * Status:Completed
  */
-router.get("/:lng/entities/:id", (req, res) => {
-
-    entityController.fetchFullEntityDataById({
-        req: req
-    }, (fetchSuccess, fetchResult) => {
+router.get("/entities/initials", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await entityController.fetchAllEntitiesInitials()
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
-    })
+    }
 })
 
 
@@ -283,6 +309,24 @@ router.put("/users/:id/profile", async (req, res) => {
 })
 
 
+
+router.patch("/users/:id/profile/status", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await userController.updateUserStatus({
+            req: req,
+            id_user: req.sanitize(req.params.id)
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+
+
 /**
  * Fetch all users (restrict access only for Super admin or entity Admin)
  * Status:Completed
@@ -340,6 +384,14 @@ router.patch("/users/profile/picture", async (req, res) => {
         res.status(putResult.processRespCode).send(putResult.toClient)
     }
 })
+
+
+
+
+
+
+
+
 
 
 
@@ -518,13 +570,6 @@ router.get("/:lng/entities/:id/news", async (req, res) => {
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
 // *News model  >
-
-
-
-
-
-
-
 
 
 // !!!!!!!!!!!!!!!!!!Init test  

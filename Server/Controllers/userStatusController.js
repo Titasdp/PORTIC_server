@@ -147,7 +147,57 @@ const fetchUserStatusIdByDesignation = async (designation) => {
 
 
 
+
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!New!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!111
+/**
+ * Fetches all user Level Designation from the database
+ * Status:Completed
+ * @returns obj of data
+ */
+const fetchAllUserStatusDesignation = async () => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT User_status.designation FROM User_status", {
+            model: UserStatusModel.User_status
+        })
+        .then(data => {
+            let respMsg = "Fetch successfully."
+            if (data.length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+};
+
+
+
+
 module.exports = {
     initUserStatus,
-    fetchUserStatusIdByDesignation
+    fetchUserStatusIdByDesignation,
+
+    // 
+    fetchAllUserStatusDesignation
 }

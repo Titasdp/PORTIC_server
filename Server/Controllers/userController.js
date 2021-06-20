@@ -7,6 +7,7 @@ const tokenPack = require("../Middleware/tokenFunctions")
 // const passwordPack = require("../Middleware/randomPasswordFunctions")
 const encryptPack = require("../Middleware/encrypt")
 const uniqueIdPack = require("../Middleware/uniqueId");
+const imgConvertPack = require("../Middleware/imgConvertUrl")
 // const fsPack = require("../Middleware/fsFunctions")
 //Controllers
 const pictureController = require("../Controllers/pictureController")
@@ -638,7 +639,10 @@ const fetchUserProfileById = async (dataObj) => {
 
                     if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-                        userObj.picture = fetchImgResult.toClient.processResult
+
+                        let url = await imgConvertPack.convertImage(fetchImgResult.toClient.processResult.data);
+
+                        userObj.picture = url
                     }
 
 
@@ -822,7 +826,8 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
  * Patch user Status
  * StatusCompleted
  */
-const updateUserStatus = async () => {
+const updateUserStatus = async (dataObj) => {
+    console.log(dataObj.req.body);
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
         processResult = {
@@ -854,7 +859,7 @@ const updateUserStatus = async () => {
         .query(
             `UPDATE User SET User.id_status =:id_status  Where User.id_user=:id_user `, {
                 replacements: {
-                    id_status: fetchResult.toClient.processResult.id_status,
+                    id_status: fetchResult.toClient.processResult[0].id_status,
                     id_user: dataObj.id_user
                 }
             }, {
@@ -1198,6 +1203,7 @@ module.exports = {
     fetchUserProfileById,
     editUserProfileByAdminOrProfileOwner,
     updateUserProfilePicture,
+    updateUserStatus
 
 
 }

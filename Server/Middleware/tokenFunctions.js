@@ -52,7 +52,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                     toClient: {
                         processResult: null,
                         processError: null,
-                        processMsg: "Missing file.",
+                        processMsg: error.message,
                     }
                 }
                 resolve(processResp);
