@@ -640,7 +640,7 @@ const fetchUserProfileById = async (dataObj) => {
                     if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
 
-                        let url = await imgConvertPack.supremeConvert(fetchImgResult.toClient.processResult);
+                        let url = await imgConvertPack.convertImage(fetchImgResult.toClient.processResult);
 
                         userObj.picture = url
                     }
