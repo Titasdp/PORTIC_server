@@ -521,7 +521,6 @@ const initUser = async (dataObj) => {
  * @returns 
  */
 const fetchAllUsers = async (dataObj) => {
-    console.log(dataObj);
     let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.username, User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
         User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
             User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity) where Entity.id_entity = :id_entity`
@@ -558,7 +557,7 @@ const fetchAllUsers = async (dataObj) => {
                         user_status: el.user_status,
                         user_entity: el.entity_initials
                     }
-                    if (el.id_picture === null) {
+                    if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
                         userObj.picture = fetchImgResult.toClient.processResult
                     }
@@ -617,6 +616,9 @@ const fetchUserProfileById = async (dataObj) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
+                    console.log(el.id_picture);
+
+
                     let userObj = {
                         id_user: el.id_user,
                         username: el.username,
@@ -632,11 +634,16 @@ const fetchUserProfileById = async (dataObj) => {
                         user_level: el.user_level,
                         user_status: el.user_status,
                     }
-                    if (el.id_picture === null) {
+
+
+                    if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
                         userObj.picture = fetchImgResult.toClient.processResult
                     }
+
+
                     users.push(userObj)
+
                 }
             }
             processResp = {
@@ -1046,6 +1053,8 @@ const updateUserProfilePicture = async (dataObj) => {
         id_picture: fetchResult.toClient.processResult,
         folder: `/Server/Images/UserProfilePicture/`
     })
+
+
     if (uploadResult.processRespCode !== 201) {
         console.log(uploadResult);
         return uploadResult
@@ -1111,8 +1120,6 @@ const updateUserProfilePicture = async (dataObj) => {
  * Status: Complete
  */
 const fetchUserImgByUserId = async (id_user) => {
-
-
     let processResp = {}
     await sequelize
         .query("SELECT id_picture FROM User where id_user =:id_user", {
@@ -1123,16 +1130,19 @@ const fetchUserImgByUserId = async (id_user) => {
             model: UserModel.User
         })
         .then(data => {
+            console.log(data);
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
+            // console.log(data[0].id_picture);
             processResp = {
+
                 processRespCode: respCode,
                 toClient: {
-                    processResult: ((!data[0].id_picture) ? null : (!data[0].id_picture)),
+                    processResult: ((!data[0][0].id_picture) ? null : data[0][0].id_picture),
                     processError: null,
                     processMsg: respMsg,
                 }

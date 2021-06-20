@@ -304,6 +304,7 @@ const checkFileExistence = async (imgPath, callback) => {
  * @returns True or false
  */
 const confirmIsImg = async (fileMimeType) => {
+    console.log(fileMimeType);
     if (fileMimeType.includes('image/')) {
         return true
     } else {
@@ -318,11 +319,11 @@ const confirmIsImg = async (fileMimeType) => {
  */
 const simplifyCheckFileExistence = async (imgPath) => {
     return await new Promise((resolve, reject) => {
-        fs.access(imgPath, (err, exit) => {
-            if (err) {
+        fs.access(imgPath, (err) => {
+            if (!err) {
                 resolve(true) //
             } else {
-                resolve(exit)
+                resolve(false)
             }
         })
     })
@@ -376,20 +377,20 @@ const simpleFileUpload = async (dataObj) => {
  * */
 const simpleFileDelete = async (dataObj) => {
     let processResp = {}
-    let fileExist = await simplifyCheckFileExistence(process.cwd() + '/Server/Images' + dataObj.folder + dataObj.req.files.img.name)
+    let fileExist = await simplifyCheckFileExistence(dataObj.deletePath)
     if (!fileExist) {
         processResp = {
-            processRespCode: 409,
+            processRespCode: 500,
             toClient: {
                 processResult: null,
                 processError: null,
-                processMsg: "There is already an image with that name, please change the image name.",
+                processMsg: "Something went terribly Wrong.",
             }
         }
         return processResp
     } else {
         return await new Promise(async (resolve) => {
-            await fs.unlink(process.cwd() + '/Server/Images' + dataObj.folder + dataObj.req.files.img.name, function (err) {
+            await fs.unlink(dataObj.deletePath, function (err) {
                 if (err) {
                     processResp = {
                         processRespCode: 500,
@@ -404,7 +405,7 @@ const simpleFileDelete = async (dataObj) => {
                     processResp = {
                         processRespCode: 200,
                         toClient: {
-                            processResult: uploadPath,
+                            processResult: null,
                             processError: null,
                             processMsg: "The file was successfully deleted.",
                         }

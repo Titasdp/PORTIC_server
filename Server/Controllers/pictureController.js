@@ -197,62 +197,77 @@ const updatePictureInSystemById = async (dataObj) => {
         }
         return processResp
     }
-
+    console.log(dataObj.id_picture);
     if (dataObj.id_picture === null) {
         let updateResult = await directUpdatePicture(dataObj)
         return updateResult
     } else {
 
+        let fetchResult = await fetchPicturePathById(dataObj.id_picture)
 
-        // await sequelize
-        //     .query(query, {
-        //         replacements: {
-        //             id_picture: dataObj.id_picture
-        //         }
-        //     }, {
-        //         model: PictureModel.Picture
-        //     })
-        //     .then(async data => {
+        if (fetchResult.processRespCode === 500 || !fetchResult.toClient.processResult) {
+            return {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong.",
+                }
+            }
+        }
 
-        //         //Txoma li dento
+        let oldPath = fetchResult.toClient.processResult
+        let idPicture = dataObj.id_picture
 
-        //         let picture = null
-        //         let respCode = 200
-        //         let respMsg = "Fetch successfully."
-        //         if (data[0].length === 0) {
-        //             respCode = 204
-        //             respMsg = "Fetch process completed successfully, but there is no content."
-        //         } else {
-        //             for (const el of data[0]) {
-        //                 let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
-        //                 if (imgFetch.processRespCode === 200) {
-        //                     picture = imgFetch.toClient.processResult
-        //                 }
-        //             }
-        //         }
-        //         processResp = {
-        //             processRespCode: respCode,
-        //             toClient: {
-        //                 processResult: picture,
-        //                 processError: null,
-        //                 processMsg: respMsg,
-        //             }
-        //         }
-        //     })
-        //     .catch(error => {
-        //         console.log(error);
-        //         processResp = {
-        //             processRespCode: 500,
-        //             toClient: {
-        //                 processResult: picture,
-        //                 processError: error,
-        //                 processMsg: "Something when wrong please try again later",
-        //             }
-        //         }
+        let updateResult = await indirectUpdatePicture({
+            oldPath: oldPath,
+            folder: dataObj.folder,
+            req: dataObj.req
+        })
 
-        //     });
+        if (updateResult.processRespCode !== 200) {
+            return updateResult
+        } else {
+            let query = `UPDATE Picture SET Picture.img_path=:img_path Where Picture.id_picture=:id_picture`
+            await sequelize
+                .query(query, {
+                    replacements: {
+                        img_path: updateResult.toClient.processResult,
+                        id_picture: idPicture
+                    }
+                }, {
+                    model: PictureModel.Picture
+                })
+                .then(async data => {
 
-        // return processResp
+                    processResp = {
+                        processRespCode: 200,
+                        toClient: {
+                            processResult: data[0],
+                            processError: null,
+                            processMsg: "Picture updated Successfully",
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    processResp = {
+                        processRespCode: 500,
+                        toClient: {
+                            processResult: picture,
+                            processError: error,
+                            processMsg: "Something when wrong please try again later",
+                        }
+                    }
+
+                });
+
+            return processResp
+        }
+
+        // !!!!!!!!!!!!!!!!!!!!!
+
+
     }
 }
 /**
@@ -333,6 +348,35 @@ const directUpdatePicture = async (dataObj) => {
 }
 
 
+const indirectUpdatePicture = async (dataObj) => {
+    let exist = await (fsPack.confirmIsImg(dataObj.req.sanitize(dataObj.req.files.file.mimetype)))
+    if (!exist) {
+
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "The file attached must be an image.",
+            }
+        }
+        return processResp
+    }
+    let deleteResult = await fsPack.simpleFileDelete({
+        deletePath: dataObj.oldPath
+    })
+
+    if (deleteResult.processRespCode === 500) {
+        return deleteResult
+    }
+
+
+    let imgUploadResult = await fsPack.simpleFileUpload(dataObj)
+    return imgUploadResult
+}
+
+
+
 
 
 
@@ -346,10 +390,10 @@ const fetchPicturePathById = async (id_picture) => {
     await sequelize
         .query("SELECT img_path FROM Picture where Picture.id_picture =:id_picture", {
             replacements: {
-                id_user: id_user
+                id_picture: id_picture
             }
         }, {
-            model: UserModel.User
+            model: PictureModel.Picture
         })
         .then(data => {
             let respCode = 200;
@@ -358,10 +402,12 @@ const fetchPicturePathById = async (id_picture) => {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
+
             processResp = {
+
                 processRespCode: respCode,
                 toClient: {
-                    processResult: ((!data[0].img_path) ? null : (!data[0].img_path)),
+                    processResult: ((!data[0][0].img_path) ? null : data[0][0].img_path),
                     processError: null,
                     processMsg: respMsg,
                 }
