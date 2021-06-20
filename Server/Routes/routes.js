@@ -335,9 +335,9 @@ router.patch("/users/:id/profile/status", async (req, res) => {
 
 router.get("/test", async (req, res) => {
     const blobUrl = await toBlobURL(fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`))
-    console.log(url)
+    console.log(blobUrl)
 
-    res.status(200).send(url)
+    res.status(200).send(blobUrl)
 
 
 })
