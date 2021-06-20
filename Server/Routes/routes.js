@@ -326,8 +326,8 @@ router.patch("/users/:id/profile/status", async (req, res) => {
 
 
 router.get("/test", async (req, res) => {
-
-    res.send(200).send(process.cwd() + `/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`)
+    let path = `${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`
+    res.status(200).send(path)
 
 
 })
