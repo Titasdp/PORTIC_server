@@ -338,8 +338,13 @@ router.get("/test", async (req, res) => {
 
 
     const readStreamer = fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`)
-    res.status(200).send(readStreamer);
 
+    readStreamer.pipe(res)
+    // readStreamer.on('data', function (chunk) {
+
+    //     res.status(200).send(chunk);
+    //     console.log(chunk);
+    // })
 
     // const Blob = require("cross-blob")
     // var toBlobURL = require('stream-to-blob-url')
