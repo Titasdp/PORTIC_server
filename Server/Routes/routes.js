@@ -315,7 +315,7 @@ router.get("/users/profile", async (req, res) => {
  */
 router.put("/users/profile", async (req, res) => {
     console.log(req.headers);
-    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    let tokenResult = await tokenPack.validateTokenForProfileFetch(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
     } else {
