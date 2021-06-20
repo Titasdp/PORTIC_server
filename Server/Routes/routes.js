@@ -39,8 +39,16 @@ const pictureController = require("../Controllers/pictureController")
 //
 const entityController = require("../Controllers/entityController");
 
+
+const toBlobURL = require('stream-to-blob-url')
+const fs = require('fs')
+
+
 //Middleware
-let tokenPack = require("../Middleware/tokenFunctions")
+let tokenPack = require("../Middleware/tokenFunctions");
+const {
+    url
+} = require("inspector");
 
 
 
@@ -326,8 +334,10 @@ router.patch("/users/:id/profile/status", async (req, res) => {
 
 
 router.get("/test", async (req, res) => {
-    let path = `${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`
-    res.status(200).send(path)
+    const blobUrl = await toBlobURL(fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`))
+    console.log(url)
+
+    res.status(200).send(url)
 
 
 })
