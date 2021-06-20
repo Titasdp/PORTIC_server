@@ -1,3 +1,5 @@
+const Blob = require("cross-blob")
+
 const convertImage = (img) => {
     let arrayBufferView = new Uint8Array(img);
     let blob = new Blob([arrayBufferView], {
@@ -10,13 +12,28 @@ const convertImage = (img) => {
 }
 
 
+const supremeConvert = (data) => {
+    let binary = Buffer.from(data); //or Buffer.from(data, 'binary')
+    let imgData = new Blob(binary.buffer, {
+        type: 'application/octet-binary'
+    });
+    let link = URL.createObjectURL(imgData);
+
+    let img = new Image();
+    img.onload = () => URL.revokeObjectURL(link);
+    img.src = link;
+
+    return img.src
+}
+
 
 
 
 
 
 module.exports = {
-    convertImage
+    convertImage,
+    supremeConvert
 
 
 }
