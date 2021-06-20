@@ -1,7 +1,7 @@
 const Blob = require("cross-blob")
 
 const convertImage = (data) => {
-    let arrayBufferView = new Uint8Array(data);
+    let arrayBufferView = new Uint8Array([data]);
     let blob = new Blob([arrayBufferView], {
         type: "image/png"
     });
