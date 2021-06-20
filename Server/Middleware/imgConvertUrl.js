@@ -5,6 +5,15 @@ const convertImage = (img) => {
     let blob = new Blob([arrayBufferView], {
         type: "image/png"
     });
+
+    let link = URL.createObjectURL(blob);
+    let img = new Image();
+
+    img.onload = () => URL.revokeObjectURL(link);
+    img.src = link;
+    return img.src
+
+
     let urlCreator = window.URL || window.webkitURL;
     let image = urlCreator.createObjectURL(blob);
 
