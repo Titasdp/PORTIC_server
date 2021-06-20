@@ -5,7 +5,7 @@ const convertImage = (img) => {
     let blob = new Blob([arrayBufferView], {
         type: "image/png"
     });
-
+    console.log(blob);
     let link = URL.createObjectURL(blob);
     let img = new Image();
 
