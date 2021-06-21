@@ -333,39 +333,39 @@ router.patch("/users/:id/profile/status", async (req, res) => {
 })
 
 
-router.get("/test", async (req, res) => {
+// router.get("/test", async (req, res) => {
 
-    const {
-        Blob
-    } = require('Buffer')
-    console.log(Blob);
-    // const readStreamer = fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`)
-    // let blob = new Blob([readStreamer])
-    // console.log(blob);
-    // readStreamer.pipe(res)
-    // readStreamer.on('data', function (chunk) {
+//     const {
+//         Blob
+//     } = require('Buffer')
+//     console.log(Blob);
+//     // const readStreamer = fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`)
+//     // let blob = new Blob([readStreamer])
+//     // console.log(blob);
+//     // readStreamer.pipe(res)
+//     // readStreamer.on('data', function (chunk) {
 
-    //     res.status(200).send(chunk);
-    //     console.log(chunk);
-    // })
+//     //     res.status(200).send(chunk);
+//     //     console.log(chunk);
+//     // })
 
-    // const Blob = require("cross-blob")
-    // var toBlobURL = require('stream-to-blob-url')
-    // console.log("test");
-    // const blobUrl = await (fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`))
-    // console.log(blobUrl)
+//     // const Blob = require("cross-blob")
+//     // var toBlobURL = require('stream-to-blob-url')
+//     // console.log("test");
+//     // const blobUrl = await (fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`))
+//     // console.log(blobUrl)
 
-    // toBlobURL(new Blob(readStreamer), function (err, url) {
-    //     if (err) return console.error(err.message)
-    //     console.log(url)
-    // })
+//     // toBlobURL(new Blob(readStreamer), function (err, url) {
+//     //     if (err) return console.error(err.message)
+//     //     console.log(url)
+//     // })
 
-    // // new Blob(binary.buffer, {
-    // //     type: 'application/octet-binary'
-    // // });
+//     // // new Blob(binary.buffer, {
+//     // //     type: 'application/octet-binary'
+//     // // });
 
 
-})
+// })
 
 
 
