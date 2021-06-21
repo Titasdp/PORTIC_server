@@ -12,6 +12,10 @@ const cors = require("cors");
 //     res.header('Access-Control-Allow-Origin', '*');
 //     next();
 // });
+// process.cwd() +
+console.log(__dirname);
+
+app.use(express.static('Images'))
 app.use(fileUploader());
 app.use(express.json()); //Used to parse JSON bodies
 app.use(express.urlencoded({
@@ -22,7 +26,7 @@ app.use(cors())
 
 app.use(expressSanitizer());
 app.use(router);
-
+app.use('/UserProfilePicture', express.static(__dirname + "/Images/UserProfilePicture"))
 // 
 
 // var httpServer = http.createServer(app);

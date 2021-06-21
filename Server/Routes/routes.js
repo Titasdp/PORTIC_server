@@ -332,6 +332,7 @@ router.patch("/users/:id/profile/status", async (req, res) => {
     }
 })
 
+router.use('/UserProfilePicture', express.static(__dirname + "/Images/UserProfilePicture"))
 
 // router.get("/test", async (req, res) => {
 
@@ -366,7 +367,12 @@ router.patch("/users/:id/profile/status", async (req, res) => {
 
 
 // })
+// router.get("/dirname", async (req, res) => {
 
+
+
+
+// })
 
 
 
