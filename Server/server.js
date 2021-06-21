@@ -27,10 +27,11 @@ app.use(cors())
 // app.use(Blob)
 
 app.use(expressSanitizer());
-app.use(router);
+app.use('/Images', express.static(__dirname + "/Images/"))
+app.use("/", router);
 
 //Static files Routes
-app.use('/Images', express.static(__dirname + "/Images/"))
+// app.use('/Images', express.static(__dirname + "/Images/"))
 // app.use('/Logos', express.static(__dirname + "/Images/Logos"))
 // app.use('/ProjectsGallery', express.static(__dirname + "/Images/ProjectsGallery"))
 // app.use('/NewsImagesGallery', express.static(__dirname + "/Images/NewsImagesGallery"))

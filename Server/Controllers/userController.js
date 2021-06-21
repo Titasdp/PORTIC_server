@@ -14,6 +14,9 @@ const pictureController = require("../Controllers/pictureController")
 const entityController = require("../Controllers/entityController")
 const userLevelController = require("../Controllers/userLevelController")
 const userStatusController = require("../Controllers/userStatusController")
+//Env
+require("dotenv").config();
+
 const {
     Entity
 } = require("../Models/Entity")
@@ -561,7 +564,7 @@ const fetchAllUsers = async (dataObj) => {
                     }
                     if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-                        userObj.picture = fetchImgResult.toClient.processResult
+                        userObj.picture = process.env.API_URL + fetchImgResult.toClient.processResult
                     }
                     users.push(userObj)
                 }
@@ -641,7 +644,7 @@ const fetchUserProfileById = async (dataObj) => {
 
                     if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-                        userObj.picture = fetchImgResult.toClient.processResult
+                        userObj.picture = process.env.API_URL + fetchImgResult.toClient.processResult
                     }
 
 

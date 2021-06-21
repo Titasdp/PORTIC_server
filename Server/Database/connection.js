@@ -12,11 +12,11 @@ const sequelize = new Sequelize(
 
         },
         pool: {
-            max: 1000,
+            max: 5,
             min: 0,
-            acquire: 100 * 1000,
+            // acquire: 100 * 1000,
 
-            idle: 10000
+            idle: 10 * 100000000
         }
     }
 );
@@ -29,6 +29,7 @@ sequelize
         console.log("Sequelize is working normally");
     })
     .catch(error => {
+        sequelize.query('select pg_sleep(1);');
         console.log(error);
     });
 

@@ -26,6 +26,10 @@ const projectTeamController = require("../Controllers/projectTeamController")
 const pictureController = require("../Controllers/pictureController")
 
 
+// .Env
+require("dotenv").config();
+
+
 
 
 
@@ -687,7 +691,7 @@ const selectProjectGallery = async (id_project) => {
                 for (const el of data[0]) {
                     // let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
                     // if (imgFetch.processRespCode === 200) {
-                    galleryArray.push(el.img_path)
+                    galleryArray.push(process.env.API_URL + el.img_path)
                     // }
                 }
             }
@@ -755,7 +759,7 @@ const selectProjectTeam = async (id_project) => {
 
                     if (el.id_picture === null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-                        teamMemberObj.picture = fetchImgResult.toClient.processResult
+                        teamMemberObj.picture = process.env.API_URL + el.img_path + fetchImgResult.toClient.processResult
                     }
                     teamMemberArray.push(teamMemberObj)
                 }

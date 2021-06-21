@@ -9,6 +9,8 @@ const CourseUnityModel = require("../Models/CourseUnity") // done
 const ProjectUnityModel = require("../Models/ProjectUnity")
 const RecruitmentUnityModel = require("../Models/RecruitmentUnity") // 
 const pictureController = require("../Controllers/pictureController")
+// Env
+require("dotenv").config();
 
 const confTableFilled = async () => {
     let respCode = null
@@ -83,7 +85,7 @@ const fetchEntityUnityByIdEntity = async (dataObj) => {
                         id_unity: el.id_unity,
                         designation: el.designation,
                         description: el.description,
-                        img: el.img_path,
+                        img: process.env.API_URL + el.img_path,
                         course_tags: courseTags,
                         project_tags: projectTags,
                         recruitment_tags: recruitmentTags,
@@ -99,6 +101,7 @@ const fetchEntityUnityByIdEntity = async (dataObj) => {
                     processError: null,
                     processMsg: respMsg,
                 }
+
             }
 
         })

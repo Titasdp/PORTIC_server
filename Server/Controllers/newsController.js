@@ -10,6 +10,10 @@ const pictureController = require("../Controllers/pictureController")
 //Models
 const ProjectNewsModel = require("../Models/NewsProject")
 
+
+// Env
+require("dotenv").config();
+
 /**
  * gets news ids to confirm if there is data inside the table
  * @returns (200 if exists, 204 if data doesn't exist and 500 if there has been an error)
@@ -173,7 +177,7 @@ const fetchEntityNewsByIdEntity = async (dataObj) => {
             } else {
                 for (const el of data[0]) {
                     let projectTags = await selectProjectNews(el.id_news, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let cover = await fsPack.simplifyFileFetch(el.img_path)
+                    // let cover = await fsPack.simplifyFileFetch(el.img_path)
                     let projectObj = {
                         id_news: el.id_news,
                         title: el.title,
@@ -181,10 +185,11 @@ const fetchEntityNewsByIdEntity = async (dataObj) => {
                         description: el.description,
                         published_date: el.published_date,
                         writer: el.full_name,
-                        cover: ((cover.processRespCode === 200) ? cover.toClient.processResult : []),
+                        cover: process.env.API_URL + el.img_path,
                         project_tags: ((projectTags.processRespCode === 200) ? projectTags.toClient.processResult : []),
                     }
                     project.push(projectObj)
+
                 }
             }
 

@@ -9,7 +9,8 @@ const fsPack = require("../Middleware/fsFunctions")
 //Aux Controller 
 const pictureController = require("../Controllers/pictureController")
 
-
+// Env
+require("dotenv").config();
 
 
 const confTableFilled = async () => {
@@ -74,7 +75,7 @@ const fetchAreaFocusByIdEntity = async (dataObj) => {
                     let areaFocusObj = {
                         id_areas_focus: el.id_areas_focus,
                         description: el.description,
-                        img: el.img_path
+                        img: process.env.API_URL + el.img_path
                     }
                     areasFocus.push(areaFocusObj)
                 }
