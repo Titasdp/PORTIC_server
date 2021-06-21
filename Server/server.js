@@ -1,6 +1,7 @@
 require("dotenv").config();
 // const Blob = require("cross-blob")
 const express = require("express")
+
 const app = express()
 const port = process.env.PORT || 3000
 const dbConnectionPack = require('../Server/Middleware/bdConnection')
@@ -13,7 +14,8 @@ const cors = require("cors");
 //     next();
 // });
 // process.cwd() +
-console.log(__dirname);
+// console.log(__dirname);
+// console.log(process.cwd());
 
 app.use(express.static('Images'))
 app.use(fileUploader());
@@ -26,7 +28,13 @@ app.use(cors())
 
 app.use(expressSanitizer());
 app.use(router);
-app.use('/UserProfilePicture', express.static(__dirname + "/Images/UserProfilePicture"))
+
+//Static files Routes
+app.use('/Images', express.static(__dirname + "/Images/"))
+// app.use('/Logos', express.static(__dirname + "/Images/Logos"))
+// app.use('/ProjectsGallery', express.static(__dirname + "/Images/ProjectsGallery"))
+// app.use('/NewsImagesGallery', express.static(__dirname + "/Images/NewsImagesGallery"))
+// app.use('/UnitiesGalley', express.static(__dirname + "/Images/UnitiesGalley"))
 // 
 
 // var httpServer = http.createServer(app);

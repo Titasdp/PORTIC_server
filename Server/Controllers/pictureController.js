@@ -139,10 +139,11 @@ const fetchPictureInSystemById = async (id_picture) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
-                    if (imgFetch.processRespCode === 200) {
-                        picture = imgFetch.toClient.processResult
-                    }
+                    // let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
+                    // if (imgFetch.processRespCode === 200) {
+
+                    // }
+                    picture = el.img_path
                 }
             }
             processResp = {

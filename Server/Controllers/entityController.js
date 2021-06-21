@@ -107,57 +107,52 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     contacts: [],
                     emails: [],
                     social_medias: [],
-                    img: []
+                    img: [0][0].img
                 }
 
 
-                fsPack.fileFetch({
-                    path: data[0][0].img
-                }, (fsSuccess, fsResult) => {
-                    if (fsSuccess) {
-                        entityObj.img = fsResult.toClient.processResult
+
+                menuController.fetchEntityMenus({
+                    req: dataObj.req
+                }, (fetchSuccess, fetchResult) => {
+                    if (fetchSuccess) {
+                        entityObj.menus = fetchResult.toClient.processResult
                     }
-                    menuController.fetchEntityMenus({
+                    entityEmailController.fetchEntityEmails({
                         req: dataObj.req
                     }, (fetchSuccess, fetchResult) => {
                         if (fetchSuccess) {
-                            entityObj.menus = fetchResult.toClient.processResult
+                            entityObj.emails = fetchResult.toClient.processResult
                         }
-                        entityEmailController.fetchEntityEmails({
+                        entityContactController.fetchEntityContacts({
                             req: dataObj.req
                         }, (fetchSuccess, fetchResult) => {
                             if (fetchSuccess) {
-                                entityObj.emails = fetchResult.toClient.processResult
+                                entityObj.contacts = fetchResult.toClient.processResult
                             }
-                            entityContactController.fetchEntityContacts({
+
+                            socialMediaController.fetchEntitySocialMedia({
                                 req: dataObj.req
                             }, (fetchSuccess, fetchResult) => {
                                 if (fetchSuccess) {
-                                    entityObj.contacts = fetchResult.toClient.processResult
+                                    entityObj.social_medias = fetchResult.toClient.processResult
                                 }
-
-                                socialMediaController.fetchEntitySocialMedia({
-                                    req: dataObj.req
-                                }, (fetchSuccess, fetchResult) => {
-                                    if (fetchSuccess) {
-                                        entityObj.social_medias = fetchResult.toClient.processResult
+                                let processResp = {
+                                    processRespCode: respCode,
+                                    toClient: {
+                                        processResult: [entityObj],
+                                        processError: null,
+                                        processMsg: respMsg,
                                     }
-                                    let processResp = {
-                                        processRespCode: respCode,
-                                        toClient: {
-                                            processResult: [entityObj],
-                                            processError: null,
-                                            processMsg: respMsg,
-                                        }
-                                    }
-                                    return callback(true, processResp)
-                                })
-
+                                }
+                                return callback(true, processResp)
                             })
 
                         })
+
                     })
                 })
+
             }
         })
         .catch(error => {
@@ -225,7 +220,7 @@ const initEntity = async (dataObj) => {
 
 
     let idLogoFetchResult = await pictureController.initAddMultipleImgs({
-        insertArray: [`${process.cwd()}/Server/Images/Logos/logoPortic.png`]
+        insertArray: [`/Images/Logos/logoPortic.png`]
     })
 
     if (idLogoFetchResult.processRespCode === 500) {

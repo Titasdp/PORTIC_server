@@ -556,12 +556,13 @@ const fetchAllUsers = async (dataObj) => {
                         updated_at: el.updated_at,
                         user_level: el.user_level,
                         user_status: el.user_status,
-                        user_entity: el.entity_initials
+                        user_entity: el.entity_initials,
+                        picture: null,
                     }
-                    // if (el.id_picture !== null) {
-                    //     let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-                    //     userObj.picture = fetchImgResult.toClient.processResult
-                    // }
+                    if (el.id_picture !== null) {
+                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                        userObj.picture = fetchImgResult.toClient.processResult
+                    }
                     users.push(userObj)
                 }
             }
@@ -634,16 +635,14 @@ const fetchUserProfileById = async (dataObj) => {
                         updated_at: el.updated_at,
                         user_level: el.user_level,
                         user_status: el.user_status,
+                        picture: null
                     }
 
 
-                    // if (el.id_picture !== null) {
-                    //     let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-
-                    //     let url = await imgConvertPack.convertImage(fetchImgResult.toClient.processResult);
-
-                    //     userObj.picture = url
-                    // }
+                    if (el.id_picture !== null) {
+                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                        userObj.picture = fetchImgResult.toClient.processResult
+                    }
 
 
                     users.push(userObj)
@@ -1046,8 +1045,12 @@ const updateUserLevel = async () => {
     return processResp
 }
 
+/**
+ * Patch user picture
+ * @param {Obj } dataObj Object of data      
+ * @returns Obj of data
+ */
 const updateUserProfilePicture = async (dataObj) => {
-
     let fetchResult = await fetchUserImgByUserId(dataObj.req.sanitize(dataObj.id_user))
 
     if (fetchResult.processRespCode === 500) {
@@ -1056,7 +1059,7 @@ const updateUserProfilePicture = async (dataObj) => {
     let uploadResult = await pictureController.updatePictureInSystemById({
         req: dataObj.req,
         id_picture: fetchResult.toClient.processResult,
-        folder: `/Server/Images/UserProfilePicture/`
+        folder: `/Images/UserProfilePicture/`
     })
 
 
@@ -1103,12 +1106,7 @@ const updateUserProfilePicture = async (dataObj) => {
             });
 
         return processResp
-
-
-
     }
-
-
 }
 
 

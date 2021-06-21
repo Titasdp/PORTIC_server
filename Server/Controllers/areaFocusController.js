@@ -69,13 +69,12 @@ const fetchAreaFocusByIdEntity = async (dataObj) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
+                    // let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
                     console.log(el.img_path);
                     let areaFocusObj = {
                         id_areas_focus: el.id_areas_focus,
                         description: el.description,
-                        img: await (imgFetch.processRespCode === 200) ? imgFetch.toClient.processResult : [],
-
+                        img: el.img_path
                     }
                     areasFocus.push(areaFocusObj)
                 }
@@ -146,7 +145,7 @@ const initAreaFocus = async (dataObj) => {
         return processResp
     }
     let imgsInitResult = await pictureController.initAddMultipleImgs({
-        insertArray: [`${process.cwd()}/Server/Images/Icons/search.png`, `${process.cwd()}/Server/Images/Icons/tech.png`, `${process.cwd()}/Server/Images/Icons/creativity.png`, `${process.cwd()}/Server/Images/Icons/business.png`, `${process.cwd()}/Server/Images/Icons/incubation.png`, `${process.cwd()}/Server/Images/Icons/startups.png`]
+        insertArray: [`/Images/Icons/search.png`, `/Images/Icons/tech.png`, `/Images/Icons/creativity.png`, `/Images/Icons/business.png`, `/Images/Icons/incubation.png`, `/Images/Icons/startups.png`]
     })
 
     if (imgsInitResult.processRespCode === 500) {

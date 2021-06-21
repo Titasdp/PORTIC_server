@@ -685,10 +685,10 @@ const selectProjectGallery = async (id_project) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
-                    if (imgFetch.processRespCode === 200) {
-                        galleryArray.push(imgFetch.toClient.processResult)
-                    }
+                    // let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
+                    // if (imgFetch.processRespCode === 200) {
+                    galleryArray.push(el.img_path)
+                    // }
                 }
             }
             processResp = {

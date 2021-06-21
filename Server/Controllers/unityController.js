@@ -71,7 +71,7 @@ const fetchEntityUnityByIdEntity = async (dataObj) => {
                 for (const el of data[0]) {
 
                     console.log(el.img_path);
-                    let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
+                    // let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
 
 
 
@@ -83,7 +83,7 @@ const fetchEntityUnityByIdEntity = async (dataObj) => {
                         id_unity: el.id_unity,
                         designation: el.designation,
                         description: el.description,
-                        img: await (imgFetch.processRespCode === 200) ? imgFetch.toClient.processResult : [],
+                        img: el.img_path,
                         course_tags: courseTags,
                         project_tags: projectTags,
                         recruitment_tags: recruitmentTags,
@@ -196,7 +196,7 @@ const initUnity = async (dataObj) => {
     }
 
     let imgsInitResult = await pictureController.initAddMultipleImgs({
-        insertArray: [`${process.cwd()}/Server/Images/UnitiesGalley/portoDesignFactory.jpeg`, `${process.cwd()}/Server/Images/UnitiesGalley/startupPorto.jpeg`, `${process.cwd()}/Server/Images/UnitiesGalley/portoBusinessInnovation.jpg`]
+        insertArray: [`/Images/UnitiesGalley/portoDesignFactory.jpeg`, `/Images/UnitiesGalley/startupPorto.jpeg`, `/Images/UnitiesGalley/portoBusinessInnovation.jpg`]
     })
 
     if (imgsInitResult.processRespCode === 500) {
