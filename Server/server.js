@@ -28,7 +28,7 @@ app.use(cors())
 
 app.use(expressSanitizer());
 app.use('/Images', express.static(__dirname + "/Images/"))
-app.use("/", router);
+app.use(router);
 
 //Static files Routes
 // app.use('/Images', express.static(__dirname + "/Images/"))
