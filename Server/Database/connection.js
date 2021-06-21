@@ -10,6 +10,13 @@ const sequelize = new Sequelize(
         logging: false,
         define: {
 
+        },
+        pool: {
+            max: 1000,
+            min: 0,
+            acquire: 100 * 1000,
+
+            idle: 10000
         }
     }
 );
