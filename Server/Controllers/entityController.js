@@ -107,7 +107,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     contacts: [],
                     emails: [],
                     social_medias: [],
-                    img: [0][0].img
+                    img: data[0][0].img
                 }
 
 
