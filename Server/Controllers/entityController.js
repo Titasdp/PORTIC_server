@@ -10,6 +10,9 @@ const entityContactController = require("./entityContactController")
 const socialMediaController = require("./socialMediaController")
 const pictureController = require("../Controllers/pictureController")
 
+//.ENV
+require("dotenv").config();
+
 
 const confTableFilled = async () => {
     let respCode = null
@@ -107,7 +110,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     contacts: [],
                     emails: [],
                     social_medias: [],
-                    img: data[0][0].img
+                    img: process.env.API_URL + data[0][0].img
                 }
 
 
