@@ -7,7 +7,6 @@ const tokenPack = require("../Middleware/tokenFunctions")
 // const passwordPack = require("../Middleware/randomPasswordFunctions")
 const encryptPack = require("../Middleware/encrypt")
 const uniqueIdPack = require("../Middleware/uniqueId");
-const imgConvertPack = require("../Middleware/imgConvertUrl")
 // const fsPack = require("../Middleware/fsFunctions")
 //Controllers
 const pictureController = require("../Controllers/pictureController")

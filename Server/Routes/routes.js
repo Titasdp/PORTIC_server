@@ -40,7 +40,6 @@ const pictureController = require("../Controllers/pictureController")
 const entityController = require("../Controllers/entityController");
 
 
-const toBlobURL = require('stream-to-blob-url')
 const fs = require('fs')
 
 
