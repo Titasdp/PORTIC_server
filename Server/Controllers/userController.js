@@ -558,10 +558,10 @@ const fetchAllUsers = async (dataObj) => {
                         user_status: el.user_status,
                         user_entity: el.entity_initials
                     }
-                    if (el.id_picture !== null) {
-                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-                        userObj.picture = fetchImgResult.toClient.processResult
-                    }
+                    // if (el.id_picture !== null) {
+                    //     let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                    //     userObj.picture = fetchImgResult.toClient.processResult
+                    // }
                     users.push(userObj)
                 }
             }
@@ -637,13 +637,13 @@ const fetchUserProfileById = async (dataObj) => {
                     }
 
 
-                    if (el.id_picture !== null) {
-                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                    // if (el.id_picture !== null) {
+                    //     let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
 
-                        let url = await imgConvertPack.convertImage(fetchImgResult.toClient.processResult);
+                    //     let url = await imgConvertPack.convertImage(fetchImgResult.toClient.processResult);
 
-                        userObj.picture = url
-                    }
+                    //     userObj.picture = url
+                    // }
 
 
                     users.push(userObj)
