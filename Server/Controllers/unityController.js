@@ -11,7 +11,7 @@ const RecruitmentUnityModel = require("../Models/RecruitmentUnity") //
 const pictureController = require("../Controllers/pictureController")
 // Env
 require("dotenv").config();
-
+// dfkjdsj
 const confTableFilled = async () => {
     let respCode = null
     await sequelize
