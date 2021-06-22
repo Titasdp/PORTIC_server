@@ -110,6 +110,8 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             resolve(processResp)
                         } else {
                             console.log("mathc up");
+                            console.log(decoded.data.user_data.id_user_level);
+                            console.log(fetchResult.toClient.processResult[0].id_user_level);
                             console.log(fetchResult.toClient.processResult[0].id_user_level !== decoded.data.user_data.id_user_level);
                             if (fetchResult.toClient.processResult[0].id_user_level !== decoded.data.user_data.id_user_level) {
                                 processResp = {
