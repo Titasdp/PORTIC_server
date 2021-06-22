@@ -460,7 +460,7 @@ const fetchAllAreasByAdmin = async (dataObj) => {
     let processResp = {}
     console.log(dataObj);
 
-    let query = (dataObj.user_level === `Super Admin`) ? `SELECT Area.id_area , Area.designation_eng ,Area.designation_pt   ,Area.description_eng , Area.description_pt,Area.created_at, Entity.initials, User.username 
+    let query = await (dataObj.user_level === `Super Admin`) ? `SELECT Area.id_area , Area.designation_eng ,Area.designation_pt   ,Area.description_eng , Area.description_pt,Area.created_at, Entity.initials, User.username 
     FROM ((Area INNER JOIN User on User.id_user = Area.id_publisher) INNER JOIN Entity On Entity.id_entity = Area.id_entity);` : `SELECT Area.id_area , Area.designation_eng ,Area.designation_pt   ,Area.description_eng , Area.description_pt,Area.created_at, Entity.initials, User.username 
     FROM ((Area INNER JOIN User on User.id_user = Area.id_publisher) INNER JOIN Entity On Entity.id_entity = Area.id_entity)  Where Area.id_entity =: id_entity`;
 

@@ -44,8 +44,8 @@ const validateTokenForUsersMaxSecurity = async (token) => {
     }
 
     let secret = process.env.SECRET;
-    return await new Promise((resolve, reject) => {
-        jwt.verify(token.replace("Bearer ", ""), secret, async (error, decoded) => {
+    return await new Promise(async (resolve, reject) => {
+        await jwt.verify(token.replace("Bearer ", ""), secret, async (error, decoded) => {
             if (error) {
                 processResp = {
                     processRespCode: 500,
@@ -60,7 +60,8 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                 // if (decoded ) {
 
                 if (!decoded.data.user_data) {
-
+                    console.log("userData");
+                    console.log(decoded.data.user_data);
                     processResp = {
                         processRespCode: 401,
                         toClient: {
@@ -69,6 +70,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             processMsg: "Invalid Token!",
                         }
                     }
+                    console.log("fail here 2");
                 } else {
                     if (!decoded.data.user_data.id_user || !decoded.data.user_data.user_level || !decoded.data.user_data.id_user_level || !decoded.data.user_data.id_entity || decoded.data.user_data.user_code !== `PORTIC_IPP_ASSOCIATION`) {
                         processResp = {
@@ -78,7 +80,9 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                                 processError: null,
                                 processMsg: "Invalid Token!",
                             }
+
                         }
+                        console.log("fail here 1");
                     } else {
                         processResp = {
                             processRespCode: 200,
@@ -103,6 +107,8 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             }
                             resolve(processResp)
                         } else {
+                            console.log("mathc up");
+                            console.log(fetchResult.toClient.processResult[0].id_user_level !== decoded.data.user_data.id_user_level);
                             if (fetchResult.toClient.processResult[0].id_user_level !== decoded.data.user_data.id_user_level) {
                                 processResp = {
                                     processRespCode: 401,

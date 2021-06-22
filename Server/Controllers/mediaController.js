@@ -187,6 +187,10 @@ const fetchAllMedia = async (dataObj) => {
     INNER JOIN  User on User.id_user = Media.id_publisher)Inner join Entity on Entity.id_entity = Media.id_entity)  Where Entity.id_entity =: id_entity`
     await sequelize
         .query(query, {
+            replacements: {
+                id_entity: dataObj.id_entity
+            }
+        }, {
             model: MediaModel.Media
         })
         .then(data => {
