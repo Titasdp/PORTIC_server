@@ -458,6 +458,7 @@ const selectAreaRelatedProjects = async (id_area, lng) => {
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Admin!!!!!!!!!!!!!!!!!!1
 const fetchAllAreasByAdmin = async (dataObj) => {
     let processResp = {}
+    console.log(dataObj);
 
     let query = (dataObj.user_level === `Super Admin`) ? `SELECT Area.id_area , Area.designation_eng ,Area.designation_pt   ,Area.description_eng , Area.description_pt,Area.created_at, Entity.initials, User.username 
     FROM ((Area INNER JOIN User on User.id_user = Area.id_publisher) INNER JOIN Entity On Entity.id_entity = Area.id_entity);` : `SELECT Area.id_area , Area.designation_eng ,Area.designation_pt   ,Area.description_eng , Area.description_pt,Area.created_at, Entity.initials, User.username 
@@ -466,7 +467,7 @@ const fetchAllAreasByAdmin = async (dataObj) => {
     await sequelize
         .query(query, {
             replacements: {
-                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+                id_entity: dataObj.id_entity
             }
         }, {
             model: AreaModel.Area
@@ -479,10 +480,10 @@ const fetchAllAreasByAdmin = async (dataObj) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let projectTags = await selectAreaRelatedProjects(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng));
-                    let courseTags = await selectAreaRelatedCourse(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let recruitmentTags = await selectAreaRelatedRecruitment(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let unityTags = await selectAreaRelatedUnity(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let projectTags = await selectAreaRelatedProjects(el.id_area, "pt");
+                    let courseTags = await selectAreaRelatedCourse(el.id_area, "pt")
+                    let recruitmentTags = await selectAreaRelatedRecruitment(el.id_area, "pt")
+                    let unityTags = await selectAreaRelatedUnity(el.id_area, "pt")
                     let areaObj = {
                         id_area: el.id_area,
                         designation_pt: el.designation_pt,
