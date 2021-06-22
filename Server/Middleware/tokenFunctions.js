@@ -47,6 +47,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
     return await new Promise(async (resolve, reject) => {
         await jwt.verify(token.replace("Bearer ", ""), secret, async (error, decoded) => {
             if (error) {
+                console.log(error);
                 processResp = {
                     processRespCode: 500,
                     toClient: {
@@ -70,7 +71,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             processMsg: "Invalid Token!",
                         }
                     }
-                    console.log("fail here 2");
+                    console.log("hereFail3");
                 } else {
                     if (!decoded.data.user_data.id_user || !decoded.data.user_data.user_level || !decoded.data.user_data.id_user_level || !decoded.data.user_data.id_entity || decoded.data.user_data.user_code !== `PORTIC_IPP_ASSOCIATION`) {
                         processResp = {
@@ -82,7 +83,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             }
 
                         }
-                        console.log("fail here 1");
+                        console.log("hereFail2");
                     } else {
                         processResp = {
                             processRespCode: 200,
@@ -95,6 +96,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                         let fetchResult = await userLevelController.fetchUserLevelIdByDesignation(decoded.data.user_data.user_level)
 
                         if (fetchResult.processRespCode === 500) {
+                            console.log("hereFail1");
                             resolve(fetchResult)
                         } else if (fetchResult.processRespCode === 204) {
                             processResp = {
@@ -118,7 +120,9 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                                         processMsg: "Invalid token!",
                                     }
                                 }
+                                console.log("hereFail4");
                             } else {
+                                console.log();
                                 if (decoded.data.user_data.user_level !== 'Entity Admin' && decoded.data.user_data.user_level !== 'Super Admin') {
                                     processResp = {
                                         processRespCode: 401,
@@ -128,6 +132,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                                             processMsg: "The user is unauthorized of completing this function.",
                                         }
                                     }
+                                    console.log("hereFail5");
                                 }
                             }
 
