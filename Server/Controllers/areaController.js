@@ -4,7 +4,8 @@ const uniqueIdPack = require("../Middleware/uniqueId");
 const AreaUnityModel = require("../Models/AreaUnity") // done 
 const CourseAreaModel = require("../Models/CourseArea") // done
 const ProjectAreaModel = require("../Models/ProjectArea")
-const RecruitmentAreaModel = require("../Models/RecruitmentAreas") // 
+const RecruitmentAreaModel = require("../Models/RecruitmentAreas"); // 
+const e = require("express");
 
 
 /**
@@ -454,9 +455,252 @@ const selectAreaRelatedProjects = async (id_area, lng) => {
 
 
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Admin!!!!!!!!!!!!!!!!!!1
+const fetchAllAreasByAdmin = async (dataObj) => {
+    let processResp = {}
+
+    let query = (dataObj.user_level === `Super Admin`) ? `SELECT Area.id_area , Area.designation_eng ,Area.designation_pt   ,Area.description_eng , Area.description_pt,Area.created_at, Entity.initials, User.username 
+    FROM ((Area INNER JOIN User on User.id_user = Area.id_publisher) INNER JOIN Entity On Entity.id_entity = Area.id_entity);` : `SELECT Area.id_area , Area.designation_eng ,Area.designation_pt   ,Area.description_eng , Area.description_pt,Area.created_at, Entity.initials, User.username 
+    FROM ((Area INNER JOIN User on User.id_user = Area.id_publisher) INNER JOIN Entity On Entity.id_entity = Area.id_entity)  Where Area.id_entity =: id_entity`;
+
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+            }
+        }, {
+            model: AreaModel.Area
+        })
+        .then(async data => {
+            let areas = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let projectTags = await selectAreaRelatedProjects(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng));
+                    let courseTags = await selectAreaRelatedCourse(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let recruitmentTags = await selectAreaRelatedRecruitment(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let unityTags = await selectAreaRelatedUnity(el.id_area, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let areaObj = {
+                        id_area: el.id_area,
+                        designation_pt: el.designation_pt,
+                        designation_eng: el.designation_eng,
+                        description_pt: el.description_pt,
+                        description_eng: el.description_eng,
+                        created_at: el.created_at,
+                        entity_initials: el.initials,
+                        creator: el.username,
+                        project_tags: projectTags,
+                        course_tags: courseTags,
+                        recruitment_tags: recruitmentTags,
+                        unity_tags: unityTags
+                    }
+
+                    areas.push(areaObj)
+                }
+            }
+
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: areas,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+};
 
 
 
+
+
+
+
+
+/**
+ * Delete Area  
+ * StatusCompleted
+ */
+const deleteArea = async (dataObj) => {
+    let processResp = {}
+    let query = `DELETE  FROM Area Where Area.id_area = :id_area;
+    DELETE  FROM Area_unity Where Area_unity.id_area = :id_area;
+    DELETE  FROM Project_area Where Project_area.id_area = :id_area;
+    DELETE  FROM Recruitment_area Where Recruitment_area.id_area = :id_area;
+    DELETE  FROM Course_area Where Course_area.id_area = :id_area;`
+    await sequelize
+        .query(
+            query, {
+                replacements: {
+                    id_area: dataObj.req.sanitize(dataObj.req.params.id)
+                },
+                dialectOptions: {
+                    multipleStatements: true // <---- HERE
+                }
+            }, {
+                model: AreaModel.Area
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Data Deleted Successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+
+/**
+ * Add Area   
+ * StatusCompleted
+ */
+const addArea = async (dataObj) => {
+    let processResp = {}
+    if (dataObj.idUser === null || dataObj.idEntity === null || !dataObj.req.sanitize(dataObj.req.body.designation_pt) || !dataObj.req.sanitize(dataObj.req.body.designation_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_Area'), dataObj.req.sanitize(dataObj.req.body.designation_pt), dataObj.req.sanitize(dataObj.req.body.designation_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idUser, dataObj.idEntity],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Area(id_area,designation_pt,designation_eng,description_pt,description_eng,id_publisher,id_entity) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: AreaModel.Area
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+
+
+/**
+ * edit Area  
+ * Status: Complete
+ */
+const editArea = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.designation_pt) || !dataObj.req.sanitize(dataObj.req.body.designation_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Area SET designation_pt=:designation_pt,designation_eng=:designation_eng, description_eng =:description_eng, description_pt =:description_pt Where Area.id_area=:id_area`, {
+                replacements: {
+                    id_area: dataObj.req.sanitize(dataObj.req.params.id_media),
+                    designation_pt: dataObj.req.sanitize(dataObj.req.body.title_eng),
+                    designation_eng: dataObj.req.sanitize(dataObj.req.body.title_pt),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                }
+            }, {
+                model: AreaModel.Area
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The media was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
 
 
 
@@ -468,6 +712,13 @@ const selectAreaRelatedProjects = async (id_area, lng) => {
 module.exports = {
     fetchEntityAreaByIdEntity,
     initAreas,
-    fetchAreas
+    fetchAreas,
+    // 
+    fetchAllAreasByAdmin,
+    deleteArea,
+    addArea,
+    editArea
+
+
 
 }

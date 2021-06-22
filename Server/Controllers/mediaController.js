@@ -1,6 +1,11 @@
+// Main model 
 const MediaModel = require("../Models/Media") //Main Model
+//Database Connection 
 const sequelize = require("../Database/connection")
+// Middleware
 const uniqueIdPack = require("../Middleware/uniqueId");
+//Controller 
+const dataStatusController = require("../Controllers/dataStatusController")
 
 
 
@@ -153,7 +158,7 @@ const initMedia = async (dataObj) => {
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -170,24 +175,27 @@ const initMedia = async (dataObj) => {
 
 
 /**
- * Fetches all Course 
- * Status: Completed
- * @param {Object} req Request sended by the client 
- * @param {Callback} callback 
+ * Fetches all Medias 
+ * Status: Completed 
  */
-const fetchMedia = (req, callback) => {
-    sequelize
-        .query("select * from Media", {
+const fetchAllMedia = async (dataObj) => {
+    let processResp = {}
+    let query = (dataObj.user_level === `Super Admin`) ? `Select Media.id_media, Media.title_eng, Media.title_pt, Media.description_eng , Media.description_pt  , Media.appearance_case, Media.youtube_path  ,Media.created_at ,User.username, Data_Status.designation  ,Entity.initials
+    From (((Media Inner Join Data_Status on Data_Status.id_status = Media.id_status ) 
+    INNER JOIN  User on User.id_user = Media.id_publisher)Inner join Entity on Entity.id_entity = Media.id_entity) ` : `Select Media.id_media, Media.title_eng, Media.title_pt, Media.description_eng , Media.description_pt  , Media.appearance_case, Media.youtube_path  ,Media.created_at ,User.username, Data_Status.designation  ,Entity.initials
+    From (((Media Inner Join Data_Status on Data_Status.id_status = Media.id_status ) 
+    INNER JOIN  User on User.id_user = Media.id_publisher)Inner join Entity on Entity.id_entity = Media.id_entity)  Where Entity.id_entity =: id_entity`
+    await sequelize
+        .query(query, {
             model: MediaModel.Media
         })
         .then(data => {
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data.length === 0) {
-                respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
-            let processResp = {
+            processResp = {
                 processRespCode: respCode,
                 toClient: {
                     processResult: data,
@@ -195,11 +203,10 @@ const fetchMedia = (req, callback) => {
                     processMsg: respMsg,
                 }
             }
-            return callback(true, processResp)
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -207,9 +214,269 @@ const fetchMedia = (req, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+
+    return processResp
 };
+
+
+
+/**
+ * edit user profile fields present in  
+ * Status: Complete
+ */
+const editMedia = async (dataObj) => {
+    let processResp = {}
+
+
+    if (!dataObj.id_user || !dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.appearance_case) || !dataObj.req.sanitize(dataObj.req.body.youtube_path)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    await sequelize
+        .query(
+            `UPDATE Media SET title_eng= :title_eng,title_pt=:title_pt, description_eng =:description_eng, description_pt =:description_pt, appearance_case=:appearance_case,youtube_path=:youtube_path  Where User.id_media=:id_media`, {
+                replacements: {
+                    id_media: dataObj.req.sanitize(dataObj.req.params.id_media),
+                    title_eng: dataObj.req.sanitize(dataObj.req.body.title_eng),
+                    title_pt: dataObj.req.sanitize(dataObj.req.body.title_pt),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                    appearance_case: (isNaN(dataObj.req.body.appearance_case)) ? 3 : dataObj.req.sanitize(dataObj.req.body.appearance_case),
+                    youtube_path: dataObj.req.sanitize(dataObj.req.body.youtube_path),
+                }
+            }, {
+                model: MediaModel.Media
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The media was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+/**
+ * Patch  Media status 
+ * StatusCompleted
+ */
+const updateMediaStatus = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    let fetchResult = await dataStatusController.fetchDataStatusIdByDesignation(dataObj.req.sanitize(dataObj.req.body.new_status))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Media SET Media.id_status =:id_status  Where Media.id_media=:id_media `, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult[0].id_status,
+                    id_media: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: MediaModel.Media
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
+                    processError: null,
+                    processMsg: "The brand was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+/**
+ * Delete Media  
+ * StatusCompleted
+ */
+const deleteMedia = async (dataObj) => {
+    let processResp = {}
+    await sequelize
+        .query(
+            `DELETE FROM Media Where Media.id_media=:id_media `, {
+                replacements: {
+                    id_media: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: MediaModel.Media
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Data Deleted Successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+/**
+ * Add Media  
+ * StatusCompleted
+ */
+const addMedia = async (dataObj) => {
+    let processResp = {}
+    if (dataObj.idUser === null || dataObj.idEntity === null || !dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.appearance_case) || !dataObj.req.sanitize(dataObj.req.body.youtube_path)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    let dataStatusFetchResult = (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+    // dataStatusFetchResult.toClient.processResult[0].id_status,
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_Media'), dataObj.req.sanitize(dataObj.req.body.title_eng), dataObj.req.sanitize(dataObj.req.body.title_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.appearance_case), dataObj.req.sanitize(dataObj.req.body.youtube_path), dataObj.idUser, dataObj.idEntity, dataStatusFetchResult.toClient.processResult[0].id_status, ],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Media(id_media,title_eng,title_pt,description_eng,description_pt,appearance_case,youtube_path,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: MediaModel.Media
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+
+
 
 
 
@@ -228,6 +495,12 @@ const fetchMedia = (req, callback) => {
 module.exports = {
     fetchMediaByIdEntity,
     initMedia,
-    fetchMedia
+
+    //
+    fetchAllMedia,
+    editMedia,
+    deleteMedia,
+    updateMediaStatus,
+    addMedia
 
 }

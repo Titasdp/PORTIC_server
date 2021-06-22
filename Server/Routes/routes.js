@@ -331,47 +331,8 @@ router.patch("/users/:id/profile/status", async (req, res) => {
     }
 })
 
-router.use('/UserProfilePicture', express.static(__dirname + "/Images/UserProfilePicture"))
+// router.use('/UserProfilePicture', express.static(__dirname + "/Images/UserProfilePicture"))
 
-// router.get("/test", async (req, res) => {
-
-//     const {
-//         Blob
-//     } = require('Buffer')
-//     console.log(Blob);
-//     // const readStreamer = fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`)
-//     // let blob = new Blob([readStreamer])
-//     // console.log(blob);
-//     // readStreamer.pipe(res)
-//     // readStreamer.on('data', function (chunk) {
-
-//     //     res.status(200).send(chunk);
-//     //     console.log(chunk);
-//     // })
-
-//     // const Blob = require("cross-blob")
-//     // var toBlobURL = require('stream-to-blob-url')
-//     // console.log("test");
-//     // const blobUrl = await (fs.createReadStream(`${process.cwd()}/Server/Images/UserProfilePicture/4cw0jfz2vokq490vp3_Joshua.jpg`))
-//     // console.log(blobUrl)
-
-//     // toBlobURL(new Blob(readStreamer), function (err, url) {
-//     //     if (err) return console.error(err.message)
-//     //     console.log(url)
-//     // })
-
-//     // // new Blob(binary.buffer, {
-//     // //     type: 'application/octet-binary'
-//     // // });
-
-
-// })
-// router.get("/dirname", async (req, res) => {
-
-
-
-
-// })
 
 
 
@@ -461,6 +422,68 @@ router.get("/:lng/entities/:id/areas", async (req, res) => {
     })
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
+
+
+
+router.get("/areas", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaController.fetchAllAreasByAdmin(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.put("/areas/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaController.editArea({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.post("/areas/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaController.addArea({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+router.delete("/areas/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaController.deleteArea({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+
+
+
+
 
 
 //*Areas Routes>

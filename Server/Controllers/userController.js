@@ -524,6 +524,7 @@ const initUser = async (dataObj) => {
  * @returns 
  */
 const fetchAllUsers = async (dataObj) => {
+    let processResp = {}
     let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.username, User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
         User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
             User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity) where Entity.id_entity = :id_entity`
@@ -795,7 +796,7 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
         )
         .then(data => {
             processResp = {
-                processRespCode: 201,
+                processRespCode: 200,
                 toClient: {
                     processResult: data[0],
                     // {
@@ -803,7 +804,7 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
                     //     // en_answer: "Profile updated Successfully"
                     // },
                     processError: null,
-                    processMsg: "The brand was updated successfully",
+                    processMsg: "The user was updated successfully",
                 }
             }
 
