@@ -503,7 +503,7 @@ router.get("/:lng/entities/:id/courses", async (req, res) => {
 
 
 
-router.get("/course", async (req, res) => {
+router.get("/courses", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -514,7 +514,7 @@ router.get("/course", async (req, res) => {
 })
 
 
-router.put("/course/:id", async (req, res) => {
+router.put("/courses/:id", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -527,7 +527,7 @@ router.put("/course/:id", async (req, res) => {
 })
 
 
-router.post("/course", async (req, res) => {
+router.post("/courses", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -543,7 +543,7 @@ router.post("/course", async (req, res) => {
 
 
 
-router.patch("/course/:id/status", async (req, res) => {
+router.patch("/courses/:id/status", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -560,7 +560,7 @@ router.patch("/course/:id/status", async (req, res) => {
 
 
 
-router.delete("/course/:id", async (req, res) => {
+router.delete("/courses/:id", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
