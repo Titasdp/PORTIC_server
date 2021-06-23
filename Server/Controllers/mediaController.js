@@ -251,7 +251,7 @@ const editMedia = async (dataObj) => {
         .query(
             `UPDATE Media SET title_eng= :title_eng,title_pt=:title_pt, description_eng =:description_eng, description_pt =:description_pt, appearance_case=:appearance_case,youtube_path=:youtube_path  Where Media.id_media=:id_media`, {
                 replacements: {
-                    id_media: dataObj.req.sanitize(dataObj.req.params.id_media),
+                    id_media: dataObj.req.sanitize(dataObj.req.params.id),
                     title_eng: dataObj.req.sanitize(dataObj.req.body.title_eng),
                     title_pt: dataObj.req.sanitize(dataObj.req.body.title_pt),
                     description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
