@@ -667,7 +667,7 @@ const editArea = async (dataObj) => {
         .query(
             `UPDATE Area SET designation_pt=:designation_pt,designation_eng=:designation_eng, description_eng =:description_eng, description_pt =:description_pt Where Area.id_area=:id_area`, {
                 replacements: {
-                    id_area: dataObj.req.sanitize(dataObj.req.params.id_media),
+                    id_area: dataObj.req.sanitize(dataObj.req.params.id),
                     designation_pt: dataObj.req.sanitize(dataObj.req.body.designation_pt),
                     designation_eng: dataObj.req.sanitize(dataObj.req.body.designation_eng),
                     description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
