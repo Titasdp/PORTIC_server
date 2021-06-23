@@ -113,6 +113,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     img: process.env.API_URL + data[0][0].img
                 }
                 console.log(process.env.API_URL);
+                console.log(data[0][0].img);
 
                 console.log(process.env.API_URL);
 
