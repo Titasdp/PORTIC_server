@@ -714,6 +714,7 @@ const selectCourseRelatedProjects = async (id_course, lng) => {
 
 
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -721,12 +722,73 @@ const selectCourseRelatedProjects = async (id_course, lng) => {
 
 
 
+
+
+/**
+ * edit Area  
+ * Status: Complete
+ */
+const editCourse = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.candidacy_link) || !dataObj.req.sanitize(dataObj.req.body.pdf_url)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Area SET designation_pt=:designation_pt,designation_eng=:designation_eng, description_eng =:description_eng, description_pt =:description_pt Where Area.id_area=:id_area`, {
+                replacements: {
+                    id_area: dataObj.req.sanitize(dataObj.req.params.id_media),
+                    designation_pt: dataObj.req.sanitize(dataObj.req.body.title_eng),
+                    designation_eng: dataObj.req.sanitize(dataObj.req.body.title_pt),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                }
+            }, {
+                model: AreaModel.Area
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The media was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
 
 
 
 module.exports = {
     fetchCourseByIdEntity,
     initCourse,
-    fetchCourse
+    fetchCourse,
+
+    // Admin
 
 }
