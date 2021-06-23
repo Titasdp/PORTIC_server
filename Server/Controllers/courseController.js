@@ -890,8 +890,8 @@ const editCourse = async (dataObj) => {
                     designation: dataObj.req.sanitize(dataObj.req.body.designation),
                     html_structure_eng: dataObj.req.sanitize(dataObj.req.body.html_structure_eng),
                     html_structure_pt: dataObj.req.sanitize(dataObj.req.body.html_structure_pt),
-                    candidacy_link: dataObj.req.sanitize(dataObj.req.body.candidacy_link),
-                    pdf_url: dataObj.req.sanitize(dataObj.req.body.pdf_url),
+                    candidacy_link: (!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? "" : dataObj.req.sanitize(dataObj.req.body.candidacy_link),
+                    pdf_url: (!dataObj.req.sanitize(dataObj.req.body.pdf_url)) ? "" : dataObj.req.sanitize(dataObj.req.body.pdf_url),
                 }
             }, {
                 model: CourseAreaModel.Course_area
