@@ -232,10 +232,10 @@ const fetchAllMedia = async (dataObj) => {
  */
 const editMedia = async (dataObj) => {
     let processResp = {}
-    console.log(dataObj);
 
 
-    if (!dataObj.id_user || !dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.appearance_case) || !dataObj.req.sanitize(dataObj.req.body.youtube_path)) {
+
+    if (!dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.appearance_case) || !dataObj.req.sanitize(dataObj.req.body.youtube_path)) {
         processResult = {
             processRespCode: 400,
             toClient: {
