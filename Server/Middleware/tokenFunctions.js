@@ -61,8 +61,6 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                 // if (decoded ) {
 
                 if (!decoded.data.user_data) {
-                    console.log("userData");
-                    console.log(decoded.data.user_data);
                     processResp = {
                         processRespCode: 401,
                         toClient: {
@@ -71,7 +69,6 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             processMsg: "Invalid Token!",
                         }
                     }
-                    console.log("hereFail3");
                 } else {
                     if (!decoded.data.user_data.id_user || !decoded.data.user_data.user_level || !decoded.data.user_data.id_user_level || !decoded.data.user_data.id_entity || decoded.data.user_data.user_code !== `PORTIC_IPP_ASSOCIATION`) {
                         processResp = {
@@ -83,7 +80,6 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             }
 
                         }
-                        console.log("hereFail2");
                     } else {
                         processResp = {
                             processRespCode: 200,
@@ -96,7 +92,6 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                         let fetchResult = await userLevelController.fetchUserLevelIdByDesignation(decoded.data.user_data.user_level)
 
                         if (fetchResult.processRespCode === 500) {
-                            console.log("hereFail1");
                             resolve(fetchResult)
                         } else if (fetchResult.processRespCode === 204) {
                             processResp = {
@@ -109,10 +104,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                             }
                             resolve(processResp)
                         } else {
-                            console.log("mathc up");
-                            console.log(decoded.data.user_data.id_user_level);
-                            console.log(fetchResult.toClient.processResult[0].id_user_level);
-                            console.log(fetchResult.toClient.processResult[0].id_user_level !== decoded.data.user_data.id_user_level);
+
                             if (fetchResult.toClient.processResult[0].id_user_level !== decoded.data.user_data.id_user_level) {
                                 processResp = {
                                     processRespCode: 401,
@@ -122,9 +114,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                                         processMsg: "Invalid token!",
                                     }
                                 }
-                                console.log("hereFail4");
                             } else {
-                                console.log();
                                 if (decoded.data.user_data.user_level !== 'Entity Admin' && decoded.data.user_data.user_level !== 'Super Admin') {
                                     processResp = {
                                         processRespCode: 401,
@@ -134,7 +124,6 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                                             processMsg: "The user is unauthorized of completing this function.",
                                         }
                                     }
-                                    console.log("hereFail5");
                                 }
                             }
 

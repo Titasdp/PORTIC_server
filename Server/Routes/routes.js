@@ -449,7 +449,7 @@ router.put("/areas/:id", async (req, res) => {
 })
 
 
-router.post("/areas/:id", async (req, res) => {
+router.post("/areas", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -549,7 +549,7 @@ router.put("/media/:id", async (req, res) => {
 })
 
 
-router.post("/media/:id", async (req, res) => {
+router.post("/media", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
