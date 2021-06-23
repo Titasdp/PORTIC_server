@@ -429,7 +429,7 @@ const addMedia = async (dataObj) => {
         return processResp
     }
 
-    let dataStatusFetchResult = (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    let dataStatusFetchResult = await (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
     if (dataStatusFetchResult.processRespCode === 500) {
         processResp = {
             processRespCode: 500,
