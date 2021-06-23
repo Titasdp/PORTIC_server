@@ -553,11 +553,9 @@ const deleteArea = async (dataObj) => {
                     id_area: dataObj.req.sanitize(dataObj.req.params.id)
                 },
                 dialectOptions: {
-                    multipleStatements: true // <---- HERE
+                    multipleStatements: true
                 }
-            }, {
-                model: AreaModel.Area
-            }
+            },
         )
         .then(data => {
             processResp = {
