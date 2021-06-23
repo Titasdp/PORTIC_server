@@ -181,7 +181,7 @@ const updatePictureInSystemById = async (dataObj) => {
             toClient: {
                 processResult: null,
                 processError: null,
-                processMsg: "There must be a file attach to the request. 1",
+                processMsg: "There must be a file attach to the request.",
             }
         }
         return processResp
@@ -193,7 +193,7 @@ const updatePictureInSystemById = async (dataObj) => {
             toClient: {
                 processResult: null,
                 processError: null,
-                processMsg: "There must be a file attach to the request.2",
+                processMsg: "There must be a file attach to the request.",
             }
         }
         return processResp
@@ -430,6 +430,123 @@ const fetchPicturePathById = async (id_picture) => {
 
     return processResp
 };
+
+
+
+
+
+const addPictureInSystem = async (dataObj) => {
+    if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "There must be a file attach to the request.",
+            }
+        }
+        return processResp
+    }
+
+    if (dataObj.req.files.file === null) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "There must be a file attach to the request.",
+            }
+        }
+        return processResp
+    }
+
+    if (dataObj.id_picture === null) {
+        let updateResult = await directUpdatePicture(dataObj)
+        return updateResult
+    } else {
+
+        let fetchResult = await fetchPicturePathById(dataObj.id_picture)
+
+        if (fetchResult.processRespCode === 500 || !fetchResult.toClient.processResult) {
+            return {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong.",
+                }
+            }
+        }
+
+        let oldPath = fetchResult.toClient.processResult
+        let idPicture = dataObj.id_picture
+
+        let updateResult = await indirectUpdatePicture({
+            oldPath: oldPath,
+            folder: dataObj.folder,
+            req: dataObj.req
+        })
+
+        if (updateResult.processRespCode !== 200) {
+            return updateResult
+        } else {
+            let query = `UPDATE Picture SET Picture.img_path=:img_path Where Picture.id_picture=:id_picture`
+            await sequelize
+                .query(query, {
+                    replacements: {
+                        img_path: updateResult.toClient.processResult,
+                        id_picture: idPicture
+                    }
+                }, {
+                    model: PictureModel.Picture
+                })
+                .then(async data => {
+
+                    processResp = {
+                        processRespCode: 200,
+                        toClient: {
+                            processResult: data[0],
+                            processError: null,
+                            processMsg: "Picture updated Successfully",
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    processResp = {
+                        processRespCode: 500,
+                        toClient: {
+                            processResult: picture,
+                            processError: error,
+                            processMsg: "Something when wrong please try again later",
+                        }
+                    }
+
+                });
+
+            return processResp
+        }
+
+        // !!!!!!!!!!!!!!!!!!!!!
+
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
