@@ -719,18 +719,192 @@ const selectCourseRelatedProjects = async (id_course, lng) => {
 
 
 
+const fetchAllCourseByAmdin = async (dataObj) => {
+    let processResp = {}
+
+    if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
+
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
+            }
+        }
+        return processResp
+    }
+
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation  ,Entity.initials
+    From (((Course Inner Join Data_Status on Data_Status.id_status = Course.id_status ) 
+    INNER JOIN  User on User.id_user = Course.id_publisher)Inner join Entity on Entity.id_entity = Course.id_entity) ` : ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation  ,Entity.initials
+    From (((Course Inner Join Data_Status on Data_Status.id_status = Course.id_status ) 
+    INNER JOIN  User on User.id_user = Course.id_publisher)Inner join Entity on Entity.id_entity = Course.id_entity) Where Entity.id_entity = id_entity`;
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.id_entity
+            }
+        }, {
+            model: CourseModel.Course
+        })
+        .then(async data => {
+            let courses = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let projectTags = await selectCourseRelatedProjects(el.id_course, "pt");
+                    let areaTags = await selectCourseRelatedAreas(el.id_course, "pt")
+                    let recruitmentTags = await selectCourseRelatedRecruitment(el.id_course, "pt")
+                    let unityTags = await selectCourseRelatedUnity(el.id_course, "pt")
+                    let courseObj = {
+                        id_course: el.id_course,
+                        designation: el.designation,
+                        html_structure_eng: el.html_structure_eng,
+                        html_structure_pt: el.html_structure_pt,
+                        candidacy_link: el.candidacy_link,
+                        pdf_url: el.pdf_url,
+                        entity_initials: el.initials,
+                        creator: el.username,
+                        area_tags: areaTags,
+                        project_tags: projectTags,
+                        recruitment_tags: recruitmentTags,
+                        unity_tags: unityTags,
+                    }
+
+                    courses.push(courseObj)
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: courses,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 /**
- * edit Area  
+ * Add Course  
+ * StatusCompleted
+ */
+const addCourse = async (dataObj) => {
+    let processResp = {}
+    if (dataObj.idUser === null || dataObj.idEntity === null || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    let dataStatusFetchResult = (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+    // dataStatusFetchResult.toClient.processResult[0].id_status,
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_Course'), dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.html_structure_eng), dataObj.req.sanitize(dataObj.req.body.html_structure_pt), dataObj.idUser, dataObj.idEntity, dataStatusFetchResult.toClient.processResult[0].id_status],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Course(id_course,designation,html_structure_eng,html_structure_pt,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: CourseModel.Course
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+/**
+ * edit Course  
  * Status: Complete
  */
 const editCourse = async (dataObj) => {
     let processResp = {}
-    if (!dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.candidacy_link) || !dataObj.req.sanitize(dataObj.req.body.pdf_url)) {
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.id) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.candidacy_link) || !dataObj.req.sanitize(dataObj.req.body.pdf_url)) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -744,7 +918,7 @@ const editCourse = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE Course SET designation_pt=:designation_pt,designation_eng=:designation_eng, description_eng =:description_eng, description_pt =:description_pt Where Area.id_area=:id_area`, {
+            `UPDATE Course SET designation=:designation,html_structure_eng=:html_structure_eng, html_structure_pt =:html_structure_pt, candidacy_link =:candidacy_link, pdf_url=:pdf_url Where Course.id_course=:id_course`, {
                 replacements: {
                     id_course: dataObj.req.sanitize(dataObj.req.params.id),
                     designation: dataObj.req.sanitize(dataObj.req.body.designation),
@@ -754,7 +928,7 @@ const editCourse = async (dataObj) => {
                     pdf_url: dataObj.req.sanitize(dataObj.req.body.pdf_url),
                 }
             }, {
-                model: AreaModel.Area
+                model: CourseAreaModel.Course_area
             }
         )
         .then(data => {
@@ -783,6 +957,131 @@ const editCourse = async (dataObj) => {
     return processResp
 }
 
+/**
+ * Patch  Couse status 
+ * StatusCompleted
+ */
+const updateMediaCourse = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+    let fetchResult = await dataStatusController.fetchDataStatusIdByDesignation(dataObj.req.sanitize(dataObj.req.body.new_status))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Course SET Course.id_status =:id_status  Where Course.id_course=:id_course`, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult[0].id_status,
+                    id_course: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: CourseModel.Course
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
+                    processError: null,
+                    processMsg: "The brand was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+/**
+ * Delete Media  
+ * StatusCompleted
+ */
+
+const deleteMedia = async (dataObj) => {
+    let processResp = {}
+    let query = `DELETE  FROM Course Where Course.id_course =:id_course;
+    DELETE  FROM Project_course Where Project_course.id_course =:id_course;
+    DELETE  FROM Course_unity Where Course_unity.id_course =:id_course;
+    DELETE  FROM Course_area Where Course_area.id_area =:id_course;
+    DELETE  FROM Recruitment_course Where Recruitment_course.id_course =:id_course;`
+    await sequelize
+        .query(
+            query, {
+                replacements: {
+                    id_course: dataObj.req.sanitize(dataObj.req.params.id)
+                },
+                dialectOptions: {
+                    multipleStatements: true
+                }
+            },
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Data Deleted Successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+
 
 
 module.exports = {
@@ -791,5 +1090,9 @@ module.exports = {
     fetchCourse,
 
     // Admin
+    editCourse,
+    addCourse,
+    updateMediaCourse,
+    deleteMedia
 
 }
