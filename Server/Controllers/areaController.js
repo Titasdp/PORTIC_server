@@ -686,7 +686,7 @@ const editArea = async (dataObj) => {
                 toClient: {
                     processResult: data[0],
                     processError: null,
-                    processMsg: "The media was updated successfully",
+                    processMsg: "The Area was updated successfully",
                 }
             }
 
