@@ -744,13 +744,14 @@ const editCourse = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE Area SET designation_pt=:designation_pt,designation_eng=:designation_eng, description_eng =:description_eng, description_pt =:description_pt Where Area.id_area=:id_area`, {
+            `UPDATE Course SET designation_pt=:designation_pt,designation_eng=:designation_eng, description_eng =:description_eng, description_pt =:description_pt Where Area.id_area=:id_area`, {
                 replacements: {
-                    id_area: dataObj.req.sanitize(dataObj.req.params.id_media),
-                    designation_pt: dataObj.req.sanitize(dataObj.req.body.title_eng),
-                    designation_eng: dataObj.req.sanitize(dataObj.req.body.title_pt),
-                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
-                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                    id_course: dataObj.req.sanitize(dataObj.req.params.id),
+                    designation: dataObj.req.sanitize(dataObj.req.body.designation),
+                    html_structure_eng: dataObj.req.sanitize(dataObj.req.body.html_structure_eng),
+                    html_structure_pt: dataObj.req.sanitize(dataObj.req.body.html_structure_pt),
+                    candidacy_link: dataObj.req.sanitize(dataObj.req.body.candidacy_link),
+                    pdf_url: dataObj.req.sanitize(dataObj.req.body.pdf_url),
                 }
             }, {
                 model: AreaModel.Area
