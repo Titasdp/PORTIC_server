@@ -663,6 +663,9 @@ const editArea = async (dataObj) => {
         return processResp
     }
 
+
+    console.log(dataObj.req.body);
+
     await sequelize
         .query(
             `UPDATE Area SET designation_pt=:designation_pt,designation_eng=:designation_eng, description_eng =:description_eng, description_pt =:description_pt Where Area.id_area=:id_area`, {
