@@ -528,6 +528,7 @@ router.put("/courses/:id", async (req, res) => {
 
 
 router.post("/courses", async (req, res) => {
+    console.log("here");
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
