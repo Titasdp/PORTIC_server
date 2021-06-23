@@ -9,6 +9,11 @@ const expressSanitizer = require("express-sanitizer");
 const router = require("../Server/Routes/routes")
 const fileUploader = require("express-fileupload");
 const cors = require("cors");
+var corsOptions = {
+    // origin: 'http://localhost:8080',
+    optionsSuccessStatus: 200, // For legacy browser support
+    methods: "GET, PUT,POST, PATCH,DELETE"
+}
 // app.use((req, res, next) => {
 //     res.header('Access-Control-Allow-Origin', '*');
 //     next();
@@ -23,7 +28,7 @@ app.use(express.json()); //Used to parse JSON bodies
 app.use(express.urlencoded({
     extended: true
 })); //Parse URL-encoded bodies
-app.use(cors())
+app.use(cors(corsOptions))
 // app.use(Blob)
 
 app.use(expressSanitizer());
