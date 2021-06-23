@@ -11,6 +11,9 @@ const sequelize = new Sequelize(
         define: {
 
         },
+        dialectOptions: {
+            multipleStatements: true
+        },
         pool: {
             max: 5,
             min: 0,
