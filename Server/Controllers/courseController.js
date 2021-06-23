@@ -719,7 +719,7 @@ const selectCourseRelatedProjects = async (id_course, lng) => {
 
 
 
-const fetchAllCourseByAmdin = async (dataObj) => {
+const fetchAllCourseByAdmin = async (dataObj) => {
     let processResp = {}
 
     if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
@@ -802,30 +802,6 @@ const fetchAllCourseByAmdin = async (dataObj) => {
     return processResp
 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -961,7 +937,7 @@ const editCourse = async (dataObj) => {
  * Patch  Couse status 
  * StatusCompleted
  */
-const updateMediaCourse = async (dataObj) => {
+const updateCourse = async (dataObj) => {
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
         processResult = {
@@ -1034,7 +1010,7 @@ const updateMediaCourse = async (dataObj) => {
  * StatusCompleted
  */
 
-const deleteMedia = async (dataObj) => {
+const deleteCourse = async (dataObj) => {
     let processResp = {}
     let query = `DELETE  FROM Course Where Course.id_course =:id_course;
     DELETE  FROM Project_course Where Project_course.id_course =:id_course;
@@ -1090,9 +1066,10 @@ module.exports = {
     fetchCourse,
 
     // Admin
+    fetchAllCourseByAdmin,
     editCourse,
     addCourse,
-    updateMediaCourse,
-    deleteMedia
+    updateCourse,
+    deleteCourse
 
 }
