@@ -247,6 +247,121 @@ const fetchAreaFocus = (req, callback) => {
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+const fetchAreaFocusByAdmin = async (dataObj) => {
+    let processResp = {}
+
+    let query = (dataObj.user_level === `Super Admin`) ? `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng ,Entity_Areas_focus.description_pt,Entity_Areas_focus.created_at, Picture.img_path as img, Entity.initials ,User.username from  
+    (((Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) INNER JOIN Entity on Entity.id_entity = Entity_Areas_focus.id_entity) INNER JOIN User ON User.id_user = Entity_Areas_focus.id_creator)` : `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng ,Entity_Areas_focus.description_pt,Entity_Areas_focus.created_at, Picture.img_path as img, Entity.initials ,User.username from  
+    (((Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) INNER JOIN Entity on Entity.id_entity = Entity_Areas_focus.id_entity) INNER JOIN User ON User.id_user = Entity_Areas_focus.id_creator) WHERE Entity.id_entity = :id_entity`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+            }
+        }, {
+            model: EntityAreasFocusModel.Entity_areas_focus
+        })
+        .then(async data => {
+            let areasFocus = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let areaFocusObj = {
+                        id_areas_focus: el.id_areas_focus,
+                        description_eng: el.description_eng,
+                        description_pt: el.description_pt,
+                        img: process.env.API_URL + el.img
+                    }
+                    areasFocus.push(areaFocusObj)
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: areasFocus,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+    return processResp
+};
+
+
+
+
+
+/**
+ * edit user profile fields present in  
+ * Status: Complete
+ */
+const editAreaFocus = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    await sequelize
+        .query(
+            `UPDATE Entity_Areas_focus SET description_eng=:description_eng,description_pt=:description_pt Where Entity_Areas_focus.id_areas_focus=:id_areas_focus`, {
+                replacements: {
+                    id_areas_focus: dataObj.req.sanitize(dataObj.req.params.id),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+
+                }
+            }, {
+                model: EntityAreasFocusModel.Entity_areas_focus
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The media was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
 
 
 
@@ -256,5 +371,9 @@ module.exports = {
     initAreaFocus,
     fetchAreaFocus,
     fetchAreaFocusByIdEntity,
+
+    // Admin 
+    fetchAreaFocusByAdmin,
+    editAreaFocus,
 
 }

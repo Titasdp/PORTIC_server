@@ -112,6 +112,9 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     social_medias: [],
                     img: process.env.API_URL + data[0][0].img
                 }
+                console.log(process.env.API_URL);
+
+                console.log(process.env.API_URL);
 
 
 
