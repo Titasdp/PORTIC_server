@@ -81,7 +81,7 @@ const initNews = async (dataObj) => {
     }
 
     let imgsInitResult = await pictureController.initAddMultipleImgs({
-        insertArray: [`/Images/NewsImgesGallery/labMister.jpg`, `/Images/NewsImgesGallery/labourTech.png`, `/Images/NewsImgesGallery/turismoNews.png`]
+        insertArray: [`/Images/NewsImagesGallery/labMister.jpg`, `/Images/NewsImagesGallery/labourTech.png`, `/Images/NewsImagesGallery/turismoNews.png`]
     })
 
     if (imgsInitResult.processRespCode === 500) {
