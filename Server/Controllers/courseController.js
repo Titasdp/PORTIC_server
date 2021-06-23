@@ -722,20 +722,10 @@ const selectCourseRelatedProjects = async (id_course, lng) => {
 const fetchAllCourseByAdmin = async (dataObj) => {
     let processResp = {}
 
-    if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
 
-        processResp = {
-            processRespCode: 400,
-            toClient: {
-                processResult: null,
-                processError: null,
-                processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
-            }
-        }
-        return processResp
-    }
 
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation  ,Entity.initials
+
+    let query = (dataObj.user_level === `Super Admin`) ? ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation  ,Entity.initials
     From (((Course Inner Join Data_Status on Data_Status.id_status = Course.id_status ) 
     INNER JOIN  User on User.id_user = Course.id_publisher)Inner join Entity on Entity.id_entity = Course.id_entity) ` : ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation  ,Entity.initials
     From (((Course Inner Join Data_Status on Data_Status.id_status = Course.id_status ) 
