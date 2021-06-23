@@ -870,7 +870,7 @@ const addCourse = async (dataObj) => {
  */
 const editCourse = async (dataObj) => {
     let processResp = {}
-    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.candidacy_link) || !dataObj.req.sanitize(dataObj.req.body.pdf_url)) {
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt)) {
         processResp = {
             processRespCode: 400,
             toClient: {
