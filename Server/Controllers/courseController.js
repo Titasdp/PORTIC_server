@@ -721,10 +721,6 @@ const selectCourseRelatedProjects = async (id_course, lng) => {
 
 const fetchAllCourseByAdmin = async (dataObj) => {
     let processResp = {}
-
-
-
-
     let query = (dataObj.user_level === `Super Admin`) ? ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation as data_status,Entity.initials
     From (((Course Inner Join Data_Status on Data_Status.id_status = Course.id_status ) 
     INNER JOIN  User on User.id_user = Course.id_publisher)Inner join Entity on Entity.id_entity = Course.id_entity) ` : ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation as data_status  ,Entity.initials
@@ -765,7 +761,6 @@ const fetchAllCourseByAdmin = async (dataObj) => {
                         recruitment_tags: recruitmentTags,
                         unity_tags: unityTags,
                     }
-
                     courses.push(courseObj)
                 }
             }
