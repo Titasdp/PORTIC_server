@@ -475,7 +475,7 @@ const updateAreaFocusPicture = async (dataObj) => {
             )
             .then(data => {
                 processResp = {
-                    processRespCode: 201,
+                    processRespCode: 200,
                     toClient: {
                         processResult: data[0],
                         processError: null,
@@ -532,7 +532,7 @@ const deleteAreaFocus = async (dataObj) => {
             )
             .then(data => {
                 processResp = {
-                    processRespCode: 201,
+                    processRespCode: 200,
                     toClient: {
                         processResult: data[0],
                         processError: null,

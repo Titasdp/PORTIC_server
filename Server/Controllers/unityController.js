@@ -739,7 +739,7 @@ const updateUnitPicture = async (dataObj) => {
             )
             .then(data => {
                 processResp = {
-                    processRespCode: 201,
+                    processRespCode: 200,
                     toClient: {
                         processResult: data[0],
                         processError: null,
@@ -787,17 +787,23 @@ const deleteUnit = async (dataObj) => {
     } else {
         await sequelize
             .query(
-                `DELETE FROM Unity Where Unity.id_unity=:id_unity `, {
+                `DELETE FROM Unity Where Unity.id_unity=:id_unity;
+                DELETE  FROM Course_unity Where Course_unity.id_unity =:id_unity;
+                DELETE  FROM Project_unity Where Project_unity.id_unity =:id_unity;
+                DELETE  FROM Recruitment_unity Where Recruitment_unity.id_unity =:id_unity;
+                DELETE  FROM Area_unity Where Area_unity.id_unity =:id_unity;
+                `, {
                     replacements: {
                         id_unity: dataObj.req.sanitize(dataObj.req.params.id)
+                    },
+                    dialectOptions: {
+                        multipleStatements: true
                     }
-                }, {
-                    model: UnityModel.Unity
-                }
+                },
             )
             .then(data => {
                 processResp = {
-                    processRespCode: 201,
+                    processRespCode: 200,
                     toClient: {
                         processResult: data[0],
                         processError: null,
