@@ -433,60 +433,6 @@ const fetchPicturePathById = async (id_picture) => {
 
 
 
-
-//!!!!!!!!!! May to del
-/**
- * Fetches Picture Path by id_picture
- * Status: Complete
- */
-const fetchPictureIdByPath = async (id_picture) => {
-    let processResp = {}
-    await sequelize
-        .query("SELECT Picture.id_picture FROM Picture where Picture.id_picture =:id_picture", {
-            replacements: {
-                id_picture: id_picture
-            }
-        }, {
-            model: PictureModel.Picture
-        })
-        .then(data => {
-            let respCode = 200;
-            let respMsg = "Fetched successfully."
-            if (data[0].length === 0) {
-                respCode = 204
-                respMsg = "Fetch process completed successfully, but there is no content."
-            }
-
-            processResp = {
-
-                processRespCode: respCode,
-                toClient: {
-                    processResult: ((!data[0][0].img_path) ? null : data[0][0].img_path),
-                    processError: null,
-                    processMsg: respMsg,
-                }
-            }
-
-        })
-        .catch(error => {
-            console.log(error);
-            processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
-
-        });
-
-    return processResp
-};
-
-
-
-
 const addPictureOnCreate = async (dataObj) => {
     if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
         processResp = {
@@ -525,10 +471,74 @@ const addPictureOnCreate = async (dataObj) => {
 
 
 
+const deletePictureInSystemById = async (dataObj) => {
+    let fetchResult = await fetchPicturePathById(dataObj.id_picture)
 
+    if (fetchResult.processRespCode === 500 || !fetchResult.toClient.processResult) {
+        return {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong.",
+            }
+        }
+    }
 
+    let oldPath = fetchResult.toClient.processResult
+    let idPicture = dataObj.id_picture
 
+    let deleteResult = await deleteFile({
+        oldPath: oldPath,
+        folder: dataObj.folder,
+        req: dataObj.req
+    })
 
+    if (deleteResult.processRespCode !== 200) {
+        return updateResult
+    } else {
+        let query = `DELETE FROM Picture where id_picture =:id_picture`
+        await sequelize
+            .query(query, {
+                replacements: {
+                    id_picture: idPicture
+                }
+            }, {
+                model: PictureModel.Picture
+            })
+            .then(async data => {
+
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "Picture updated Successfully",
+                    }
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: error,
+                        processMsg: "Something when wrong please try again later",
+                    }
+                }
+
+            });
+
+        return processResp
+    }
+}
+const deleteFile = async (dataObj) => {
+    let deleteResult = await fsPack.simpleFileDelete({
+        deletePath: dataObj.oldPath
+    })
+    return deleteResult
+}
 
 
 
@@ -550,5 +560,6 @@ module.exports = {
     fetchPictureInSystemById,
     //New
     updatePictureInSystemById,
-    addPictureOnCreate
+    addPictureOnCreate,
+    deletePictureInSystemById
 }

@@ -247,6 +247,11 @@ const fetchAreaFocus = (req, callback) => {
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+/**
+ *Add new area focus  
+ *Status:Completed
+ */
 const addAreaFocus = async (dataObj) => {
 
     let processResp = {}
@@ -264,7 +269,7 @@ const addAreaFocus = async (dataObj) => {
 
 
     let pictureUploadResult = await pictureController.addPictureOnCreate({
-        folder: `/Images/UserProfilePicture/Icons`,
+        folder: `/Images/Icons/`,
         req: dataObj.req
     })
     if (pictureUploadResult.processRespCode !== 201) {
@@ -310,14 +315,10 @@ const addAreaFocus = async (dataObj) => {
 }
 
 
-
-
-
-
-
-
-
-
+/**
+ *Fetch all area focus based on some admin data  
+ *Status:Completed
+ */
 const fetchAreaFocusByAdmin = async (dataObj) => {
     let processResp = {}
 
@@ -371,9 +372,6 @@ const fetchAreaFocusByAdmin = async (dataObj) => {
         });
     return processResp
 };
-
-
-
 
 
 /**
@@ -435,8 +433,11 @@ const editAreaFocus = async (dataObj) => {
 }
 
 
-
-const updateAreaFocusPicture = async (dataObject) => {
+/**
+ * Delete 
+ * Status:Completed
+ */
+const updateAreaFocusPicture = async (dataObj) => {
     let fetchResult = await fetchAreaFocusImgId(dataObj.req.sanitize(dataObj.req.params.id))
 
     if (fetchResult.processRespCode === 500) {
@@ -450,7 +451,6 @@ const updateAreaFocusPicture = async (dataObject) => {
 
 
     if (uploadResult.processRespCode !== 201) {
-        console.log(uploadResult);
         return uploadResult
     } else {
         await sequelize
@@ -469,10 +469,6 @@ const updateAreaFocusPicture = async (dataObject) => {
                     processRespCode: 201,
                     toClient: {
                         processResult: data[0],
-                        // {
-                        //     // pt_answer: "Perfil actualizado com sucesso!",
-                        //     // en_answer: "Profile updated Successfully"
-                        // },
                         processError: null,
                         processMsg: "The brand was updated successfully",
                     }
@@ -499,7 +495,60 @@ const updateAreaFocusPicture = async (dataObject) => {
 
 
 
+const deleteAreaFocus = async (dataObj) => {
+    let fetchResult = await fetchAreaFocusImgId(dataObj.req.sanitize(dataObj.req.params.id))
 
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let deleteResult = await pictureController.deletePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Images/Icons/`
+    })
+
+
+    if (deleteResult.processRespCode !== 200) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `DELETE FROM Entity_Areas_focus Where Entity_Areas_focus.id_areas_focus=:id_areas_focus `, {
+                    replacements: {
+                        id_areas_focus: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: EntityAreasFocusModel.Entity_areas_focus
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 201,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+
+
+}
 
 
 //*Complement
@@ -569,6 +618,7 @@ module.exports = {
     fetchAreaFocusByAdmin,
     editAreaFocus,
     addAreaFocus,
-    updateAreaFocusPicture
+    updateAreaFocusPicture,
+    deleteAreaFocus
 
 }

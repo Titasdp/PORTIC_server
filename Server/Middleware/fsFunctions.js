@@ -377,8 +377,12 @@ const simpleFileUpload = async (dataObj) => {
  * Simple file Upload
  * */
 const simpleFileDelete = async (dataObj) => {
+
+    let pathToDelete = `${process.cwd()}/Server` + dataObj.deletePath
+
+    console.log(pathToDelete);
     let processResp = {}
-    let fileExist = await simplifyCheckFileExistence(dataObj.deletePath)
+    let fileExist = await simplifyCheckFileExistence(pathToDelete)
     if (!fileExist) {
         processResp = {
             processRespCode: 500,
@@ -391,7 +395,7 @@ const simpleFileDelete = async (dataObj) => {
         return processResp
     } else {
         return await new Promise(async (resolve) => {
-            await fs.unlink(dataObj.deletePath, function (err) {
+            await fs.unlink(pathToDelete, function (err) {
                 if (err) {
                     processResp = {
                         processRespCode: 500,

@@ -812,7 +812,7 @@ router.post("/areas/focus", async (req, res) => {
 
 
 
-router.patch("/users/:id/profile/status", async (req, res) => {
+router.patch("/areas/focus/:id/icon", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     console.log(tokenResult);
     if (tokenResult.processRespCode !== 200) {
@@ -828,17 +828,17 @@ router.patch("/users/:id/profile/status", async (req, res) => {
 
 
 
-// router.delete("/areas/focus/:id", async (req, res) => {
-//     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
-//     if (tokenResult.processRespCode !== 200) {
-//         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
-//     } else {
-//         let fetchResult = await areaController.deleteArea({
-//             req: req,
-//         })
-//         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
-//     }
-// })
+router.delete("/areas/focus/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaFocusController.deleteAreaFocus({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
 
 
 
