@@ -247,6 +247,77 @@ const fetchAreaFocus = (req, callback) => {
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+const addAreaFocus = async (dataObj) => {
+
+    let processResp = {}
+    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+
+    let pictureUploadResult = await pictureController.addPictureOnCreate({
+        folder: `/Images/UserProfilePicture/Icons`,
+        req: dataObj.req
+    })
+    if (pictureUploadResult.processRespCode !== 201) {
+        console.log("here");
+        return pictureUploadResult
+    }
+
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_AreaFocus'), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idUser, dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId, ],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Entity_Areas_focus(id_areas_focus,description_pt,description_eng,id_creator,id_entity,id_icon) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: EntityAreasFocusModel.Entity_areas_focus
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+
+
+
+
+
+
+
+
+
 const fetchAreaFocusByAdmin = async (dataObj) => {
     let processResp = {}
 
@@ -256,7 +327,7 @@ const fetchAreaFocusByAdmin = async (dataObj) => {
     await sequelize
         .query(query, {
             replacements: {
-                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+                id_entity: dataObj.id_entity
             }
         }, {
             model: EntityAreasFocusModel.Entity_areas_focus
@@ -365,6 +436,128 @@ const editAreaFocus = async (dataObj) => {
 
 
 
+const updateAreaFocusPicture = async (dataObject) => {
+    let fetchResult = await fetchAreaFocusImgId(dataObj.req.sanitize(dataObj.req.params.id))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let uploadResult = await pictureController.updatePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Images/Icons/`
+    })
+
+
+    if (uploadResult.processRespCode !== 201) {
+        console.log(uploadResult);
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `UPDATE User SET Entity_Areas_focus.id_icon =:id_icon  Where Entity_Areas_focus.id_areas_focus=:id_areas_focus `, {
+                    replacements: {
+                        id_icon: uploadResult.toClient.processResult.generatedId,
+                        id_areas_focus: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: EntityAreasFocusModel.Entity_areas_focus
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 201,
+                    toClient: {
+                        processResult: data[0],
+                        // {
+                        //     // pt_answer: "Perfil actualizado com sucesso!",
+                        //     // en_answer: "Profile updated Successfully"
+                        // },
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+
+
+}
+
+
+
+
+
+
+//*Complement
+/**
+ * Fetches user data based on his username 
+ * Status: Complete
+ */
+const fetchAreaFocusImgId = async (id_areas_focus) => {
+    let processResp = {}
+    await sequelize
+        .query(`select id_icon From Entity_Areas_focus where Entity_Areas_focus.id_areas_focus =:id_areas_focus;`, {
+            replacements: {
+                id_areas_focus: id_areas_focus
+            }
+        }, {
+            model: EntityAreasFocusModel.Entity_areas_focus
+        })
+        .then(data => {
+            console.log(data);
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            // console.log(data[0].id_picture);
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: ((!data[0][0].id_icon) ? null : data[0][0].id_icon),
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+
 
 
 module.exports = {
@@ -375,5 +568,7 @@ module.exports = {
     // Admin 
     fetchAreaFocusByAdmin,
     editAreaFocus,
+    addAreaFocus,
+    updateAreaFocusPicture
 
 }

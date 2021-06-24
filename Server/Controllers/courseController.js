@@ -7,6 +7,8 @@ const CourseUnityModel = require("../Models/CourseUnity") // done
 const ProjectCourseModel = require("../Models/ProjectCourse") //
 const RecruitmentCourseModel = require("../Models/RecruitmentCourse") // 
 
+const dataStatusController = require("../Controllers/dataStatusController")
+
 const confTableFilled = async () => {
     let respCode = null
     await sequelize
@@ -923,7 +925,7 @@ const editCourse = async (dataObj) => {
  * Patch  Couse status 
  * StatusCompleted
  */
-const updateCourse = async (dataObj) => {
+const updateStatusCourse = async (dataObj) => {
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
         processResult = {
@@ -1055,7 +1057,7 @@ module.exports = {
     fetchAllCourseByAdmin,
     editCourse,
     addCourse,
-    updateCourse,
+    updateStatusCourse,
     deleteCourse
 
 }

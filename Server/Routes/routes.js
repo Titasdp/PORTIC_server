@@ -549,7 +549,7 @@ router.patch("/courses/:id/status", async (req, res) => {
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
     } else {
-        let fetchResult = await courseController.updateCourse({
+        let fetchResult = await courseController.updateStatusCourse({
             req: req,
         })
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
@@ -768,6 +768,79 @@ router.get("/:lng/entities/:id/area_focus", async (req, res) => {
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 
 })
+
+
+router.get("/areas/focus", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaFocusController.fetchAreaFocusByAdmin(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.put("/areas/focus/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaFocusController.editAreaFocus({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.post("/areas/focus", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await areaFocusController.addAreaFocus({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+
+router.patch("/users/:id/profile/status", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await areaFocusController.updateAreaFocusPicture({
+            req: req,
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+
+
+// router.delete("/areas/focus/:id", async (req, res) => {
+//     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+//     if (tokenResult.processRespCode !== 200) {
+//         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+//     } else {
+//         let fetchResult = await areaController.deleteArea({
+//             req: req,
+//         })
+//         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+//     }
+// })
+
+
 
 //*Area Models >
 
