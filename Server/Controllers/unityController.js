@@ -518,7 +518,7 @@ const addUnit = async (dataObj) => {
     }
 
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Unit'), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idUser],
+        [uniqueIdPack.generateRandomId('_Unit'), dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idUser],
     ]
     await sequelize
         .query(
@@ -567,7 +567,7 @@ const addUnit = async (dataObj) => {
  * @param {Object} dataObject 
  * @param {*} callback 
  */
-const fetchUnitByAdmin = async (dataObj) => {
+const fetchUnitsByAdmin = async (dataObj) => {
     let processResp = {}
     let query = (dataObj.user_level === `Super Admin`) ? `Select Unity.id_unity,Unity.designation, Unity.description_eng, Unity.description_pt,Unity.created_at, Picture.img_path as img, Entity.initials ,User.username ,Data_Status.designation as data_status
     from  ((((Unity INNER JOIN Picture ON Picture.id_picture = Unity.id_photo) 
@@ -596,10 +596,10 @@ const fetchUnitByAdmin = async (dataObj) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let projectTags = await selectUnityRelatedProjects(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng));
-                    let courseTags = await selectUnityRelatedCourses(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let recruitmentTags = await selectUnityRelatedRecruitment(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let areaTags = await selectUnityRelatedAreas(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let projectTags = await selectUnityRelatedProjects(el.id_unity, "pt");
+                    let courseTags = await selectUnityRelatedCourses(el.id_unity, "pt")
+                    let recruitmentTags = await selectUnityRelatedRecruitment(el.id_unity, "pt")
+                    let areaTags = await selectUnityRelatedAreas(el.id_unity, "pt")
                     let unityObj = {
                         id_unity: el.id_unity,
                         designation: el.designation,
@@ -877,6 +877,81 @@ const fetchUnitImgId = async (id_unity) => {
 
 
 
+/**
+ * Patch  Media status 
+ * StatusCompleted
+ */
+const updateUnitStatus = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    let fetchResult = await dataStatusController.fetchDataStatusIdByDesignation(dataObj.req.sanitize(dataObj.req.body.new_status))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Unity SET Unity.id_status =:id_status  Where Unity.id_unity=:id_unity `, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult[0].id_status,
+                    id_unity: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: UnityModel.Unity
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
+                    processError: null,
+                    processMsg: "The brand was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
 
 
 
@@ -885,6 +960,14 @@ const fetchUnitImgId = async (id_unity) => {
 module.exports = {
     initUnity,
     fetchAllUnities,
-    fetchEntityUnityByIdEntity
+    fetchEntityUnityByIdEntity,
+
+    // Admin 
+    fetchUnitsByAdmin,
+    deleteUnit,
+    addUnit,
+    updateUnitPicture,
+    editUnit,
+    updateUnitStatus
 
 }
