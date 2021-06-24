@@ -755,6 +755,7 @@ const fetchAllCourseByAdmin = async (dataObj) => {
                         html_structure_pt: el.html_structure_pt,
                         candidacy_link: el.candidacy_link,
                         pdf_url: el.pdf_url,
+                        created_at: el.created_at,
                         entity_initials: el.initials,
                         data_status: el.data_status,
                         creator: el.username,

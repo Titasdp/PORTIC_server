@@ -253,6 +253,13 @@ const fetchAreaFocus = (req, callback) => {
  *Status:Completed
  */
 const addAreaFocus = async (dataObj) => {
+    console.log("Body:");
+    console.log(dataObj.req.body);
+    console.log("files Pack:");
+    console.log(dataObj.req.files);
+    console.log("img:");
+    console.log(dataObj.req.files.file);
+
 
     let processResp = {}
     if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng)) {
@@ -345,7 +352,10 @@ const fetchAreaFocusByAdmin = async (dataObj) => {
                         id_areas_focus: el.id_areas_focus,
                         description_eng: el.description_eng,
                         description_pt: el.description_pt,
-                        img: process.env.API_URL + el.img
+                        created_at: el.created_at,
+                        img: process.env.API_URL + el.img,
+                        entity_initials: el.initials,
+                        creator: el.username,
                     }
                     areasFocus.push(areaFocusObj)
                 }
@@ -400,7 +410,6 @@ const editAreaFocus = async (dataObj) => {
                     id_areas_focus: dataObj.req.sanitize(dataObj.req.params.id),
                     description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
                     description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
-
                 }
             }, {
                 model: EntityAreasFocusModel.Entity_areas_focus
@@ -455,7 +464,7 @@ const updateAreaFocusPicture = async (dataObj) => {
     } else {
         await sequelize
             .query(
-                `UPDATE User SET Entity_Areas_focus.id_icon =:id_icon  Where Entity_Areas_focus.id_areas_focus=:id_areas_focus `, {
+                `UPDATE Entity_Areas_focus SET Entity_Areas_focus.id_icon =:id_icon  Where Entity_Areas_focus.id_areas_focus=:id_areas_focus `, {
                     replacements: {
                         id_icon: uploadResult.toClient.processResult.generatedId,
                         id_areas_focus: dataObj.req.sanitize(dataObj.req.params.id)

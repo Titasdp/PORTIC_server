@@ -8,7 +8,13 @@ const AreaUnityModel = require("../Models/AreaUnity") // done
 const CourseUnityModel = require("../Models/CourseUnity") // done
 const ProjectUnityModel = require("../Models/ProjectUnity")
 const RecruitmentUnityModel = require("../Models/RecruitmentUnity") // 
+
+
+//Aux Controller 
 const pictureController = require("../Controllers/pictureController")
+const dataStatusController = require("../Controllers/dataStatusController")
+
+
 // Env
 require("dotenv").config();
 // dfkjdsj
@@ -463,6 +469,411 @@ const selectUnityRelatedProjects = async (id_unity, lng) => {
     return processResp.toClient.processResult
 
 }
+
+
+
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/**
+ *Add new area focus  
+ *Status:Completed
+ */
+const addUnit = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+
+    let dataStatusFetchResult = (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+
+
+    let pictureUploadResult = await pictureController.addPictureOnCreate({
+        folder: `/Images/UnitiesGalley/`,
+        req: dataObj.req
+    })
+    if (pictureUploadResult.processRespCode !== 201) {
+        console.log("here");
+        return pictureUploadResult
+    }
+
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_Unit'), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idUser],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Unity (id_unity,designation,description_pt,description_eng,id_entity,id_photo,id_status, id_creator) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: UnityModel.Unity
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+
+/**
+ *Fetch all area focus based on some admin data  
+ *Status:Completed
+ */
+
+//!
+
+/**
+ * 
+ * @param {Object} dataObject 
+ * @param {*} callback 
+ */
+const fetchUnitByAdmin = async (dataObj) => {
+    let processResp = {}
+    let query = (dataObj.user_level === `Super Admin`) ? `Select Unity.id_unity,Unity.designation, Unity.description_eng, Unity.description_pt,Unity.created_at, Picture.img_path as img, Entity.initials ,User.username ,Data_Status.designation as data_status
+    from  ((((Unity INNER JOIN Picture ON Picture.id_picture = Unity.id_photo) 
+    INNER JOIN Entity on Entity.id_entity = Unity.id_entity) 
+    INNER JOIN User ON User.id_user = Unity.id_creator)
+    INNER JOIN Data_Status on Data_Status.id_status = Unity.id_status);` : `Select Unity.id_unity,Unity.designation, Unity.description_eng, Unity.description_pt,Unity.created_at, Picture.img_path as img, Entity.initials ,User.username, Data_Status.designation as data_status
+    from  ((((Unity INNER JOIN Picture ON Picture.id_picture = Unity.id_photo) 
+    INNER JOIN Entity on Entity.id_entity = Unity.id_entity) 
+    INNER JOIN User ON User.id_user = Unity.id_creator)
+    INNER JOIN Data_Status on Data_Status.id_status = Unity.id_status) Where Entity.id_entity =:id_entity`
+
+
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.id_entity
+            }
+        }, {
+            model: UnityModel.Unity
+        })
+        .then(async data => {
+            let unities = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let projectTags = await selectUnityRelatedProjects(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng));
+                    let courseTags = await selectUnityRelatedCourses(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let recruitmentTags = await selectUnityRelatedRecruitment(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let areaTags = await selectUnityRelatedAreas(el.id_unity, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let unityObj = {
+                        id_unity: el.id_unity,
+                        designation: el.designation,
+                        description_pt: el.description_pt,
+                        description_eng: el.description_eng,
+                        entity_initials: el.initials,
+                        data_status: el.data_status,
+                        creator: el.username,
+                        created_at: el.created_at,
+                        img: process.env.API_URL + el.img,
+                        course_tags: courseTags,
+                        project_tags: projectTags,
+                        recruitment_tags: recruitmentTags,
+                        area_tags: areaTags,
+                    }
+                    unities.push(unityObj)
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: unities,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+};
+
+
+//!
+
+/**
+ * edit unit information
+ * Status: Complete
+ */
+const editUnit = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    await sequelize
+        .query(
+            `UPDATE Unity SET designation=:designation,description_eng=:description_eng,description_pt=:description_pt Where Unity.id_unity=:id_unity`, {
+                replacements: {
+                    id_unity: dataObj.req.sanitize(dataObj.req.params.id),
+                    designation: dataObj.req.sanitize(dataObj.req.body.designation),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                }
+            }, {
+                model: UnityModel.Unity
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The media was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+/**
+ * Delete 
+ * Status:Completed
+ */
+const updateUnitPicture = async (dataObj) => {
+    let fetchResult = await fetchUnitImgId(dataObj.req.sanitize(dataObj.req.params.id))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let uploadResult = await pictureController.updatePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Images/UnitiesGalley/`
+    })
+
+
+    if (uploadResult.processRespCode !== 201) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `UPDATE Unity SET Unity.id_photo =:id_photo Where Unity.id_unity=:id_unity `, {
+                    replacements: {
+                        id_photo: uploadResult.toClient.processResult.generatedId,
+                        id_unity: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: UnityModel.Unity
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 201,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+}
+
+
+/**
+ *Delete Unit 
+ *Status completed
+ */
+const deleteUnit = async (dataObj) => {
+    let fetchResult = await fetchUnitImgId(dataObj.req.sanitize(dataObj.req.params.id))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let deleteResult = await pictureController.deletePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Images/UnitiesGalley/`
+    })
+
+
+    if (deleteResult.processRespCode !== 200) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `DELETE FROM Unity Where Unity.id_unity=:id_unity `, {
+                    replacements: {
+                        id_unity: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: UnityModel.Unity
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 201,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+
+
+}
+
+
+//*Complement
+/**
+ * Fetches Unit img based on unit id
+ * Status: Complete
+ */
+const fetchUnitImgId = async (id_unity) => {
+    let processResp = {}
+    await sequelize
+        .query(`select id_photo From Unity where Unity.id_unity =:id_unity;`, {
+            replacements: {
+                id_unity: id_unity
+            }
+        }, {
+            model: UnityModel.Unity
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            // console.log(data[0].id_picture);
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: ((!data[0][0].id_photo) ? null : data[0][0].id_photo),
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
 
 
 
