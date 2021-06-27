@@ -958,7 +958,7 @@ router.get("/:lng/entities/:id/news", async (req, res) => {
 })
 
 
-router.get("/:lng/news", async (req, res) => {
+router.get("/pt/news", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
