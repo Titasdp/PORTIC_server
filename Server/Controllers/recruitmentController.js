@@ -820,10 +820,11 @@ DELETE FROM Recruitment_unity where id_available_position =:id_available_positio
             query, {
                 replacements: {
                     id_available_position: dataObj.req.sanitize(dataObj.req.params.id)
-                }
-            }, {
-                model: AvailablePositionModel.Available_position
-            }
+                },
+                dialectOptions: {
+                    multipleStatements: true
+                },
+            },
         )
         .then(data => {
             processResp = {

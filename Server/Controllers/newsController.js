@@ -7,8 +7,12 @@ const fsPack = require("../Middleware/fsFunctions")
 
 //Controllers
 const pictureController = require("../Controllers/pictureController")
+const dataStatusController = require("../Controllers/dataStatusController")
 //Models
-const ProjectNewsModel = require("../Models/NewsProject")
+const ProjectNewsModel = require("../Models/NewsProject");
+const {
+    Available_position
+} = require("../Models/AvailablePosition");
 
 
 // Env
@@ -268,9 +272,640 @@ const selectProjectNews = async (id_news, lng) => {
 }
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Admin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-"soemnfdsa"
+
+/**
+ * Fetch News and related projects
+ * StatusCompleted
+ */
+
+const fetchNewsByAdmin = async (dataObj) => {
+    let query = (dataObj.user_level === `Super Admin`) ? `Select News.id_news,News.title_eng,News.title_pt, News.description_eng ,News.description_pt,News.published_date,News.project_only ,News.created_at, Picture.img_path as img, Entity.initials ,User.username, Data_Status.designation as data_status from  
+    ((((News INNER JOIN Picture ON Picture.id_picture = News.id_picture) 
+    INNER JOIN Entity on Entity.id_entity = News.id_entity) 
+    INNER JOIN User ON User.id_user = News.id_publisher)
+    INNER JOIN  Data_Status on Data_Status.id_status = News.id_status ) ;` : `Select News.id_news,News.title_eng,News.title_pt, News.description_eng ,News.description_pt,News.published_date,News.project_only ,News.created_at, Picture.img_path as img, Entity.initials ,User.username,  Data_Status.designation as data_status from  
+    ((((News INNER JOIN Picture ON Picture.id_picture = News.id_picture) 
+    INNER JOIN Entity on Entity.id_entity = News.id_entity)
+    INNER JOIN  Data_Status on Data_Status.id_status = News.id_status ) 
+    INNER JOIN User ON User.id_user = News.id_publisher) Where Entity.id_entity =:id_entity;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.id_entity
+            }
+        }, {
+            model: NewsModel.News
+        })
+        .then(async data => {
+            let project = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let projectTags = await fetchNewsRelatedProject(el.id_news)
+                    // let cover = await fsPack.simplifyFileFetch(el.img_path)
+                    let projectObj = {
+                        id_news: el.id_news,
+                        title_eng: el.title_eng,
+                        title_pt: el.title_pt,
+                        description_eng: el.description_eng,
+                        description_pt: el.description_pt,
+                        published_date: el.published_date,
+                        project_show_only: ((el.project_only === 0) ? false : true),
+                        writer: el.full_name,
+                        entity_initials: el.initials,
+                        data_status: el.data_status,
+                        creator: el.username,
+                        cover: process.env.API_URL + el.img,
+                        project_tags: ((projectTags.processRespCode === 200) ? projectTags.toClient.processResult : []),
+                    }
+                    project.push(projectObj)
+
+                }
+            }
+
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: project,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+
+
+
+
+/**
+ *Add News
+ *Status:Completed
+ */
+const addProjectNews = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.published_date)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+
+    let pictureUploadResult = await pictureController.addPictureOnCreate({
+        folder: `/Images/NewsImagesGallery/`,
+        req: dataObj.req
+    })
+    if (pictureUploadResult.processRespCode !== 201) {
+        return pictureUploadResult
+    }
+
+    let dataStatusFetchResult = await (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+    let newNewsid = uniqueIdPack.generateRandomId('_News')
+
+    let insertArray = [
+        [newNewsid, dataObj.req.sanitize(dataObj.req.body.title_pt), dataObj.req.sanitize(dataObj.req.body.title_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.req.sanitize(dataObj.req.body.published_date), dataObj.idEntity, dataObj.idUser, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO News(id_news,title_pt,title_eng,description_pt,description_eng,published_date,published_date,id_entity,id_publisher,id_picture,id_status) VALUES  ${insertArray.map(element => '(?)').join(',')};
+            INSERT INTO Project_news(id_project, id_news) VALUES (:id_project,:id_news);
+            `, {
+                replacements: {
+                    insertArray: insertArray,
+                    id_project: dataObj.req.sanitize(dataObj.req.params.id),
+                    id_news: dataObj.req.sanitize(newNewsid)
+                },
+                dialectOptions: {
+                    multipleStatements: true
+                }
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+/**
+ *Add News
+ *Status:Completed
+ */
+const addEntityNews = async (dataObj) => {
+
+    let processResp = {}
+    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.published_date)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+
+    let pictureUploadResult = await pictureController.addPictureOnCreate({
+        folder: `/Images/NewsImagesGallery/`,
+        req: dataObj.req
+    })
+    if (pictureUploadResult.processRespCode !== 201) {
+        return pictureUploadResult
+    }
+
+    let dataStatusFetchResult = await (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_News'), dataObj.req.sanitize(dataObj.req.body.title_pt), dataObj.req.sanitize(dataObj.req.body.title_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.req.sanitize(dataObj.req.body.published_date), dataObj.idEntity, dataObj.idUser, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO News(id_news,title_pt,title_eng,description_pt,description_eng,published_date,id_entity,id_publisher,id_picture,id_status) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: NewsModel.News
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+
+
+
+/**
+ * edit News  
+ * Status: Complete
+ */
+const editNews = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.published_date) || !dataObj.req.sanitize(dataObj.req.body.project_only)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+    await sequelize
+        .query(
+            `UPDATE News SET title_pt=:title_pt,title_eng=:title_eng,description_pt=:description_pt,description_eng=:description_eng,published_date=:published_date,project_only=:project_only, Where News.id_news=:id_news`, {
+                replacements: {
+                    id_news: dataObj.req.sanitize(dataObj.req.params.id),
+                    title_pt: dataObj.req.sanitize(dataObj.req.body.title_pt),
+                    title_eng: dataObj.req.sanitize(dataObj.req.body.title_eng),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                    published_date: dataObj.req.sanitize(dataObj.req.body.published_date),
+                    project_only: dataObj.req.sanitize(dataObj.req.body.project_only)
+                }
+            }, {
+                model: NewsModel.News
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "All data successfully  updated.",
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+/**
+ * Delete news  
+ * Status: Complete
+ */
+const deleteNews = async (dataObj) => {
+    let fetchResult = await fetchNewsImgId(dataObj.req.sanitize(dataObj.req.params.id))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+
+
+    let deleteResult = {}
+    if (fetchResult.toClient.processResult) {
+        deleteResult = await pictureController.deletePictureInSystemById({
+            req: dataObj.req,
+            id_picture: fetchResult.toClient.processResult,
+            folder: `/Images/NewsImagesGallery/`
+        })
+    }
+    if (deleteResult.processRespCode !== 200) {
+        return deleteResult
+    } else {
+        await sequelize
+            .query(
+                `DELETE FROM News Where News.id_news=:id_news;
+                DELETE FROM Project_news Where Project_news.id_news=:id_news;
+                `, {
+                    replacements: {
+                        id_news: dataObj.req.sanitize(dataObj.req.params.id)
+                    },
+                    dialectOptions: {
+                        multipleStatements: true
+                    }
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "Dta deleted Sucessfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+
+
+}
+
+
+/**
+ * Delete 
+ * Status:Completed
+ */
+const updateNewsPicture = async (dataObj) => {
+    let fetchResult = await fetchNewsImgId(dataObj.req.sanitize(dataObj.req.params.id))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let uploadResult = await pictureController.updatePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Images/NewsImagesGallery/`
+    })
+
+    if (uploadResult.processRespCode !== 201) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `UPDATE News SET News.id_picture =:id_picture  Where News.id_news=:id_news`, {
+                    replacements: {
+                        id_picture: uploadResult.toClient.processResult.generatedId,
+                        id_news: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: NewsModel.News
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+        return processResp
+    }
+}
+
+
+
+/**
+ * Patch  Couse status 
+ * StatusCompleted
+ */
+const updateStatusNews = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+    let fetchResult = await dataStatusController.fetchDataStatusIdByDesignation(dataObj.req.sanitize(dataObj.req.body.new_status))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE News SET News.id_status =:id_status Where News.id_news=:id_news`, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult[0].id_status,
+                    id_news: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: NewsModel.News
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The news status was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+
+
+
+
+//*Complement
+/**
+ * Fetches user data based on his username 
+ * Status: Complete
+ */
+const fetchNewsImgId = async (id_news) => {
+    let processResp = {}
+    await sequelize
+        .query(`select id_picture from News where News.id_news =:id_news;`, {
+            replacements: {
+                id_news: id_news
+            }
+        }, {
+            model: NewsModel.News
+        })
+        .then(data => {
+            console.log(data);
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            // console.log(data[0][0].id_picture);
+            // console.log(data[0].id_picture);
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: ((!data[0][0].id_picture) ? null : data[0][0].id_picture),
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+/**
+ * Fetches all News related project
+ * Status: Complete
+ */
+const fetchNewsRelatedProject = async (id_news) => {
+    let processResp = {}
+    let query = `Select Project.id_project,Project.initials from ((Project_news inner Join Project on Project.id_project = Project_news.id_news) 
+    inner Join News on News.id_news =Project_news.id_news )  Where News.id_news =:id_news;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_news: id_news
+            }
+        }, {
+            model: ProjectNewsModel.Project_news
+        })
+        .then(data => {
+            console.log(data);
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            // console.log(data[0].id_picture);
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+
 
 module.exports = {
     initNews,
-    fetchEntityNewsByIdEntity
+    fetchEntityNewsByIdEntity,
+    //Admin 
+    fetchNewsByAdmin,
+    addProjectNews,
+    addEntityNews,
+    editNews,
+    deleteNews,
+    updateNewsPicture,
+    updateStatusNews
 }

@@ -956,6 +956,107 @@ router.get("/:lng/entities/:id/news", async (req, res) => {
     })
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
+
+
+router.get("/pt/news", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await newsController.fetchNewsByAdmin(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+
+router.put("/pt/news/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await newsController.editNews({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.post("/pt/news", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await newsController.addEntityNews({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+
+router.patch("/pt/news/:id/picture", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await newsController.updateNewsPicture({
+            req: req,
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+router.patch("/pt/news/:id/status", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await newsController.updateStatusNews({
+            req: req,
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+
+router.delete("/pt/news/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await newsController.deleteNews({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // *News model  >
 
 

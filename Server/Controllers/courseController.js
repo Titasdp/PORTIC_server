@@ -965,13 +965,9 @@ const updateStatusCourse = async (dataObj) => {
         )
         .then(data => {
             processResp = {
-                processRespCode: 201,
+                processRespCode: 200,
                 toClient: {
                     processResult: data[0],
-                    // {
-                    //     // pt_answer: "Perfil actualizado com sucesso!",
-                    //     // en_answer: "Profile updated Successfully"
-                    // },
                     processError: null,
                     processMsg: "The brand was updated successfully",
                 }
