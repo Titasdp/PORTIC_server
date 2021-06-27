@@ -267,11 +267,10 @@ const selectProjectNews = async (id_news, lng) => {
     return processResp
 }
 
-
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Admin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 "soemnfdsa"
 
 module.exports = {
     initNews,
     fetchEntityNewsByIdEntity
-
 }

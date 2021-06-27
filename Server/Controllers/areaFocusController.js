@@ -253,13 +253,6 @@ const fetchAreaFocus = (req, callback) => {
  *Status:Completed
  */
 const addAreaFocus = async (dataObj) => {
-    // console.log("Body:");
-    // console.log(dataObj.req.body);
-    // console.log("files Pack:");
-    // console.log(dataObj.req.files);
-    // console.log("img:");
-    // console.log(dataObj.req.files.file);
-
 
     let processResp = {}
     if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng)) {

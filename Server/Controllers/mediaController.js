@@ -226,15 +226,13 @@ const fetchAllMedia = async (dataObj) => {
 
 
 
+
 /**
  * edit user profile fields present in  
  * Status: Complete
  */
 const editMedia = async (dataObj) => {
     let processResp = {}
-
-
-
     if (!dataObj.req.sanitize(dataObj.req.body.title_eng) || !dataObj.req.sanitize(dataObj.req.body.title_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.appearance_case) || !dataObj.req.sanitize(dataObj.req.body.youtube_path)) {
         processResult = {
             processRespCode: 400,

@@ -300,7 +300,7 @@ const initAvailablePosition = async (dataObj) => {
                 [randomIds[1], secondCatId],
                 [randomIds[1], thirdCatId],
             ]
-            let result = await recruitmentCategoryController.addRecruitmentCategory({
+            let result = await recruitmentCategoryController.initAddRecruitmentCategory({
                 insertArray: insertArray,
                 exist: false
             })
@@ -586,6 +586,277 @@ const selectAvailablePositionRelatedProjects = async (id_available_position, lng
 
 
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Admin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+/**
+ * Add Area   
+ * StatusCompleted
+ */
+const addAvailable = async (dataObj) => {
+    let processResp = {}
+    if (dataObj.idUser === null || dataObj.idEntity === null || !dataObj.req.sanitize(dataObj.req.body.designation_pt) || !dataObj.req.sanitize(dataObj.req.body.designation_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_AvailablePos'), dataObj.req.sanitize(dataObj.req.body.designation_pt), dataObj.req.sanitize(dataObj.req.body.designation_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), ((!dataObj.req.sanitize(dataObj.req.body.pdf_path)) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path)), ((!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? null : dataObj.req.sanitize(dataObj.req.body.candidacy_link)), dataObj.idUser, dataObj.idEntity],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,pdf_path,candidacy_link,id_publisher,id_entity) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: AvailablePositionModel.Available_position
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+/**
+ *Fetches Available Positions based in an admin level
+ Status: Completed
+ */
+const fetchAvailablePositionByAdmin = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
+
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
+            }
+        }
+        return processResp
+
+    }
+
+    let query = await (dataObj.user_level === `Super Admin`) ? `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, User.username 
+    FROM ((Available_position INNER JOIN User on User.id_user = Available_position.id_publisher)
+    INNER JOIN Entity On Entity.id_entity = Available_position.id_entity);` : `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, User.username 
+    FROM ((Available_position INNER JOIN User on User.id_user = Available_position.id_publisher)
+    INNER JOIN Entity On Entity.id_entity = Available_position.id_entity) Where Available_position.id_entity = :id_entiy;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+            }
+        }, {
+            model: AvailablePositionModel.Available_position
+        })
+        .then(async data => {
+            let availablePositions = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let categories = await categoryController.fetchCategoryByIdAvailablePosition(el.id_available_position)
+                    let projectTags = await selectAvailablePositionRelatedProjects(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng));
+                    let courseTags = await selectAvailablePositionRelatedCourse(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let areaTags = await selectAvailablePositionRelatedArea(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let unityTags = await selectAvailablePositionRelatedUnity(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
+
+                    let positionObj = {
+                        id_available_position: el.id_available_position,
+                        designation: el.designation,
+                        description: el.description,
+                        desc_html_structure: el.desc_html_structure,
+                        pdf_path: el.pdf_path,
+                        candidacy_link: el.candidacy_link,
+                        created_at: el.created_at,
+                        entity_initials: el.initials,
+                        creator: el.username,
+                        course_tags: courseTags,
+                        project_tags: projectTags,
+                        area_tags: areaTags,
+                        unity_tags: unityTags,
+                        categories: categories
+                    }
+
+                    availablePositions.push(positionObj)
+                }
+            }
+
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: availablePositions,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+};
+
+/**
+ * edit user profile fields present in  
+ * Status: Complete
+ */
+const editAvailablePosition = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.designation_pt) || !dataObj.req.sanitize(dataObj.req.body.designation_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    await sequelize
+        .query(
+            `UPDATE Media SET designation_pt=:designation_pt,designation_eng=:designation_eng, desc_html_structure_pt =:desc_html_structure_pt, desc_html_structure_eng =:desc_html_structure_eng, pdf_path=:pdf_path,candidacy_link=:candidacy_link  Where Available_position.id_available_position=:id_available_position`, {
+                replacements: {
+                    id_available_position: dataObj.req.sanitize(dataObj.req.params.id),
+                    designation_pt: dataObj.req.sanitize(dataObj.req.body.designation_pt),
+                    designation_eng: dataObj.req.sanitize(dataObj.req.body.designation_eng),
+                    desc_html_structure_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    desc_html_structure_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                    pdf_path: (!dataObj.req.body.pdf_path) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path),
+                    candidacy_link: (!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? null : dataObj.req.sanitize(dataObj.req.body.candidacy_link),
+                }
+            }, {
+                model: AvailablePositionModel.Available_position
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The media was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+/**
+ * Delete Media  
+ * StatusCompleted
+ */
+const deleteAvailablePosition = async (dataObj) => {
+    let processResp = {}
+    let query = `
+    DELETE FROM Available_position Where id_available_position=:id_available_position;
+DELETE FROM Recruitment_category where id_available_position =:id_available_position;
+DELETE FROM Project_recruitment where id_available_position =:id_available_position;
+DELETE FROM Recruitment_area where id_available_position =:id_available_position;
+DELETE FROM Recruitment_course where id_available_position =:id_available_position;
+DELETE FROM Recruitment_unity where id_available_position =:id_available_position;
+ `
+    await sequelize
+        .query(
+            query, {
+                replacements: {
+                    id_available_position: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: AvailablePositionModel.Available_position
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Data Deleted Successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+
+
+
 
 
 
@@ -600,5 +871,10 @@ const selectAvailablePositionRelatedProjects = async (id_available_position, lng
 module.exports = {
     fetchAvailablePositionByIdEntity,
     initAvailablePosition,
-    fetchAvailablePositions
+    fetchAvailablePositions,
+    // 
+    addAvailable,
+    deleteAvailablePosition,
+    editAvailablePosition,
+    fetchAvailablePositionByAdmin
 }

@@ -137,17 +137,9 @@ const fetchCategoryIdByDesignation = async (designation) => {
  * Function that adds a new category to the database
  * *Done
  */
-addCategory = (dataObj, callback) => {
-    if (dataObj.exist) {
-        return callback(true, processResp = {
-            processRespCode: 409,
-            toClient: {
-                processResult: null,
-                processError: null,
-                processMsg: "There is already and category with that description!",
-            }
-        })
-    }
+const addCategory = (dataObj) => {
+    let processResp = {}
+
     let insertArray = [
         [uniqueIdPack.generateRandomId('_Category'), dataObj.newCatDesignation],
     ]
