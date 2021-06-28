@@ -312,6 +312,23 @@ const confirmIsImg = async (fileMimeType) => {
     }
 }
 
+
+
+
+/**
+ * confirms if the file sended by the client is from the image.
+ * @param {String} fileMimeType Contains the file type
+ * @returns True or false
+ */
+const confirmIsPdf = async (fileMimeType) => {
+    console.log(fileMimeType);
+    if (fileMimeType.includes('image/')) {
+        return true
+    } else {
+        return false
+    }
+}
+
 /**
  * Confirms if there is a file in a expecific path 
  * @param {String} imgPath The path where file is stored in the Server
@@ -338,9 +355,7 @@ const simplifyCheckFileExistence = async (imgPath) => {
 const simpleFileUpload = async (dataObj) => {
     let processResp = {}
     let generatedPath = dataObj.folder + uniqueIdPack.generateRandomId('_') + dataObj.req.sanitize(dataObj.req.files.file.name)
-
     let uploadPath = `${process.cwd()}/Server` + generatedPath
-
     return await new Promise(async (resolve) => {
         await dataObj.req.files.file.mv(uploadPath, function (err) {
             if (err) {
@@ -440,5 +455,6 @@ module.exports = {
 
     // Confirmations
     simplifyCheckFileExistence,
-    confirmIsImg
+    confirmIsImg,
+    confirmIsPdf
 }

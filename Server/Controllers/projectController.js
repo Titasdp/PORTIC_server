@@ -26,6 +26,7 @@ const projectTeamController = require("../Controllers/projectTeamController")
 const pictureController = require("../Controllers/pictureController")
 
 
+
 // .Env
 require("dotenv").config();
 
@@ -789,6 +790,141 @@ const selectProjectTeam = async (id_project) => {
     return processResp
 
 }
+
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Admin !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/**
+ *Add News
+ *Status:Completed
+ */
+const addProject = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+    let pdfUploadResult = await pictureController.addPictureOnCreate(dataObj)
+    if (pdfUploadResult.processRespCode !== 200) {
+        return pictureUploadResult
+    }
+
+    let dataStatusFetchResult = await (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+    let randomId = uniqueIdPack.generateRandomId('_Project')
+    let insertArray = [
+        [randomId, dataObj.req.sanitize(dataObj.req.body.title), dataObj.req.sanitize(dataObj.req.body.initials), dataObj.req.sanitize(dataObj.req.body.reference), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.start_date), dataObj.req.sanitize(dataObj.req.body.end_date), pdfUploadResult.toClient.processResult, dataObj.idEntity, dataObj.idUser, dataStatusFetchResult.toClient.processResult[0].id_status],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Project(id_project,title,initials,reference,desc_html_structure_eng,desc_html_structure_pt,start_date,end_date,project_contact,project_email,pdf_path,id_leader_entity,id_creator,id_status) VALUES  ${insertArray.map(element => '(?)').join(',')};
+            INSERT INTO Project_team(id_project, id_team_member,can_edit) VALUES (:id_project,:id_team_member, 1) ;
+            `, {
+                replacements: {
+                    insertArray: insertArray,
+                    id_team_member: dataObj.idUser,
+                    id_project: randomId,
+                },
+
+                dialectOptions: {
+                    multipleStatements: true
+                }
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+
+
+const addProjectPdf = async (dataObj) => {
+    if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "There must be a pdf file attach to the request.",
+            }
+        }
+        return processResp
+    }
+
+    if (dataObj.req.files.file === null) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "There must be a pdf file attach to the request.",
+            }
+        }
+        return processResp
+    }
+    console.log(dataObj.req.files.file.mimetype);
+
+    if (!await fsPack.confirmIsImg(dataObj.req.sanitize(dataObj.req.files.file.mimetype))) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "The file attached must be an pdf file.",
+            }
+        }
+        return processResp
+    } else {
+        let fileUploadResult = await fsPack.simpleFileUpload({
+            req: dataObj.req,
+            folder: `/Assets/`
+        })
+        return fileUploadResult
+    }
+}
+
+
+
+
+
+
 
 
 

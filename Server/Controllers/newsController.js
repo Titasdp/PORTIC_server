@@ -546,7 +546,7 @@ const editNews = async (dataObj) => {
     }
     await sequelize
         .query(
-            `UPDATE News SET title_pt=:title_pt,title_eng=:title_eng,description_pt=:description_pt,description_eng=:description_eng,published_date=:published_date,project_only=:project_only, Where News.id_news=:id_news`, {
+            `UPDATE News SET title_pt=:title_pt,title_eng=:title_eng,description_pt=:description_pt,description_eng=:description_eng,published_date=:published_date,project_only=:project_only Where News.id_news=:id_news`, {
                 replacements: {
                     id_news: dataObj.req.sanitize(dataObj.req.params.id),
                     title_pt: dataObj.req.sanitize(dataObj.req.body.title_pt),
