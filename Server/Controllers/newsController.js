@@ -658,6 +658,14 @@ const deleteNews = async (dataObj) => {
 const updateNewsPicture = async (dataObj) => {
     let fetchResult = await fetchNewsImgId(dataObj.req.sanitize(dataObj.req.params.id))
 
+    console.log("files:");
+    console.log(dataObj.req.files);
+    console.log("body:");
+    console.log(dataObj.req.body);
+
+
+    console.log("Img fetch id result:");
+    console.log(fetchResult);
     if (fetchResult.processRespCode === 500) {
         return fetchResult
     }
