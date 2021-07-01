@@ -26,6 +26,8 @@ const areaFocusController = require("../Controllers/areaFocusController")
 const projectController = require("../Controllers/projectController")
 const newsController = require("../Controllers/newsController")
 //
+const outsideInvestorController = require("../Controllers/outsideInvestorController")
+const projectTeamController = require("../Controllers/projectTeamController")
 
 //
 const areaController = require("../Controllers/areaController")
@@ -35,7 +37,7 @@ const recruitmentController = require("../Controllers/recruitmentController")
 const unityController = require("../Controllers/unityController")
 
 //
-const pictureController = require("../Controllers/pictureController")
+
 //
 const entityController = require("../Controllers/entityController");
 
@@ -48,6 +50,9 @@ let tokenPack = require("../Middleware/tokenFunctions");
 const {
     url
 } = require("inspector");
+const {
+    Outside_investor
+} = require("../Models/OutsideInvestor");
 
 
 
@@ -677,14 +682,6 @@ router.delete("/media/:id", async (req, res) => {
 
 
 //*Media Routes>
-
-
-
-
-
-
-
-
 //*<Available_position routes
 
 router.get("/:lng/entities/:id/available_positions", async (req, res) => {
@@ -693,6 +690,61 @@ router.get("/:lng/entities/:id/available_positions", async (req, res) => {
     })
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
+
+
+//Admin 
+router.get("/positions", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await recruitmentController.fetchAvailablePositionByAdmin(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.put("/positions/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await recruitmentController.editAvailablePosition({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.post("/positions", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await recruitmentController.addAvailable({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.delete("/positions/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await recruitmentController.deleteAvailablePosition({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
 //*Available_position routes>
 
 //*<Unit routes
@@ -944,7 +996,188 @@ router.get("/:lng/entities/:id/projects", async (req, res) => {
     })
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
+// *Admin
 
+
+
+router.get("/projects", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectController.fetchProjectByAdminAndDev(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.post("/projects", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectController.addProject({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+router.patch("/projects/:id/file", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await projectController.updatePdf({
+            req: req,
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+router.put("/projects/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await projectController.editProject({
+            req: req,
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+router.patch("/projects/:id/status", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await projectController.updateStatusProject({
+            req: req,
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+
+router.post("/projects/:id/pictures", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectController.addProjectGalleryImage({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+router.delete("/projects/:id/pictures/:id_picture", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectController.deleteProjectGalleryImage({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+router.post("/projects/:id/investors", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await outsideInvestorController.addProjectOutsideInvestor({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.delete("/projects/:id/investors/:id_outside_investor", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await outsideInvestorController.deleteProjectInvestor({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+router.post("/projects/:id/news", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await newsController.addProjectNews({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+router.post("/projects/:id/members", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectTeamController.addProjectMember({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+router.patch("/projects/:id/members/:id_team_member", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectTeamController.updateMemberEditionStatus({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+router.delete("/projects/:id/members/:id_team_member", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectTeamController.deleteTeamMember({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
 
 //* Project Models>
 

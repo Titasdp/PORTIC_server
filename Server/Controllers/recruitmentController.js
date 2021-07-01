@@ -39,15 +39,6 @@ const confTableFilled = async () => {
 };
 
 
-
-
-
-
-
-
-
-
-
 /**
  * TODO 
  * @param {Object} dataObject 
@@ -66,10 +57,9 @@ const fetchAvailablePositionByIdEntity = async (dataObj) => {
             }
         }
         return processResp
-
     }
 
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT Available_position.id_available_position, Available_position.designation_pt as designation, Available_position.desc_html_structure_pt as desc_html_structure, Available_position.pdf_path, Available_position.candidacy_link FROM Available_position WHERE Available_position.id_entity =:id_entity` : `SELECT Available_position.id_available_position, Available_position.designation_eng as designation, Available_position.desc_html_structure_eng as desc_html_structure, Available_position.pdf_path, Available_position.candidacy_link FROM Available_position WHERE  Available_position.id_entity = :id_entity;`
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT Available_position.id_available_position, Available_position.designation_pt as designation, Available_position.desc_html_structure_pt as desc_html_structure, Available_position.pdf_path, Available_position.candidacy_link, Available_position.category_1,Available_position.category_2,Available_position.category_3 FROM Available_position WHERE Available_position.id_entity =:id_entity; ` : `SELECT Available_position.id_available_position, Available_position.designation_eng as designation, Available_position.desc_html_structure_eng as desc_html_structure, Available_position.pdf_path, Available_position.candidacy_link,Available_position.category_1,Available_position.category_2,Available_position.category_3 FROM Available_position WHERE  Available_position.id_entity = :id_entity;`
     await sequelize
         .query(query, {
             replacements: {
@@ -86,7 +76,8 @@ const fetchAvailablePositionByIdEntity = async (dataObj) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let categories = await categoryController.fetchCategoryByIdAvailablePosition(el.id_available_position)
+                    console.log(el);
+                    let categories = [el.category_1, el.category_2, el.category_3]
                     let projectTags = await selectAvailablePositionRelatedProjects(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng));
                     let courseTags = await selectAvailablePositionRelatedCourse(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
                     let areaTags = await selectAvailablePositionRelatedArea(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
@@ -247,7 +238,7 @@ const initAvailablePosition = async (dataObj) => {
         <br>
         <br>
         <span wfd-id="424">Candidates can send an email with a brief CV, motivation statement identifying the area and foreseen research topics, to jobs@portic.ipp.pt, no later than March 28th, 2021, for support with the application process.</span>
-        </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idUser, dataObj.idEntity],
+        </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idUser, dataObj.idEntity, `cybersecurity`, ` Digital Systems for Health and Telehealth`, null],
 
 
         [randomIds[1], `Scholarships`, `Scholarships`, `<p>
@@ -268,11 +259,11 @@ const initAvailablePosition = async (dataObj) => {
          </ul>
          <br>
          Information about these positions will be made available soon. If wanting to ask for more information, or send a spontaneous application, contact at <a href="mailto:jobs@portic.ipp.pt" target="_blank">jobs@portic.ipp.pt</a>.
-         </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idUser, dataObj.idEntity]
+         </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idUser, dataObj.idEntity, `Health Technologies`, ` Digital Systems for Health and Telehealth`, null]
     ]
     await sequelize
         .query(
-            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,candidacy_link,id_publisher,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,candidacy_link,id_publisher,id_entity,category_1,category_2,category_3) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: AvailablePositionModel.Available_position
@@ -285,32 +276,32 @@ const initAvailablePosition = async (dataObj) => {
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: "All data Where created successfully",
+                    processMsg: "All data Where created successfully.",
                 }
             }
 
 
-            let firstCatId = (await categoryController.fetchCategoryIdByDesignation("Digital Systems for Health and Telehealth")).toClient.processResult[0].id_category
-            let secondCatId = (await categoryController.fetchCategoryIdByDesignation("Cibersecurity")).toClient.processResult[0].id_category
-            let thirdCatId = (await categoryController.fetchCategoryIdByDesignation("Health Technologies")).toClient.processResult[0].id_category
-            console.log(firstCatId);
-            let insertArray = await [
-                [randomIds[0], firstCatId],
-                [randomIds[0], secondCatId],
-                [randomIds[1], secondCatId],
-                [randomIds[1], thirdCatId],
-            ]
-            let result = await recruitmentCategoryController.initAddRecruitmentCategory({
-                insertArray: insertArray,
-                exist: false
-            })
+            // let firstCatId = (await categoryController.fetchCategoryIdByDesignation("Digital Systems for Health and Telehealth")).toClient.processResult[0].id_category
+            // let secondCatId = (await categoryController.fetchCategoryIdByDesignation("Cibersecurity")).toClient.processResult[0].id_category
+            // let thirdCatId = (await categoryController.fetchCategoryIdByDesignation("Health Technologies")).toClient.processResult[0].id_category
+            // console.log(firstCatId);
+            // let insertArray = await [
+            //     [randomIds[0], firstCatId],
+            //     [randomIds[0], secondCatId],
+            //     [randomIds[1], secondCatId],
+            //     [randomIds[1], thirdCatId],
+            // ]
+            // let result = await recruitmentCategoryController.initAddRecruitmentCategory({
+            //     insertArray: insertArray,
+            //     exist: false
+            // })
 
-            if (result.processRespCode !== 201) {
-                processResp.toClient.processMsg += ` ,except the available positions categories.`
+            // if (result.processRespCode !== 201) {
+            //     processResp.toClient.processMsg += ` ,except the available positions categories.`
 
-            } else {
-                processResp.toClient.processMsg += `.`
-            }
+            // } else {
+            //     processResp.toClient.processMsg += `.`
+            // }
         })
         .catch(error => {
             console.log(error);
@@ -608,11 +599,11 @@ const addAvailable = async (dataObj) => {
         return processResp
     }
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_AvailablePos'), dataObj.req.sanitize(dataObj.req.body.designation_pt), dataObj.req.sanitize(dataObj.req.body.designation_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), ((!dataObj.req.sanitize(dataObj.req.body.pdf_path)) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path)), ((!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? null : dataObj.req.sanitize(dataObj.req.body.candidacy_link)), dataObj.idUser, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_AvailablePos'), dataObj.req.sanitize(dataObj.req.body.designation_pt), dataObj.req.sanitize(dataObj.req.body.designation_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), ((!dataObj.req.sanitize(dataObj.req.body.pdf_path)) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path)), ((!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? null : dataObj.req.sanitize(dataObj.req.body.candidacy_link)), dataObj.idUser, dataObj.idEntity, ((!dataObj.req.sanitize(dataObj.req.body.category_1)) ? null : dataObj.req.sanitize(dataObj.req.body.category_1)), ((!dataObj.req.sanitize(dataObj.req.body.category_2)) ? null : dataObj.req.sanitize(dataObj.req.body.category_2)), ((!dataObj.req.sanitize(dataObj.req.body.category_3)) ? null : dataObj.req.sanitize(dataObj.req.body.category_3))],
     ]
     await sequelize
         .query(
-            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,pdf_path,candidacy_link,id_publisher,id_entity) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,pdf_path,candidacy_link,id_publisher,id_entity,category_1,category_2,category_3) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: AvailablePositionModel.Available_position
@@ -650,29 +641,15 @@ const addAvailable = async (dataObj) => {
  */
 const fetchAvailablePositionByAdmin = async (dataObj) => {
     let processResp = {}
-    if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
-
-        processResp = {
-            processRespCode: 400,
-            toClient: {
-                processResult: null,
-                processError: null,
-                processMsg: "Something went wrong, the client is not sending all needed components to complete the request.",
-            }
-        }
-        return processResp
-
-    }
-
-    let query = await (dataObj.user_level === `Super Admin`) ? `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, User.username 
+    let query = await (dataObj.user_level === `Super Admin`) ? `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, User.username, Available_position.category_1,Available_position.category_2,Available_position.category_3 
     FROM ((Available_position INNER JOIN User on User.id_user = Available_position.id_publisher)
     INNER JOIN Entity On Entity.id_entity = Available_position.id_entity);` : `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, User.username 
     FROM ((Available_position INNER JOIN User on User.id_user = Available_position.id_publisher)
-    INNER JOIN Entity On Entity.id_entity = Available_position.id_entity) Where Available_position.id_entity = :id_entiy;`
+    INNER JOIN Entity On Entity.id_entity = Available_position.id_entity) Where Available_position.id_entity = :id_entity;`
     await sequelize
         .query(query, {
             replacements: {
-                id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+                id_entity: dataObj.id_entity
             }
         }, {
             model: AvailablePositionModel.Available_position
@@ -685,16 +662,18 @@ const fetchAvailablePositionByAdmin = async (dataObj) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    let categories = await categoryController.fetchCategoryByIdAvailablePosition(el.id_available_position)
-                    let projectTags = await selectAvailablePositionRelatedProjects(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng));
-                    let courseTags = await selectAvailablePositionRelatedCourse(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let areaTags = await selectAvailablePositionRelatedArea(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let unityTags = await selectAvailablePositionRelatedUnity(el.id_available_position, dataObj.req.sanitize(dataObj.req.params.lng))
+                    let categories = [el.category_1, el.category_2, el.category_3]
+                    let projectTags = await selectAvailablePositionRelatedProjects(el.id_available_position, "pt");
+                    let courseTags = await selectAvailablePositionRelatedCourse(el.id_available_position, "pt")
+                    let areaTags = await selectAvailablePositionRelatedArea(el.id_available_position, "pt")
+                    let unityTags = await selectAvailablePositionRelatedUnity(el.id_available_position, "pt")
 
                     let positionObj = {
                         id_available_position: el.id_available_position,
-                        designation: el.designation,
-                        description: el.description,
+                        designation_pt: el.designation_pt,
+                        description_pt: el.description_pt,
+                        designation_eng: el.designation_eng,
+                        description_eng: el.description_eng,
                         desc_html_structure: el.desc_html_structure,
                         pdf_path: el.pdf_path,
                         candidacy_link: el.candidacy_link,
@@ -760,11 +739,14 @@ const editAvailablePosition = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE Media SET designation_pt=:designation_pt,designation_eng=:designation_eng, desc_html_structure_pt =:desc_html_structure_pt, desc_html_structure_eng =:desc_html_structure_eng, pdf_path=:pdf_path,candidacy_link=:candidacy_link  Where Available_position.id_available_position=:id_available_position`, {
+            `UPDATE Available_position SET designation_pt=:designation_pt,designation_eng=:designation_eng, desc_html_structure_pt =:desc_html_structure_pt, desc_html_structure_eng =:desc_html_structure_eng, pdf_path=:pdf_path,candidacy_link=:candidacy_link  Where Available_position.id_available_position=:id_available_position`, {
                 replacements: {
                     id_available_position: dataObj.req.sanitize(dataObj.req.params.id),
                     designation_pt: dataObj.req.sanitize(dataObj.req.body.designation_pt),
                     designation_eng: dataObj.req.sanitize(dataObj.req.body.designation_eng),
+                    category_1: dataObj.req.sanitize(dataObj.req.body.category_1),
+                    category_2: dataObj.req.sanitize(dataObj.req.body.category_2),
+                    category_3: dataObj.req.sanitize(dataObj.req.body.category_3),
                     desc_html_structure_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
                     desc_html_structure_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
                     pdf_path: (!dataObj.req.body.pdf_path) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path),
@@ -780,7 +762,7 @@ const editAvailablePosition = async (dataObj) => {
                 toClient: {
                     processResult: data[0],
                     processError: null,
-                    processMsg: "The media was updated successfully",
+                    processMsg: "The position was updated successfully",
                 }
             }
 

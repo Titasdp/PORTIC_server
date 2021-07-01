@@ -1,8 +1,14 @@
 //main model
 const OutsideInvestorModel = require("../Models/OutsideInvestor")
 
+
+//Controllers 
+const pictureController = require("../Controllers/pictureController")
+
+
 //Database Connection 
 const sequelize = require("../Database/connection")
+//Middleware 
 const uniqueIdPack = require("../Middleware/uniqueId")
 
 
@@ -185,7 +191,203 @@ const fetchProjectOutsideInvestor = async (id_project) => {
     return processResp
 }
 
+
+
+
+/**
+ * Add Investor to the investor table
+ * Status:Completed
+ */
+const addProjectOutsideInvestor = async (dataObj) => {
+    if (!dataObj.idUser || !dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.investor_name)) {
+
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request.",
+            }
+        }
+        return processResp
+    }
+
+
+    let pictureUploadResult = null
+    if (dataObj.req.files || Object.keys(dataObj.req.files).length !== 0) {
+        pictureUploadResult = await pictureController.addPictureOnCreate({
+            folder: `/Images/Logos/`,
+            req: dataObj.req
+        })
+        if (pictureUploadResult.processRespCode !== 201) {
+            return pictureUploadResult
+        }
+    }
+
+
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_OutsideInvestor'), dataObj.req.sanitize(dataObj.req.body.investor_name), pictureUploadResult.toClient.processResult.generatedId, dataObj.idUser, dataObj.req.sanitize(dataObj.req.params.id)],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Outside_investor (id_investor,designation,id_logo,id_publisher,id_project) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: OutsideInvestorModel.Outside_investor
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processSuccess: null,
+                    processError: null,
+                    processMsg: "Something went wrong while trying to init outsideInvestor.",
+                }
+            }
+
+        });
+
+    return processResp
+}
+
+
+
+
+/**
+ * Add Investor to the investor table
+ * Status:Completed
+ */
+const deleteProjectInvestor = async (dataObj) => {
+    let fetchResult = await fetchOutsideInvestorLogo(dataObj.req.sanitize(dataObj.req.params.id_outside_investor))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let deleteResult = {}
+    if (fetchResult.toClient.processResult) {
+        deleteResult = await pictureController.deletePictureInSystemById({
+            req: dataObj.req,
+            id_picture: fetchResult.toClient.processResult,
+            folder: `/Images/Logos/`
+        })
+
+        if (deleteResult.processRespCode !== 200) {
+            return deleteResult
+        }
+    }
+
+    await sequelize
+        .query(
+            `DELETE FROM Outside_investor Where Outside_investor.id_investor=:id_investor and Outside_investor.id_project =:id_project;`, {
+                replacements: {
+                    id_investor: dataObj.req.sanitize(dataObj.req.params.id_outside_investor),
+                    id_project: dataObj.req.sanitize(dataObj.req.params.id),
+                },
+                dialectOptions: {
+                    multipleStatements: true
+                }
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Investor deleted successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+
+
+//*Complement
+/**
+ * Fetches user data based on his username 
+ * Status: Complete
+ */
+const fetchOutsideInvestorLogo = async (id_investor) => {
+    let processResp = {}
+    await sequelize
+        .query(`select id_logo from Outside_investor where Outside_investor.id_investor =:id_investor;`, {
+            replacements: {
+                id_investor: id_investor
+            }
+        }, {
+            model: OutsideInvestorModel.Outside_investor
+        })
+        .then(data => {
+            console.log(data);
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: ((!data[0][0].id_logo) ? null : data[0][0].id_logo),
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
 module.exports = {
     initOutsideInvestors,
-    fetchProjectOutsideInvestor
+    fetchProjectOutsideInvestor,
+
+    // Admin ,
+    addProjectOutsideInvestor,
+    deleteProjectInvestor,
 }

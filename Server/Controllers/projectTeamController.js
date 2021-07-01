@@ -111,6 +111,258 @@ const initProjectTeam = async (dataObj) => {
     return processResp
 }
 
+
+
+
+
+
+
+
+
+
+
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Admin !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+const addProjectMember = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.id_team_member) || !dataObj.req.sanitize(dataObj.req.body.can_edit)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    let fetchResult = await confirmConnectionProjectToUser(dataObj.req.sanitize(dataObj.req.params.id), dataObj.req.sanitize(dataObj.req.body.id_team_member))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    } else if (fetchResult.processRespCode === 200) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "The user is already connected to the project.",
+            }
+        }
+        return processResp
+    }
+    let insertArray = [
+        [dataObj.req.sanitize(dataObj.req.body.id_team_member), dataObj.req.sanitize(dataObj.req.params.id), dataObj.req.sanitize(dataObj.req.body.can_edit)],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Project_team (id_team_member,id_project,can_edit) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: ProjectTeamModel.Project_team
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processSuccess: null,
+                    processError: null,
+                    processMsg: "Something went wrong while trying to init outsideInvestor.",
+                }
+            }
+
+        });
+
+    return processResp
+}
+
+
+
+const deleteTeamMember = async (dataObj) => {
+    let processResp = {}
+    let query = `DELETE FROM Project_team Where Project_team.id_team_member =:id_team_member and Project_team.id_project =:id_project;`
+    await sequelize
+        .query(
+            query, {
+                replacements: {
+                    id_project: dataObj.req.sanitize(dataObj.req.params.id),
+                    id_team_member: dataObj.req.sanitize(dataObj.req.params.id_team_member)
+                },
+                dialectOptions: {
+                    multipleStatements: true
+                }
+            },
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Data deleted Successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+/**
+ * Patch  project member edition status 
+ * StatusCompleted
+ */
+const updateMemberEditionStatus = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.can_edit)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete!!"
+            }
+        }
+        return processResult
+    }
+    await sequelize
+        .query(
+            `UPDATE Project_team SET Project_team.can_edit =:can_edit Where Project_team.id_project=:id_project and Project_team.id_team_member=:id_team_member`, {
+                replacements: {
+                    can_edit: (isNaN(dataObj.req.sanitize(dataObj.req.body.can_edit))) ? dataObj.req.sanitize(dataObj.req.body.can_edit) : 0,
+                    id_project: dataObj.req.sanitize(dataObj.req.params.id),
+                    id_team_member: dataObj.req.sanitize(dataObj.req.params.id_team_member)
+                }
+            }, {
+                model: ProjectTeamModel.Project_team
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The user possibility of editing the project has changed.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+//*Complement
+/**
+ * Fetches team and user connection based on ids
+ * Status: Complete
+ */
+const confirmConnectionProjectToUser = async (id_project, id_team_member) => {
+    let processResp = {}
+    await sequelize
+        .query(`Select * from Project_team Where id_project =:id_project and id_team_member = :id_team_member;`, {
+            replacements: {
+                id_project: id_project,
+                id_team_member: id_team_member,
+            }
+        }, {
+            model: ProjectTeamModel.Project_team
+        })
+        .then(data => {
+
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            console.log();
+            if (data[0].length === 0) {
+                console.log("here");
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
-    initProjectTeam
+    initProjectTeam,
+
+
+    //admin 
+    addProjectMember,
+    deleteTeamMember,
+    updateMemberEditionStatus
 }

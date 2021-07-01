@@ -24,6 +24,7 @@ const outsideInvestorController = require("../Controllers/outsideInvestorControl
 const insideInvestorController = require("../Controllers/insideInvestorController")
 const projectTeamController = require("../Controllers/projectTeamController")
 const pictureController = require("../Controllers/pictureController")
+const dataStatusController = require("../Controllers/dataStatusController")
 
 
 
@@ -79,12 +80,12 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                     let courseTags = await selectProjectRelatedCourse(el.id_project, dataObj.req.sanitize(dataObj.req.params.lng))
                     let recruitmentTags = await selectProjectRelatedRecruitment(el.id_project, dataObj.req.sanitize(dataObj.req.params.lng))
                     let unityTags = await selectProjectRelatedUnity(el.id_project, dataObj.req.sanitize(dataObj.req.params.lng))
-                    let insideInvestors = await selectProjectInsideInvestor(el.id_project)
+                    // let insideInvestors = await selectProjectInsideInvestor(el.id_project)
                     let outsideInvestors = await outsideInvestorController.fetchProjectOutsideInvestor(el.id_project)
                     let news = await selectProjectNews(el.id_project, dataObj.req.sanitize(dataObj.req.params.lng))
                     let galleryImgs = await selectProjectGallery(el.id_project)
                     let projectTeam = await selectProjectTeam(el.id_project)
-                    let pdf = await fsPack.simplifyFileFetch(el.pdf_path)
+                    // let pdf = await fsPack.simplifyFileFetch(el.pdf_path)
 
                     let projectObj = {
                         id_project: el.id_project,
@@ -95,7 +96,8 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                         end_date: el.end_date,
                         project_contact: el.project_contact,
                         project_email: el.project_email,
-                        inside_investors: ((insideInvestors.processRespCode === 200) ? insideInvestors.toClient.processResult : []),
+                        pdf_path: process.env.API_URL + el.pdf_path,
+                        // inside_investors: ((insideInvestors.processRespCode === 200) ? insideInvestors.toClient.processResult : []),
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
                         news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
                         gallery_imgs: ((galleryImgs.processRespCode === 200) ? galleryImgs.toClient.processResult : []),
@@ -104,7 +106,7 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                         area_tags: areaTags,
                         recruitment_tags: recruitmentTags,
                         unity_tags: unityTags,
-                        project_sheet: await (pdf.processRespCode === 200) ? pdf.toClient.processResult : [],
+                        // project_sheet: await (pdf.processRespCode === 200) ? pdf.toClient.processResult : [],
 
                     }
                     project.push(projectObj)
@@ -625,14 +627,13 @@ const selectProjectNews = async (id_project, lng) => {
 
 
                 for (const el of data[0]) {
-                    let cover = await fsPack.simplifyFileFetch(el.img_path)
                     let newsObj = {
                         id_news: el.id_news,
                         title: el.title,
                         description: el.description,
                         published_date: el.published_date,
                         id_news: el.id_news,
-                        cover: ((cover.processRespCode === 200) ? cover.toClient.processResult : []),
+                        cover: el.img_path,
                     }
                     newsArray.push(newsObj)
                 }
@@ -690,10 +691,10 @@ const selectProjectGallery = async (id_project) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
                 for (const el of data[0]) {
-                    // let imgFetch = await fsPack.simplifyFileFetch(el.img_path)
-                    // if (imgFetch.processRespCode === 200) {
-                    galleryArray.push(process.env.API_URL + el.img_path)
-                    // }
+                    galleryArray.push({
+                        id_picture: el.id_picture,
+                        img: process.env.API_URL + el.img_path
+                    })
                 }
             }
             processResp = {
@@ -759,8 +760,7 @@ const selectProjectTeam = async (id_project) => {
                     }
 
                     if (el.id_picture === null) {
-                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
-                        teamMemberObj.picture = process.env.API_URL + el.img_path + fetchImgResult.toClient.processResult
+                        teamMemberObj.picture = process.env.API_URL + el.id_picture
                     }
                     teamMemberArray.push(teamMemberObj)
                 }
@@ -795,12 +795,144 @@ const selectProjectTeam = async (id_project) => {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Admin !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /**
+ * 
+ * @param {Object} dataObject 
+ * @param {*} callback 
+ */
+const fetchProjectByAdminAndDev = async (dataObj) => {
+    let processResp = {}
+
+    let query = (dataObj.user_level === `Super Admin`) ? `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials
+    From (((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
+    INNER JOIN  User on User.id_user = Project.id_creator)
+    Inner join Entity on Entity.id_entity = Project.id_leader_entity);` : ((dataObj.user_level === `Entity Admin`) ? `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials
+        From (((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
+        INNER JOIN  User on User.id_user = Project.id_creator)
+        Inner join Entity on Entity.id_entity = Project.id_leader_entity)  Where Entity.id_entity =  :id_entity;` : `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials
+        From ((((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
+        INNER JOIN  User on User.id_user = Project.id_creator)
+        Inner join Entity on Entity.id_entity = Project.id_leader_entity)
+        INNER JOIN Project_team on Project_team.id_project = Project.id_project)  
+        Where Project_team.id_team_member = :id_user or Project.id_creator = :id_user and Project_team.can_edit =1;`)
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.id_entity
+            }
+        }, {
+            model: ProjectModel.Project
+        })
+        .then(async data => {
+            let project = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let areaTags = await selectProjectRelatedArea(el.id_project, "pt");
+                    let courseTags = await selectProjectRelatedCourse(el.id_project, "pt")
+                    let recruitmentTags = await selectProjectRelatedRecruitment(el.id_project, "pt")
+                    let unityTags = await selectProjectRelatedUnity(el.id_project, "pt")
+                    // let insideInvestors = await selectProjectInsideInvestor(el.id_project)
+                    let outsideInvestors = await outsideInvestorController.fetchProjectOutsideInvestor(el.id_project)
+                    let news = await fetchProjectNewsByAdmin(el.id_project)
+                    let galleryImgs = await selectProjectGallery(el.id_project)
+                    let projectTeam = await selectProjectTeam(el.id_project)
+                    let pdf = await fsPack.simplifyFileFetch(el.pdf_path)
+
+                    let projectObj = {
+                        id_project: el.id_project,
+                        title: el.title,
+                        initials: el.initials,
+                        reference: el.reference,
+                        desc_html_structure_pt: el.desc_html_structure_pt,
+                        desc_html_structure_eng: el.desc_html_structure_eng,
+                        start_date: el.start_date,
+                        end_date: el.end_date,
+                        project_contact: el.project_contact,
+                        project_email: el.project_email,
+                        pdf_path: process.env.API_URL + el.pdf_path,
+                        created_at: el.created_at,
+                        entity_initials: el.initials,
+                        data_status: el.data_status,
+                        creator: el.username,
+                        outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
+                        news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
+                        gallery_imgs: ((galleryImgs.processRespCode === 200) ? galleryImgs.toClient.processResult : []),
+                        project_team: ((projectTeam.processRespCode === 200) ? projectTeam.toClient.processResult : []),
+                        course_tags: courseTags,
+                        area_tags: areaTags,
+                        recruitment_tags: recruitmentTags,
+                        unity_tags: unityTags,
+                        project_sheet: await (pdf.processRespCode === 200) ? pdf.toClient.processResult : [],
+
+                    }
+                    project.push(projectObj)
+                }
+            }
+
+
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: project,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
  *Add News
  *Status:Completed
  */
 const addProject = async (dataObj) => {
+    // console.log(dataObj.req.body);
     let processResp = {}
-    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email)) {
+    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email)) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -811,10 +943,15 @@ const addProject = async (dataObj) => {
         }
         return processResp
     }
-    let pdfUploadResult = await pictureController.addPictureOnCreate(dataObj)
-    if (pdfUploadResult.processRespCode !== 200) {
-        return pictureUploadResult
+    let pdfUploadResult = null
+    if (dataObj.req.files) {
+        pdfUploadResult = await addProjectPdf(dataObj)
+        if (pdfUploadResult.processRespCode !== 200) {
+            return pictureUploadResult
+        }
     }
+
+
 
     let dataStatusFetchResult = await (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
     if (dataStatusFetchResult.processRespCode === 500) {
@@ -829,20 +966,31 @@ const addProject = async (dataObj) => {
         return processResp
     }
     let randomId = uniqueIdPack.generateRandomId('_Project')
-    let insertArray = [
-        [randomId, dataObj.req.sanitize(dataObj.req.body.title), dataObj.req.sanitize(dataObj.req.body.initials), dataObj.req.sanitize(dataObj.req.body.reference), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.start_date), dataObj.req.sanitize(dataObj.req.body.end_date), pdfUploadResult.toClient.processResult, dataObj.idEntity, dataObj.idUser, dataStatusFetchResult.toClient.processResult[0].id_status],
-    ]
+    // let insertArray = [
+    //     [randomId, dataObj.req.sanitize(dataObj.req.body.title), dataObj.req.sanitize(dataObj.req.body.initials), (!dataObj.req.sanitize(dataObj.req.body.reference)) ? null : dataObj.req.sanitize(dataObj.req.body.reference), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.project_contact), dataObj.req.sanitize(dataObj.req.body.project_email), dataObj.req.sanitize(dataObj.req.body.start_date), dataObj.req.sanitize(dataObj.req.body.end_date), (pdfUploadResult == null) ? null : (pdfUploadResult.toClient.processResult), dataObj.idEntity, dataObj.idUser, dataStatusFetchResult.toClient.processResult[0].id_status]
+    // ]
+
     await sequelize
         .query(
-            `INSERT INTO Project(id_project,title,initials,reference,desc_html_structure_eng,desc_html_structure_pt,start_date,end_date,project_contact,project_email,pdf_path,id_leader_entity,id_creator,id_status) VALUES  ${insertArray.map(element => '(?)').join(',')};
-            INSERT INTO Project_team(id_project, id_team_member,can_edit) VALUES (:id_project,:id_team_member, 1) ;
+            `INSERT INTO Project(id_project,title,initials,reference,desc_html_structure_eng,desc_html_structure_pt,project_contact,project_email,start_date,end_date,pdf_path,id_leader_entity,id_creator,id_status) VALUES (:id_project,:title,:initials,:reference,:desc_html_structure_eng,:desc_html_structure_pt,:project_contact,:project_email,:start_date,:end_date,:pdf_path,:id_leader_entity,:id_creator,:id_status);
+                  INSERT INTO Project_team(id_project, id_team_member,can_edit) VALUES (:id_project,:id_creator,1) ;
             `, {
                 replacements: {
-                    insertArray: insertArray,
-                    id_team_member: dataObj.idUser,
                     id_project: randomId,
+                    title: dataObj.req.sanitize(dataObj.req.body.title),
+                    initials: dataObj.req.sanitize(dataObj.req.body.initials),
+                    reference: (!dataObj.req.sanitize(dataObj.req.body.reference)) ? null : dataObj.req.sanitize(dataObj.req.body.reference),
+                    desc_html_structure_eng: dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng),
+                    desc_html_structure_pt: dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt),
+                    project_contact: dataObj.req.sanitize(dataObj.req.body.project_contact),
+                    project_email: dataObj.req.sanitize(dataObj.req.body.project_email),
+                    start_date: dataObj.req.sanitize(dataObj.req.body.start_date),
+                    end_date: dataObj.req.sanitize(dataObj.req.body.end_date),
+                    pdf_path: (pdfUploadResult == null) ? null : (pdfUploadResult.toClient.processResult),
+                    id_leader_entity: dataObj.idEntity,
+                    id_creator: dataObj.idUser,
+                    id_status: dataStatusFetchResult.toClient.processResult[0].id_status
                 },
-
                 dialectOptions: {
                     multipleStatements: true
                 }
@@ -875,6 +1023,370 @@ const addProject = async (dataObj) => {
 }
 
 
+
+/**
+ * Update
+ * Status:Completed
+ */
+const updatePdf = async (dataObj) => {
+    if (!dataObj.req.params.id) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+    let fetchResult = await fetchProjectPdfById(dataObj.req.sanitize(dataObj.req.params.id))
+
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let uploadResult = await updateProjectPdf({
+        req: dataObj.req,
+        deletePath: fetchResult.toClient.processResult,
+    })
+
+
+    if (uploadResult.processRespCode !== 200) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `UPDATE Project SET Project.pdf_path =:pdf_path  Where Project.id_project=:id_project `, {
+                    replacements: {
+                        pdf_path: uploadResult.toClient.processResult,
+                        id_project: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: ProjectModel.Project
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "The file was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+
+
+}
+
+
+/**
+ * edit Project  
+ * Status: Complete
+ */
+const editProject = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Project SET title=:title,initials=:initials, reference =:reference, desc_html_structure_eng =:desc_html_structure_eng,desc_html_structure_pt=:desc_html_structure_pt,start_date=:start_date,
+            end_date=:end_date,  project_contact=:project_contact,project_email=:project_email Where Project.id_project=:id_project`, {
+                replacements: {
+                    id_project: dataObj.req.sanitize(dataObj.req.params.id),
+                    title: dataObj.req.sanitize(dataObj.req.body.title),
+                    initials: dataObj.req.sanitize(dataObj.req.body.initials),
+                    reference: (!dataObj.req.sanitize(dataObj.req.body.reference)) ? null : dataObj.req.sanitize(dataObj.req.body.reference),
+                    desc_html_structure_eng: dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng),
+                    desc_html_structure_pt: dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt),
+                    start_date: dataObj.req.sanitize(dataObj.req.body.start_date),
+                    end_date: dataObj.req.sanitize(dataObj.req.body.end_date),
+                    project_contact: dataObj.req.sanitize(dataObj.req.body.project_contact),
+                    project_email: dataObj.req.sanitize(dataObj.req.body.project_email),
+                }
+            }, {
+                model: ProjectModel.Project
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The Area was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+/**
+ * Patch  Couse status 
+ * StatusCompleted
+ */
+const updateStatusProject = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+    let fetchResult = await dataStatusController.fetchDataStatusIdByDesignation(dataObj.req.sanitize(dataObj.req.body.new_status))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Project SET Project.id_status =:id_status Where Project.id_project=:id_project`, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult[0].id_status,
+                    id_project: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: ProjectModel.Project
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The project status was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+const addProjectGalleryImage = async (dataObj) => {
+    let pictureUploadResult = await pictureController.addPictureOnCreate({
+        folder: `/Images/ProjectsGallery/`,
+        req: dataObj.req
+    })
+    if (pictureUploadResult.processRespCode !== 201) {
+
+        return pictureUploadResult
+    }
+
+    let insertArray = [
+        [dataObj.req.sanitize(dataObj.req.params.id), pictureUploadResult.toClient.processResult.generatedId],
+    ]
+
+
+    await sequelize
+        .query(
+            `INSERT INTO Project_gallery(id_project,id_image) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: ProjectGalleryModel.Project_gallery
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: "All data Where created successfully.",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+
+}
+
+const deleteProjectGalleryImage = async (dataObj) => {
+    let deleteResult = await pictureController.deletePictureInSystemById({
+        req: dataObj.req,
+        id_picture: dataObj.req.sanitize(dataObj.req.params.id_picture),
+        folder: `/Images/ProjectsGallery/`
+    })
+
+    if (deleteResult.processRespCode !== 200) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `DELETE FROM Project_gallery Where Project_gallery.id_image=:id_image and Project_gallery.id_project =:id_project`, {
+                    replacements: {
+                        id_image: dataObj.req.sanitize(dataObj.req.params.id_picture),
+                        id_project: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: ProjectGalleryModel.Project_gallery
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "Image sucessfully removed from the gallery",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+}
+
+
+
+
+
+
+
+
+//*Complement
+/**
+ * Fetches user data based on his username 
+ * Status: Complete
+ */
+const fetchProjectPdfById = async (id_project) => {
+    let processResp = {}
+    await sequelize
+        .query(`select pdf_path from Project where Project.id_project =:id_project;`, {
+            replacements: {
+                id_project: id_project
+            }
+        }, {
+            model: ProjectModel.Project
+        })
+        .then(data => {
+
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: ((!data[0][0].pdf_path) ? null : data[0][0].pdf_path),
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
 const addProjectPdf = async (dataObj) => {
     if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
         processResp = {
@@ -899,9 +1411,8 @@ const addProjectPdf = async (dataObj) => {
         }
         return processResp
     }
-    console.log(dataObj.req.files.file.mimetype);
 
-    if (!await fsPack.confirmIsImg(dataObj.req.sanitize(dataObj.req.files.file.mimetype))) {
+    if (!await fsPack.confirmIsPdf(dataObj.req.sanitize(dataObj.req.files.file.mimetype))) {
         processResp = {
             processRespCode: 409,
             toClient: {
@@ -922,13 +1433,136 @@ const addProjectPdf = async (dataObj) => {
 
 
 
+const updateProjectPdf = async (dataObj) => {
+    if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "There must be a pdf file attach to the request.",
+            }
+        }
+        return processResp
+    }
+
+    if (dataObj.req.files.file === null) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "There must be a pdf file attach to the request.",
+            }
+        }
+        return processResp
+    }
+
+
+    if (!await fsPack.confirmIsPdf(dataObj.req.sanitize(dataObj.req.files.file.mimetype))) {
+        processResp = {
+            processRespCode: 409,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "The file attached must be an pdf file.",
+            }
+        }
+        return processResp
+    } else {
+        let fileDeleteResult = null
+        if (dataObj.deletePath !== null) {
+            fileDeleteResult = await fsPack.simpleFileDelete({
+                deletePath: dataObj.deletePath, //Old Path
+            })
+        }
+        if (dataObj.deletePath !== null) {
+            if (fileDeleteResult.processRespCode !== 200) {
+                return fileDeleteResult
+            }
+        }
+        let fileUploadResult = await fsPack.simpleFileUpload({
+            req: dataObj.req,
+            folder: `/Assets/`
+        })
+        return fileUploadResult
+    }
+}
 
 
 
+const fetchProjectNewsByAdmin = async (id_project) => {
+    let query = ` SELECT News.id_news, News.title_pt, News.title_eng , News.description_eng ,News.description_pt, News.published_date , Picture.img_path,Entity.initials ,User.username, Data_Status.designation as data_statu  FROM((((((Project_news  inner Join 
+        Project on Project.id_project= Project_news.id_project)
+        Inner Join
+        News on News.id_news = Project_news.id_news) 
+        INNER JOIN 
+        Picture on Picture.id_picture = News.id_picture)
+        INNER JOIN  Data_Status on Data_Status.id_status = News.id_status )
+        INNER JOIN 
+        User on User.id_user = News.id_publisher)
+          INNER JOIN Entity on Entity.id_entity = News.id_entity) 
+        where Project_news.id_project =:id_project;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_project: id_project
+            }
+        })
+        .then(async data => {
+            let projects = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+
+                    // let cover = await fsPack.simplifyFileFetch(el.img_path)
+                    let projectObj = {
+                        id_news: el.id_news,
+                        title_eng: el.title_eng,
+                        title_pt: el.title_pt,
+                        description_eng: el.description_eng,
+                        description_pt: el.description_pt,
+                        published_date: el.published_date,
+                        project_show_only: ((el.project_only === 0) ? false : true),
+                        writer: el.full_name,
+                        entity_initials: el.initials,
+                        data_status: el.data_status,
+                        creator: el.username,
+                        cover: process.env.API_URL + el.img,
+                    }
+                    projects.push(projectObj)
+
+                }
+            }
 
 
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: projects,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
 
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
 
+    return processResp
+};
 
 
 
@@ -937,5 +1571,15 @@ const addProjectPdf = async (dataObj) => {
 module.exports = {
     fetchProjectByIdByInitials,
     initProject,
-    fetchEntityProjectByIdEntity
+    fetchEntityProjectByIdEntity,
+
+    // 
+    fetchProjectByAdminAndDev,
+    addProject,
+    updatePdf,
+    editProject,
+    updateStatusProject,
+    addProjectGalleryImage,
+    deleteProjectGalleryImage,
+
 }

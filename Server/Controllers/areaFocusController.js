@@ -436,7 +436,7 @@ const editAreaFocus = async (dataObj) => {
 
 
 /**
- * Delete 
+ * patch picture 
  * Status:Completed
  */
 const updateAreaFocusPicture = async (dataObj) => {
@@ -496,7 +496,10 @@ const updateAreaFocusPicture = async (dataObj) => {
 }
 
 
-
+/**
+ * Delete 
+ * Status:Completed
+ */
 const deleteAreaFocus = async (dataObj) => {
     let fetchResult = await fetchAreaFocusImgId(dataObj.req.sanitize(dataObj.req.params.id))
 

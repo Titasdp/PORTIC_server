@@ -402,18 +402,26 @@ const addProjectNews = async (dataObj) => {
     }
     let newNewsid = uniqueIdPack.generateRandomId('_News')
 
-    let insertArray = [
-        [newNewsid, dataObj.req.sanitize(dataObj.req.body.title_pt), dataObj.req.sanitize(dataObj.req.body.title_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.req.sanitize(dataObj.req.body.published_date), dataObj.idEntity, dataObj.idUser, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status],
-    ]
+    // let insertArray = [
+    //     [newNewsid, dataObj.req.sanitize(dataObj.req.body.title_pt), dataObj.req.sanitize(dataObj.req.body.title_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.req.sanitize(dataObj.req.body.published_date), dataObj.idEntity, dataObj.idUser, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status],
+    // ]
     await sequelize
         .query(
-            `INSERT INTO News(id_news,title_pt,title_eng,description_pt,description_eng,published_date,published_date,id_entity,id_publisher,id_picture,id_status) VALUES  ${insertArray.map(element => '(?)').join(',')};
+            `INSERT INTO News(id_news,title_pt,title_eng,description_pt,description_eng,published_date,id_entity,id_publisher,id_picture,id_status,project_only) VALUES (:id_news,:title_pt,:title_eng,:description_pt,:description_eng,:published_date,:id_entity,:id_publisher,:id_picture,:id_status,1);
             INSERT INTO Project_news(id_project, id_news) VALUES (:id_project,:id_news);
             `, {
                 replacements: {
-                    insertArray: insertArray,
                     id_project: dataObj.req.sanitize(dataObj.req.params.id),
-                    id_news: dataObj.req.sanitize(newNewsid)
+                    id_news: dataObj.req.sanitize(newNewsid),
+                    title_pt: dataObj.req.sanitize(dataObj.req.body.title_pt),
+                    title_eng: dataObj.req.sanitize(dataObj.req.body.title_eng),
+                    description_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
+                    description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                    published_date: dataObj.req.sanitize(dataObj.req.body.published_date),
+                    id_entity: dataObj.idEntity,
+                    id_publisher: dataObj.idUser,
+                    id_picture: pictureUploadResult.toClient.processResult.generatedId,
+                    id_status: dataStatusFetchResult.toClient.processResult[0].id_status
                 },
                 dialectOptions: {
                     multipleStatements: true
@@ -658,14 +666,7 @@ const deleteNews = async (dataObj) => {
 const updateNewsPicture = async (dataObj) => {
     let fetchResult = await fetchNewsImgId(dataObj.req.sanitize(dataObj.req.params.id))
 
-    console.log("files:");
-    console.log(dataObj.req.files);
-    console.log("body:");
-    console.log(dataObj.req.body);
 
-
-    console.log("Img fetch id result:");
-    console.log(fetchResult);
     if (fetchResult.processRespCode === 500) {
         return fetchResult
     }

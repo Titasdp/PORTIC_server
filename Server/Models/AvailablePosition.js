@@ -40,6 +40,21 @@ Available_position.init({
         type: DataTypes.TEXT('long'),
         allowNull: false,
     },
+    category_1: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+    },
+    category_2: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+    },
+    category_3: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+    },
     pdf_path: {
         type: DataTypes.STRING,
         allowNull: true,
