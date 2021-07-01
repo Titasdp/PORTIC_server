@@ -57,8 +57,16 @@ const {
 
 
 //<DataStatus
+router.get("/data_status", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await dataStatusController.fetchAllDataStatus()
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
 
-//Init
 
 // DataStatus>
 

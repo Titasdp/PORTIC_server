@@ -179,9 +179,50 @@ const fetchDataStatusIdByDesignation = async (designation) => {
 
 
 
+
+// Todo 
+const fetchAllDataStatus = async () => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT id_status, designation FROM Data_Status", {
+            model: DataStatusModel.Data_status
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+    return processResp
+};
+
+
+
+
 module.exports = {
     // getAllDataStatus,
     initDataStatus,
     // fetchDataStatusIdByName,
-    fetchDataStatusIdByDesignation
+    fetchDataStatusIdByDesignation,
+    fetchAllDataStatus
 }
