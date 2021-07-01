@@ -92,7 +92,7 @@ router.get("/user_status", async (req, res) => {
  * Fetch all user level
  * Status:Completed
  */
-router.get("/user_levels", async (req, res) => {
+router.get("/users/levels", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)

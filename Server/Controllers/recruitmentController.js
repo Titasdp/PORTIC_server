@@ -748,8 +748,8 @@ const editAvailablePosition = async (dataObj) => {
                     category_1: dataObj.req.sanitize(dataObj.req.body.category_1),
                     category_2: dataObj.req.sanitize(dataObj.req.body.category_2),
                     category_3: dataObj.req.sanitize(dataObj.req.body.category_3),
-                    desc_html_structure_pt: dataObj.req.sanitize(dataObj.req.body.description_pt),
-                    desc_html_structure_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
+                    desc_html_structure_pt: dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt),
+                    desc_html_structure_eng: dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng),
                     pdf_path: (!dataObj.req.body.pdf_path) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path),
                     candidacy_link: (!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? null : dataObj.req.sanitize(dataObj.req.body.candidacy_link),
                 }
