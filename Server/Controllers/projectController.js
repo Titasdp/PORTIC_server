@@ -802,13 +802,13 @@ const selectProjectTeam = async (id_project) => {
 const fetchProjectByAdminAndDev = async (dataObj) => {
     let processResp = {}
 
-    let query = (dataObj.user_level === `Super Admin`) ? `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials
+    let query = (dataObj.user_level === `Super Admin`) ? `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials as entity
     From (((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
     INNER JOIN  User on User.id_user = Project.id_creator)
-    Inner join Entity on Entity.id_entity = Project.id_leader_entity);` : ((dataObj.user_level === `Entity Admin`) ? `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials
+    Inner join Entity on Entity.id_entity = Project.id_leader_entity);` : ((dataObj.user_level === `Entity Admin`) ? `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials as entity
         From (((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
         INNER JOIN  User on User.id_user = Project.id_creator)
-        Inner join Entity on Entity.id_entity = Project.id_leader_entity)  Where Entity.id_entity =  :id_entity;` : `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials
+        Inner join Entity on Entity.id_entity = Project.id_leader_entity)  Where Entity.id_entity =  :id_entity;` : `Select Project.id_project, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials as entity
         From ((((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
         INNER JOIN  User on User.id_user = Project.id_creator)
         Inner join Entity on Entity.id_entity = Project.id_leader_entity)
@@ -854,7 +854,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                         project_email: el.project_email,
                         pdf_path: process.env.API_URL + el.pdf_path,
                         created_at: el.created_at,
-                        entity_initials: el.initials,
+                        entity_initials: el.entity,
                         data_status: el.data_status,
                         creator: el.username,
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
