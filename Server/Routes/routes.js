@@ -344,6 +344,30 @@ router.patch("/users/:id/profile/status", async (req, res) => {
     }
 })
 
+
+
+
+router.patch("/users/:id/profile/password", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await userController.refreshUserPassword({
+            req: req,
+            id_user: req.sanitize(req.params.id)
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+
+
+
+
+
+
 // router.use('/UserProfilePicture', express.static(__dirname + "/Images/UserProfilePicture"))
 
 
@@ -406,6 +430,24 @@ router.patch("/users/profile/picture", async (req, res) => {
         res.status(putResult.processRespCode).send(putResult.toClient)
     }
 })
+
+
+
+
+
+router.patch("/users/profile/password", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let putResult = await userController.updateUserPassword({
+            req: req,
+            id_user: req.sanitize(tokenResult.toClient.processResult.id_user)
+        })
+        res.status(putResult.processRespCode).send(putResult.toClient)
+    }
+})
+
 
 
 
@@ -1059,6 +1101,24 @@ router.put("/projects/:id", async (req, res) => {
         res.status(patchResult.processRespCode).send(patchResult.toClient)
     }
 })
+
+
+
+
+router.delete("/projects/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await projectController.deleteProject({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
 
 router.patch("/projects/:id/status", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
