@@ -1432,6 +1432,58 @@ const addProjectPdf = async (dataObj) => {
 }
 
 
+/**
+ * Delete Area  
+ * StatusCompleted
+ */
+const deleteProject = async (dataObj) => {
+    let processResp = {}
+    let query = `DELETE  FROM Project Where Project.id_project = :id_project;
+    DELETE  FROM Project_unity Where id_project = :id_project;
+    DELETE  FROM Project_area Where id_project = :id_project;
+    DELETE  FROM Project_recruitment Where id_project = :id_project;
+    DELETE  FROM Course_area Where id_project = :id_project;
+    DELETE  FROM Project_news Where id_project = :id_project;
+    DELETE  FROM Project_gallery Where id_project = :id_project;
+    DELETE  FROM Outside_investor Where id_project = :id_project;
+    `
+    await sequelize
+        .query(
+            query, {
+                replacements: {
+                    id_project: dataObj.req.sanitize(dataObj.req.params.id)
+                },
+                dialectOptions: {
+                    multipleStatements: true
+                }
+            },
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Data Deleted Successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
 
 const updateProjectPdf = async (dataObj) => {
     if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
@@ -1581,5 +1633,6 @@ module.exports = {
     updateStatusProject,
     addProjectGalleryImage,
     deleteProjectGalleryImage,
+    deleteProject
 
 }
