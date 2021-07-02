@@ -1442,7 +1442,7 @@ const deleteProject = async (dataObj) => {
     DELETE  FROM Project_unity Where id_project = :id_project;
     DELETE  FROM Project_area Where id_project = :id_project;
     DELETE  FROM Project_recruitment Where id_project = :id_project;
-    DELETE  FROM Course_area Where id_project = :id_project;
+    DELETE  FROM Project_course Where id_project = :id_project;
     DELETE  FROM Project_news Where id_project = :id_project;
     DELETE  FROM Project_gallery Where id_project = :id_project;
     DELETE  FROM Outside_investor Where id_project = :id_project;
