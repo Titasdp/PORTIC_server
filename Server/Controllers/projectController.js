@@ -944,7 +944,7 @@ const addProject = async (dataObj) => {
         return processResp
     }
     let pdfUploadResult = null
-    if (dataObj.req.files) {
+    if ((dataObj.req.files.file) != null) {
         pdfUploadResult = await addProjectPdf(dataObj)
         if (pdfUploadResult.processRespCode !== 200) {
             return pictureUploadResult
