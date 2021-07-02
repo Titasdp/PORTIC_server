@@ -7,6 +7,7 @@ const tokenPack = require("../Middleware/tokenFunctions")
 // const passwordPack = require("../Middleware/randomPasswordFunctions")
 const encryptPack = require("../Middleware/encrypt")
 const uniqueIdPack = require("../Middleware/uniqueId");
+const generatePassPack = require("../Middleware/randomPasswordFunctions")
 // const fsPack = require("../Middleware/fsFunctions")
 //Controllers
 const pictureController = require("../Controllers/pictureController")
@@ -1174,6 +1175,252 @@ const fetchUserImgByUserId = async (id_user) => {
 
 
 
+//*Complement
+/**
+ * Fetches user password based on his id 
+ * Status: Complete
+ */
+const fetchUserPasswordByUserId = async (id_user) => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT password FROM User where id_user =:id_user", {
+            replacements: {
+                id_user: id_user
+            }
+        }, {
+            model: UserModel.User
+        })
+        .then(data => {
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            // console.log(data[0].id_picture);
+            processResp = {
+
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+
+/**
+ * Update user profile password
+ * Status : Completed
+ */
+const updateUserPassword = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.idUser === null || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.old_password) || !dataObj.req.sanitize(dataObj.req.body.new_password)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    let fetchResult = await fetchUserPasswordByUserId(dataObj.idUser)
+
+    if (fetchResult.processRespCode !== 200) {
+        return fetchResult
+    }
+    return await new Promise(async (resolve) => {
+        await encryptPack.decryptPassword({
+            password: dataObj.req.sanitize(dataObj.req.body.old_password),
+            hash: fetchResult.toClient.processResult[0].password
+        }, (isError, decryptResult) => {
+            if (isError) {
+                console.log(decryptResult);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+                resolve(processResp)
+            } else {
+                if (decryptResult) {
+                    encryptPack.encryptPassword(dataObj.req.sanitize(dataObj.req.body.new_password), (isErrorEncrypting, encryptResult) => {
+                        if (isErrorEncrypting) {
+                            processResp = {
+                                processRespCode: 500,
+                                toClient: {
+                                    processResult: null,
+                                    processError: null,
+                                    processMsg: "Something went wrong, please try again later.",
+                                }
+                            }
+                            resolve(processResp)
+                        } else {
+
+
+                            sequelize
+                                .query(
+                                    "UPDATE User SET password = :new_password  Where user.id_user = :id_user", {
+                                        replacements: {
+                                            id_user: dataObj.idUser,
+                                            new_password: encryptResult,
+                                        }
+                                    }, {
+                                        model: UserModel.User
+                                    }
+                                )
+                                .then(data => {
+                                    processResp = {
+                                        processRespCode: 200,
+                                        toClient: {
+                                            processResult: data[0],
+                                            processError: null,
+                                            processMsg: "User password updated successfully.",
+                                        }
+                                    }
+                                    resolve(processResp)
+
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                    processResp = {
+                                        processRespCode: 500,
+                                        toClient: {
+                                            processResult: null,
+                                            processError: null,
+                                            processMsg: "Something went wrong please ty again later.",
+                                        }
+                                    }
+
+                                    resolve(processResp)
+                                });
+                        }
+                    })
+                } else {
+                    processResp = {
+                        processRespCode: 400,
+                        toClient: {
+                            processResult: null,
+                            processError: null,
+                            processMsg: "The actual password doesn't match our records",
+                        }
+                    }
+                    resolve(processResp)
+                }
+            }
+        })
+    })
+};
+
+
+
+
+/**
+ * Update user profile password
+ * Status : Completed
+ */
+const refreshUserPassword = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.params.id)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    let generatedPassword = generatePassPack.generateRandomPass()
+    return await new Promise(async (resolve) => {
+        await encryptPack.encryptPassword(generatedPassword, async (isErrorEncrypting, encryptResult) => {
+            if (isErrorEncrypting) {
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+                resolve(processResp)
+            } else {
+                await sequelize
+                    .query(
+                        "UPDATE User SET password = :new_password  Where User.id_user = :id_user", {
+                            replacements: {
+                                id_user: dataObj.req.sanitize(dataObj.req.params.id),
+                                new_password: encryptResult,
+                            }
+                        }, {
+                            model: UserModel.User
+                        }
+                    )
+                    .then(data => {
+                        processResp = {
+                            processRespCode: 200,
+                            toClient: {
+                                processResult: generatedPassword,
+                                processError: null,
+                                processMsg: "User password updated successfully.",
+                            }
+                        }
+                        resolve(processResp)
+
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        processResp = {
+                            processRespCode: 500,
+                            toClient: {
+                                processResult: null,
+                                processError: null,
+                                processMsg: "Something went wrong please ty again later.",
+                            }
+                        }
+
+                        resolve(processResp)
+                    });
+            }
+        })
+    })
+};
+
+
+
+
+
+
 
 
 
@@ -1204,7 +1451,10 @@ module.exports = {
     fetchUserProfileById,
     editUserProfileByAdminOrProfileOwner,
     updateUserProfilePicture,
-    updateUserStatus
+    updateUserStatus,
+
+    refreshUserPassword,
+    updateUserPassword,
 
 
 }

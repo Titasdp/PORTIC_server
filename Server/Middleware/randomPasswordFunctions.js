@@ -1,4 +1,4 @@
-generateRandomPass = () => {
+const generateRandomPass = () => {
 
     const numbChar = 8
     const charPack = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

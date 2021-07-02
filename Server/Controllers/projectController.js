@@ -1459,6 +1459,7 @@ const deleteProject = async (dataObj) => {
             },
         )
         .then(data => {
+            console.log(data);
             processResp = {
                 processRespCode: 200,
                 toClient: {
