@@ -42,7 +42,7 @@ const confTableFilled = async () => {
  * @param {Object} dataObject 
  * @param {*} callback 
  */
-const fetchFullEntityDataById = (dataObj, callback) => {
+const fetchFullEntityDataById = async (dataObj, callback) => {
     let processResp = {}
 
     if (!dataObj.req.sanitize(dataObj.req.params.lng) || !dataObj.req.params.id) {
@@ -70,7 +70,7 @@ const fetchFullEntityDataById = (dataObj, callback) => {
         Inner Join
         Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;`;
 
-    sequelize
+    await sequelize
         .query(query, {
             replacements: {
                 id_entity: dataObj.req.sanitize(dataObj.req.params.id)
@@ -110,14 +110,17 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     contacts: [],
                     emails: [],
                     social_medias: [],
-                    img: process.env.API_URL + data[0][0].img
+                    img: process.env.API_URL + data[0][0].img,
+                    emails: [dataObj[0][0].main_email, dataObj[0][0].secondary_email],
+                    contacts: [dataObj[0][0].main_contact],
+                    social_medias: {
+                        Facebook: dataObj[0][0].facebook,
+                        Instagram: dataObj[0][0].instagram,
+                        LinkedIn: dataObj[0][0].linkedIn,
+                        Twitter: dataObj[0][0].twitter,
+                        Youtube: dataObj[0][0].youtube,
+                    },
                 }
-                console.log(process.env.API_URL);
-                console.log(data[0][0].img);
-
-                console.log(process.env.API_URL);
-
-
 
                 menuController.fetchEntityMenus({
                     req: dataObj.req
@@ -125,39 +128,15 @@ const fetchFullEntityDataById = (dataObj, callback) => {
                     if (fetchSuccess) {
                         entityObj.menus = fetchResult.toClient.processResult
                     }
-                    entityEmailController.fetchEntityEmails({
-                        req: dataObj.req
-                    }, (fetchSuccess, fetchResult) => {
-                        if (fetchSuccess) {
-                            entityObj.emails = fetchResult.toClient.processResult
+                    let processResp = {
+                        processRespCode: respCode,
+                        toClient: {
+                            processResult: [entityObj],
+                            processError: null,
+                            processMsg: respMsg,
                         }
-                        entityContactController.fetchEntityContacts({
-                            req: dataObj.req
-                        }, (fetchSuccess, fetchResult) => {
-                            if (fetchSuccess) {
-                                entityObj.contacts = fetchResult.toClient.processResult
-                            }
-
-                            socialMediaController.fetchEntitySocialMedia({
-                                req: dataObj.req
-                            }, (fetchSuccess, fetchResult) => {
-                                if (fetchSuccess) {
-                                    entityObj.social_medias = fetchResult.toClient.processResult
-                                }
-                                let processResp = {
-                                    processRespCode: respCode,
-                                    toClient: {
-                                        processResult: [entityObj],
-                                        processError: null,
-                                        processMsg: respMsg,
-                                    }
-                                }
-                                return callback(true, processResp)
-                            })
-
-                        })
-
-                    })
+                    }
+                    return callback(true, processResp)
                 })
 
             }

@@ -27,6 +27,9 @@ const pictureController = require("../Controllers/pictureController")
 const dataStatusController = require("../Controllers/dataStatusController")
 
 
+// 
+
+
 
 // .Env
 require("dotenv").config();
@@ -96,7 +99,7 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                         end_date: el.end_date,
                         project_contact: el.project_contact,
                         project_email: el.project_email,
-                        pdf_path: process.env.API_URL + el.pdf_path,
+                        pdf_path: (!el.pdf_path) ? null : process.env.API_URL + el.pdf_path,
                         // inside_investors: ((insideInvestors.processRespCode === 200) ? insideInvestors.toClient.processResult : []),
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
                         news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
@@ -852,7 +855,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                         end_date: el.end_date,
                         project_contact: el.project_contact,
                         project_email: el.project_email,
-                        pdf_path: process.env.API_URL + el.pdf_path,
+                        pdf_path: (!el.pdf_path) ? null : process.env.API_URL + el.pdf_path,
                         created_at: el.created_at,
                         entity_initials: el.entity,
                         data_status: el.data_status,

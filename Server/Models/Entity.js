@@ -101,6 +101,46 @@ Entity.init({
         allowNull: false,
         defaultValue: `[#ffff,#C94D24,#080808]`
     },
+    main_email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: `portic@portic.ipp.pt`
+    },
+    secondary_email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: `communication@portic.ipp.pt`
+    },
+    main_contact: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: `(+351) 22 557 1020`
+    },
+    linkedIn: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: `https://www.linkedin.com/company/portic-pporto`
+    },
+    facebook: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: `https://www.facebook.com/porticpporto`
+    },
+    instagram: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: `https://www.instagram.com/politecnicodoporto/`
+    },
+    youtube: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: `https://www.youtube.com/channel/UCa0njrkoyEd8kwjIVPE5pNg`
+    },
+    twitter: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: `https://twitter.com/politecnico`
+    },
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,
