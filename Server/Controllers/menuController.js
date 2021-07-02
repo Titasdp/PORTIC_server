@@ -72,6 +72,7 @@ const initMenu = async (dataObj) => {
         [uniqueIdPack.generateRandomId('_Menu'), "Media", "Media", `Research and development, technology and knowledge transfer, innovation and creativity, entrepreneurship, incubation, spin-offs, startups – these are all part of Research, Technology & Innovation, a holistic chain of interrelated activities. PORTIC includes units and groups with activities in different stages of the knowledge and innovation chain, in several areas of knowledge.`, `Investigação e desenvolvimento, transferência de tecnologia e conhecimento, inovação e criatividade, empreendedorismo, incubação, spin-offs, start-ups - tudo isto faz parte da Investigação, Tecnologia & Inovação, uma cadeia holística de actividades inter-relacionadas. PORTIC inclui unidades e grupos com actividades em diferentes fases da cadeia do conhecimento e da inovação, em várias áreas do conhecimento.`, `Media`, dataObj.idDataStatus, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_Menu'), "Positions", "Recrutamento", `nothing`, `nada`, `Positions`, dataObj.idDataStatus, dataObj.idEntity],
         [uniqueIdPack.generateRandomId('_Menu'), "Login", "Login", null, null, `SignIn`, dataObj.idDataStatus, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Entidades", "Entities", null, null, `Entities`, dataObj.idDataStatus, dataObj.idEntity],
     ]
     await sequelize
         .query(
@@ -156,12 +157,11 @@ const fetchMenus = (req, callback) => {
 /**
  * Fetches all Menus from a specific entity
  * Status: Completed
- * @param {Object} req Request sended by the client 
- * @param {Callback} callback 
  */
-const fetchEntityMenus = (dataObj, callback) => {
+const fetchEntityMenus = async (dataObj) => {
+    let processResp = {}
     let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? ` SELECT Menu.id_menu ,Menu.designation_pt as menu_designation,Menu.default, Menu.external_path,  Menu.info_html_pt as info_html , Menu.page_description_pt as page_description, Menu.router_link FROM ( Menu  INNER JOIN Data_Status on Data_Status.id_status = Menu.id_status) where Data_Status.designation = "Published" and Menu.id_entity =:id_entity;` : `SELECT Menu.id_menu ,Menu.designation_eng as menu_designation,Menu.default, Menu.external_path, Menu.info_html_eng as info_html ,Menu.page_description_eng as page_description, Menu.router_link FROM ( Menu  INNER JOIN Data_Status on Data_Status.id_status = Menu.id_status) where Data_Status.designation = "Published" and Menu.id_entity =:id_entity;`
-    sequelize
+    await sequelize
         .query(query, {
             replacements: {
                 id_entity: dataObj.req.sanitize(dataObj.req.params.id)
@@ -171,13 +171,12 @@ const fetchEntityMenus = (dataObj, callback) => {
         })
         .then(data => {
             let menusArray = []
-            let success = 0
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
                 respCode = 204
                 respMsg = "Fetch process completed successfully, but there is no content."
-                let processResp = {
+                processResp = {
                     processRespCode: respCode,
                     toClient: {
                         processResult: data[0],
@@ -185,7 +184,7 @@ const fetchEntityMenus = (dataObj, callback) => {
                         processMsg: respMsg,
                     }
                 }
-                return callback(true, processResp)
+                return processResp
             } else {
                 for (const el of data[0]) {
                     let obj = {
@@ -201,26 +200,20 @@ const fetchEntityMenus = (dataObj, callback) => {
                         submenus_array: []
                     }
                     menusArray.push(obj);
-                    success++;
                 }
-
-                if (success === data[0].length) {
-                    success = 0
-                    let processResp = {
-                        processRespCode: respCode,
-                        toClient: {
-                            processResult: menusArray,
-                            processError: null,
-                            processMsg: respMsg,
-                        }
+                processResp = {
+                    processRespCode: respCode,
+                    toClient: {
+                        processResult: menusArray,
+                        processError: null,
+                        processMsg: respMsg,
                     }
-                    return callback(true, processResp)
                 }
             }
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
@@ -228,8 +221,10 @@ const fetchEntityMenus = (dataObj, callback) => {
                     processMsg: "Something when wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
+
+    return processResp
 };
 
 

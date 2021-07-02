@@ -58,12 +58,13 @@ const fetchFullEntityDataById = async (dataObj, callback) => {
         return callback(true, processResp)
     }
 
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng === "pt")) ? `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_pt as desc_html  ,Entity.slogan_pt as slogan,Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id,  Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img, Entity.main_email, Entity.secondary_email ,Entity.main_contact ,Entity.facebook,Entity.instagram,Entity.linkedIn, Entity.twitter,Entity.youtube FROM((( Entity inner Join 
         Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
         Inner Join
         Picture on Picture.id_picture = Entity.id_logo)
         Inner Join
-        Data_Status on Data_Status.id_status= Entity.id_status)  where Entity.id_entity =:id_entity;` : `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_eng as desc_html  ,Entity.slogan_eng as slogan, Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id, Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img FROM((( Entity inner Join 
+        Data_Status on Data_Status.id_status= Entity.id_status) where Entity.id_entity = :id_entity
+        ` : `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Entity.desc_html_eng as desc_html  ,Entity.slogan_eng as slogan, Entity.colors,Entity.hightLight_1_id, Entity.hightLight_2_id,Entity.hightLight_3_id, Entity.postal_code ,Entity.street, Entity.lat, Entity.long , Picture.img_path as img ,Entity.main_email, Entity.secondary_email ,Entity.main_contact ,Entity.facebook,Entity.instagram,Entity.linkedIn, Entity.twitter,Entity.youtube FROM((( Entity inner Join 
         Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
         Inner Join
         Picture on Picture.id_picture = Entity.id_logo)
@@ -78,7 +79,7 @@ const fetchFullEntityDataById = async (dataObj, callback) => {
         }, {
             model: EntityModel.Entity
         })
-        .then(data => {
+        .then(async data => {
 
             let respCode = 200;
             let respMsg = "Fetched successfully."
@@ -94,6 +95,7 @@ const fetchFullEntityDataById = async (dataObj, callback) => {
                 }
                 return callback(true, processResp)
             } else {
+                console.log(data);
                 let entityObj = {
                     id_entity: data[0][0].id_entity,
                     designation: data[0][0].designation,
@@ -111,33 +113,32 @@ const fetchFullEntityDataById = async (dataObj, callback) => {
                     emails: [],
                     social_medias: [],
                     img: process.env.API_URL + data[0][0].img,
-                    emails: [dataObj[0][0].main_email, dataObj[0][0].secondary_email],
-                    contacts: [dataObj[0][0].main_contact],
+                    emails: [data[0][0].main_email, data[0][0].secondary_email],
+                    contacts: [data[0][0].main_contact],
                     social_medias: {
-                        Facebook: dataObj[0][0].facebook,
-                        Instagram: dataObj[0][0].instagram,
-                        LinkedIn: dataObj[0][0].linkedIn,
-                        Twitter: dataObj[0][0].twitter,
-                        Youtube: dataObj[0][0].youtube,
+                        Facebook: data[0][0].facebook,
+                        Instagram: data[0][0].instagram,
+                        LinkedIn: data[0][0].linkedIn,
+                        Twitter: data[0][0].twitter,
+                        Youtube: data[0][0].youtube,
                     },
                 }
-
-                menuController.fetchEntityMenus({
+                let menuFetch = await menuController.fetchEntityMenus({
                     req: dataObj.req
-                }, (fetchSuccess, fetchResult) => {
-                    if (fetchSuccess) {
-                        entityObj.menus = fetchResult.toClient.processResult
-                    }
-                    let processResp = {
-                        processRespCode: respCode,
-                        toClient: {
-                            processResult: [entityObj],
-                            processError: null,
-                            processMsg: respMsg,
-                        }
-                    }
-                    return callback(true, processResp)
                 })
+
+                console.log(menuFetch);
+
+                entityObj.menus = menuFetch.toClient.processResult
+                let processResp = {
+                    processRespCode: respCode,
+                    toClient: {
+                        processResult: [entityObj],
+                        processError: null,
+                        processMsg: respMsg,
+                    }
+                }
+                return callback(true, processResp)
 
             }
         })
@@ -462,9 +463,81 @@ const fetchEntityIdByInitials = async (initials) => {
 
 
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Admin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/**
+ * edit Project  
+ * Status: Complete
+ */
+const editEntity = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_eng) ||
+        !dataObj.req.sanitize(dataObj.req.body.slogan_eng) || !dataObj.req.sanitize(dataObj.req.body.slogan_pt) || !dataObj.req.sanitize(dataObj.req.body.colors) || !dataObj.req.sanitize(dataObj.req.body.main_email) ||
+        !dataObj.req.sanitize(dataObj.req.body.secondary_email) || !dataObj.req.sanitize(dataObj.req.body.main_contact) || !dataObj.req.sanitize(dataObj.req.body.linkedIn) || !dataObj.req.sanitize(dataObj.req.body.facebook) ||
+        !dataObj.req.sanitize(dataObj.req.body.facebook) || !dataObj.req.sanitize(dataObj.req.body.facebook) || !dataObj.req.sanitize(dataObj.req.body.facebook) || !dataObj.req.sanitize(dataObj.req.body.facebook)
+    ) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
 
+    await sequelize
+        .query(
+            `UPDATE Project SET designation=:designation,initials=:initials, desc_html_pt =:desc_html_pt, desc_html_eng =:desc_html_eng,slogan_eng=:slogan_eng,slogan_pt=:slogan_pt,
+            colors=:colors,  main_email=:main_email,secondary_email=:secondary_email,main_contact=:main_contact , main_contact=:main_contact,linkedIn=:linkedIn,facebook=:facebook,instagram=:instagram ,twitter=:twitter,youtube=:youtube Where Project.id_project=:id_project`, {
+                replacements: {
+                    id_entity: dataObj.req.sanitize(dataObj.req.params.id),
+                    designation: dataObj.req.sanitize(dataObj.req.body.designation),
+                    initials: dataObj.req.sanitize(dataObj.req.body.initials),
+                    desc_html_pt: dataObj.req.sanitize(dataObj.req.body.desc_html_pt),
+                    desc_html_eng: dataObj.req.sanitize(dataObj.req.body.desc_html_eng),
+                    slogan_eng: dataObj.req.sanitize(dataObj.req.body.slogan_eng),
+                    slogan_pt: dataObj.req.sanitize(dataObj.req.body.slogan_pt),
+                    colors: dataObj.req.sanitize(dataObj.req.body.colors),
+                    main_email: dataObj.req.sanitize(dataObj.req.body.main_email),
+                    secondary_email: dataObj.req.sanitize(dataObj.req.body.secondary_email),
+                    main_contact: dataObj.req.sanitize(dataObj.req.body.main_contact),
+                    linkedIn: dataObj.req.sanitize(dataObj.req.body.linkedIn),
+                    facebook: dataObj.req.sanitize(dataObj.req.body.facebook),
+                    instagram: dataObj.req.sanitize(dataObj.req.body.instagram),
+                    youtube: dataObj.req.sanitize(dataObj.req.body.youtube),
+                    twitter: dataObj.req.sanitize(dataObj.req.body.twitter),
+                }
+            }, {
+                model: ProjectModel.Project
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "The Area was updated successfully",
+                }
+            }
 
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
 
+    return processResp
+
+}
 
 
 
@@ -477,6 +550,8 @@ module.exports = {
     fetchEntityIdByDesignation,
     //
     fetchAllEntitiesInitials,
+    // 
+    editEntity
 }
 
 
