@@ -115,13 +115,28 @@ const fetchFullEntityDataById = async (dataObj, callback) => {
                     img: process.env.API_URL + data[0][0].img,
                     emails: [data[0][0].main_email, data[0][0].secondary_email],
                     contacts: [data[0][0].main_contact],
-                    social_medias: {
-                        Facebook: data[0][0].facebook,
-                        Instagram: data[0][0].instagram,
-                        LinkedIn: data[0][0].linkedIn,
-                        Twitter: data[0][0].twitter,
-                        Youtube: data[0][0].youtube,
-                    },
+                    social_medias: [{
+                            url: data[0][0].facebook,
+                            name: "Facebook"
+                        },
+                        {
+                            url: data[0][0].instagram,
+                            name: "Instagram"
+                        },
+                        {
+                            url: data[0][0].linkedIn,
+                            name: "LinkedIn"
+                        },
+                        {
+                            url: data[0][0].twitter,
+                            name: "Twitter"
+                        },
+                        {
+                            url: data[0][0].youtube,
+                            name: "Youtube"
+                        },
+
+                    ],
                 }
                 let menuFetch = await menuController.fetchEntityMenus({
                     req: dataObj.req
