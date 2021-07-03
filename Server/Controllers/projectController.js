@@ -842,7 +842,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                     let news = await fetchProjectNewsByAdmin(el.id_project)
                     let galleryImgs = await selectProjectGallery(el.id_project)
                     let projectTeam = await selectProjectTeam(el.id_project)
-                    let pdf = await fsPack.simplifyFileFetch(el.pdf_path)
+
 
                     let projectObj = {
                         id_project: el.id_project,
@@ -868,7 +868,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                         area_tags: areaTags,
                         recruitment_tags: recruitmentTags,
                         unity_tags: unityTags,
-                        project_sheet: await (pdf.processRespCode === 200) ? pdf.toClient.processResult : [],
+
 
                     }
                     project.push(projectObj)
@@ -1468,7 +1468,7 @@ const deleteProject = async (dataObj) => {
 
 
 const updateProjectPdf = async (dataObj) => {
-    console.log("here1");
+
     if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
         processResp = {
             processRespCode: 400,
@@ -1481,9 +1481,6 @@ const updateProjectPdf = async (dataObj) => {
         return processResp
     }
 
-
-
-    console.log(dataObj.req.files.file);
     if (dataObj.req.files.file === null) {
         processResp = {
             processRespCode: 400,
@@ -1495,9 +1492,6 @@ const updateProjectPdf = async (dataObj) => {
         }
         return processResp
     }
-
-    console.log("here 2");
-
     if (!await fsPack.confirmIsPdf(dataObj.req.sanitize(dataObj.req.files.file.mimetype))) {
         processResp = {
             processRespCode: 409,
@@ -1509,8 +1503,6 @@ const updateProjectPdf = async (dataObj) => {
         }
         return processResp
     } else {
-        console.log("here 3");
-        console.log(dataObj.deletePath);
         let fileDeleteResult = null
         if (dataObj.deletePath !== null) {
             fileDeleteResult = await fsPack.simpleFileDelete({
@@ -1573,7 +1565,7 @@ const fetchProjectNewsByAdmin = async (id_project) => {
                         entity_initials: el.initials,
                         data_status: el.data_status,
                         creator: el.username,
-                        cover: process.env.API_URL + el.img,
+                        cover: process.env.API_URL + el.img_path,
                     }
                     projects.push(projectObj)
 
