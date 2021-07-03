@@ -393,6 +393,8 @@ const simpleFileUpload = async (dataObj) => {
  * Simple file Upload
  * */
 const simpleFileDelete = async (dataObj) => {
+    console.log("here 4");
+    console.log(dataObj);
 
     let pathToDelete = `${process.cwd()}/Server` + dataObj.deletePath
 
@@ -411,7 +413,7 @@ const simpleFileDelete = async (dataObj) => {
         return processResp
     } else {
         return await new Promise(async (resolve) => {
-            await fs.unlink(pathToDelete, function (err) {
+            fs.unlink(pathToDelete, function (err) {
                 if (err) {
                     processResp = {
                         processRespCode: 500,

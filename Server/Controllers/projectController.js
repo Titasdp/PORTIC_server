@@ -1510,6 +1510,7 @@ const updateProjectPdf = async (dataObj) => {
         return processResp
     } else {
         console.log("here 3");
+        console.log(dataObj.deletePath);
         let fileDeleteResult = null
         if (dataObj.deletePath !== null) {
             fileDeleteResult = await fsPack.simpleFileDelete({
@@ -1527,6 +1528,7 @@ const updateProjectPdf = async (dataObj) => {
         })
         return fileUploadResult
     }
+
 }
 
 
