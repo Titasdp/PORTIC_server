@@ -359,8 +359,8 @@ const simpleFileUpload = async (dataObj) => {
     let processResp = {}
     let generatedPath = dataObj.folder + uniqueIdPack.generateRandomId('_') + dataObj.req.sanitize(dataObj.req.files.file.name)
     let uploadPath = `${process.cwd()}/Server` + generatedPath
-    return await new Promise((resolve) => {
-        dataObj.req.files.file.mv(uploadPath, function (err) {
+    return await new Promise(async (resolve) => {
+        await dataObj.req.files.file.mv(uploadPath, function (err) {
             console.log("here 6");
             if (err) {
                 console.log(err);
