@@ -321,8 +321,9 @@ const confirmIsImg = async (fileMimeType) => {
  * @returns True or false
  */
 const confirmIsPdf = async (fileMimeType) => {
+    console.log();
     console.log(fileMimeType);
-    if (fileMimeType.includes('application/pdf')) {
+    if (await fileMimeType.includes('application/pdf')) {
         return true
     } else {
         return false

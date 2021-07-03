@@ -1509,6 +1509,7 @@ const updateProjectPdf = async (dataObj) => {
         }
         return processResp
     } else {
+        console.log("here 3");
         let fileDeleteResult = null
         if (dataObj.deletePath !== null) {
             fileDeleteResult = await fsPack.simpleFileDelete({
