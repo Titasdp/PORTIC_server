@@ -853,8 +853,9 @@ const fetchNewsImgId = async (id_news) => {
  * Status: Complete
  */
 const fetchNewsRelatedProject = async (id_news) => {
+    console.log(id_news);
     let processResp = {}
-    let query = `Select Project.id_project,Project.initials from ((Project_news inner Join Project on Project.id_project = Project_news.id_news) 
+    let query = `Select Project.id_project,Project.initials from ((Project_news inner Join Project on Project.id_project = Project_news.id_project) 
     inner Join News on News.id_news =Project_news.id_news )  Where News.id_news =:id_news;`
     await sequelize
         .query(query, {

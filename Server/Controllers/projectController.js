@@ -906,30 +906,8 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
- *Add News
+ *Add Project
  *Status:Completed
  */
 const addProject = async (dataObj) => {
