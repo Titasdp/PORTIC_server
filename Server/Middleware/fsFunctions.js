@@ -354,11 +354,13 @@ const simplifyCheckFileExistence = async (imgPath) => {
  * Simple file Upload
  * */
 const simpleFileUpload = async (dataObj) => {
+    console.log(dataObj.req.files.file);
+    console.log(dataObj.folder);
     let processResp = {}
     let generatedPath = dataObj.folder + uniqueIdPack.generateRandomId('_') + dataObj.req.sanitize(dataObj.req.files.file.name)
     let uploadPath = `${process.cwd()}/Server` + generatedPath
-    return await new Promise(async (resolve) => {
-        await dataObj.req.files.file.mv(uploadPath, function (err) {
+    return await new Promise((resolve) => {
+        dataObj.req.files.file.mv(uploadPath, function (err) {
             if (err) {
                 processResp = {
                     processRespCode: 500,
