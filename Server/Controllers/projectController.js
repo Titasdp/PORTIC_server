@@ -1468,6 +1468,7 @@ const deleteProject = async (dataObj) => {
 
 
 const updateProjectPdf = async (dataObj) => {
+    console.log("here1");
     if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
         processResp = {
             processRespCode: 400,
@@ -1480,6 +1481,9 @@ const updateProjectPdf = async (dataObj) => {
         return processResp
     }
 
+
+
+    console.log(dataObj.req.files.file);
     if (dataObj.req.files.file === null) {
         processResp = {
             processRespCode: 400,
@@ -1492,6 +1496,7 @@ const updateProjectPdf = async (dataObj) => {
         return processResp
     }
 
+    console.log("here 2");
 
     if (!await fsPack.confirmIsPdf(dataObj.req.sanitize(dataObj.req.files.file.mimetype))) {
         processResp = {
