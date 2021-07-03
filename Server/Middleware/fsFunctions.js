@@ -361,7 +361,9 @@ const simpleFileUpload = async (dataObj) => {
     let uploadPath = `${process.cwd()}/Server` + generatedPath
     return await new Promise((resolve) => {
         dataObj.req.files.file.mv(uploadPath, function (err) {
+            console.log("here 6");
             if (err) {
+                console.log(err);
                 processResp = {
                     processRespCode: 500,
                     toClient: {
