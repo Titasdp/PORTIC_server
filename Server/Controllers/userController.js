@@ -641,14 +641,10 @@ const fetchUserProfileById = async (dataObj) => {
                         user_status: el.user_status,
                         picture: null
                     }
-
-
                     if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
                         userObj.picture = process.env.API_URL + fetchImgResult.toClient.processResult
                     }
-
-
                     users.push(userObj)
 
                 }

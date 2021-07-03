@@ -11,8 +11,8 @@ const sequelize = require("../Database/connection")
 //Middleware 
 const uniqueIdPack = require("../Middleware/uniqueId")
 
-
-
+// Env
+require("dotenv").config();
 
 
 
@@ -149,7 +149,7 @@ const initOutsideInvestors = async (dataObj) => {
 
 const fetchProjectOutsideInvestor = async (id_project) => {
     let processResp = {}
-    let query = `Select id_investor, designation,page_url from Outside_investor Where Outside_investor.id_project = :id_project`;
+    let query = `Select Outside_investor.id_investor, Outside_investor.designation, Outside_investor.id_logo from Outside_investor Where Outside_investor.id_project =:id_project;`;
 
     await sequelize
         .query(query, {
@@ -159,7 +159,8 @@ const fetchProjectOutsideInvestor = async (id_project) => {
         }, {
             model: OutsideInvestorModel.Outside_investor
         })
-        .then(data => {
+        .then(async data => {
+            let investors = []
             let respCode = 200
             let respMsg = "Fetch successfully."
             if (data[0].length === 0) {
@@ -167,10 +168,28 @@ const fetchProjectOutsideInvestor = async (id_project) => {
                 respMsg = "Fetch process completed successfully, but there is no content."
             }
 
+
+            for (const el of data[0]) {
+
+                let object = {
+                    id_investor: el.id_investor,
+                    designation: el.designation,
+                    logo: null
+                }
+                if (el.id_logo !== null) {
+                    let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_logo);
+
+                    object.logo = process.env.API_URL + fetchImgResult.toClient.processResult
+                }
+
+                investors.push(object)
+
+            }
+
             processResp = {
                 processRespCode: respCode,
                 toClient: {
-                    processResult: data[0],
+                    processResult: investors,
                     processError: null,
                     processMsg: respMsg,
                 }
@@ -214,7 +233,7 @@ const addProjectOutsideInvestor = async (dataObj) => {
 
 
     let pictureUploadResult = null
-    if (dataObj.req.files || Object.keys(dataObj.req.files).length !== 0) {
+    if (dataObj.req.files != null) {
         pictureUploadResult = await pictureController.addPictureOnCreate({
             folder: `/Images/Logos/`,
             req: dataObj.req
@@ -224,9 +243,10 @@ const addProjectOutsideInvestor = async (dataObj) => {
         }
     }
 
+    console.log(pictureUploadResult);
 
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_OutsideInvestor'), dataObj.req.sanitize(dataObj.req.body.investor_name), pictureUploadResult.toClient.processResult.generatedId, dataObj.idUser, dataObj.req.sanitize(dataObj.req.params.id)],
+        [uniqueIdPack.generateRandomId('_OutsideInvestor'), dataObj.req.sanitize(dataObj.req.body.investor_name), (!pictureUploadResult) ? null : (pictureUploadResult.toClient.processResult.generatedId), dataObj.idUser, dataObj.req.sanitize(dataObj.req.params.id)],
     ]
     await sequelize
         .query(

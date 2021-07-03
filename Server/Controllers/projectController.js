@@ -636,7 +636,7 @@ const selectProjectNews = async (id_project, lng) => {
                         description: el.description,
                         published_date: el.published_date,
                         id_news: el.id_news,
-                        cover: el.img_path,
+                        cover: process.env.API_URL + el.img_path,
                     }
                     newsArray.push(newsObj)
                 }
