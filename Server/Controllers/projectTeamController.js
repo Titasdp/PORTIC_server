@@ -242,6 +242,8 @@ const deleteTeamMember = async (dataObj) => {
  * StatusCompleted
  */
 const updateMemberEditionStatus = async (dataObj) => {
+    console.log(dataObj.req.body);
+    console.log(dataObj.req.params);
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.body.can_edit)) {
         processResult = {
@@ -254,11 +256,12 @@ const updateMemberEditionStatus = async (dataObj) => {
         }
         return processResult
     }
+
     await sequelize
         .query(
             `UPDATE Project_team SET Project_team.can_edit =:can_edit Where Project_team.id_project=:id_project and Project_team.id_team_member=:id_team_member`, {
                 replacements: {
-                    can_edit: (isNaN(dataObj.req.sanitize(dataObj.req.body.can_edit))) ? dataObj.req.sanitize(dataObj.req.body.can_edit) : 0,
+                    can_edit: (!(dataObj.req.sanitize(dataObj.req.body.can_edit))) ? 0 : ((dataObj.req.sanitize(dataObj.req.body.can_edit) !== 1 || dataObj.req.sanitize(dataObj.req.body.can_edit) !== 0) ? 0 : dataObj.req.sanitize(dataObj.req.body.can_edit)),
                     id_project: dataObj.req.sanitize(dataObj.req.params.id),
                     id_team_member: dataObj.req.sanitize(dataObj.req.params.id_team_member)
                 }
