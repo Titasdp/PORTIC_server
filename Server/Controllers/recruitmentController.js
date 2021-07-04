@@ -3,8 +3,8 @@ const sequelize = require("../Database/connection")
 const uniqueIdPack = require("../Middleware/uniqueId");
 //SecondaryController
 
-const categoryController = require("../Controllers/categoryController")
-const recruitmentCategoryController = require("../Controllers/recruitmentCategoryController")
+// const categoryController = require("../Controllers/categoryController")
+// const recruitmentCategoryController = require("../Controllers/recruitmentCategoryController")
 
 // Secondary models
 const RecruitmentAreaModel = require("../Models/RecruitmentAreas") // done
