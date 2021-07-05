@@ -270,10 +270,10 @@ const initUnity = async (dataObj) => {
  */
 const selectUnityRelatedAreas = async (id_unity, lng) => {
     let processResp = {}
-    let query = (lng !== 'pt') ? `SELECT Area.id_area, Area.description_pt as description FROM ((  Area_unity  inner Join 
+    let query = (lng !== 'pt') ? `SELECT Area.id_area, Area.designation_pt as designation FROM ((  Area_unity  inner Join 
         Unity on Unity.id_unity= Area_unity.id_unity)
         Inner Join
-        Area on Area.id_area = Area_unity.id_area) WHERE Unity.id_unity=:id_unity;` : `SELECT Area.id_area, Area.description_eng as description FROM ((  Area_unity  inner Join 
+        Area on Area.id_area = Area_unity.id_area) WHERE Unity.id_unity=:id_unity;` : `SELECT Area.id_area, Area.designation_eng as designation FROM ((  Area_unity  inner Join 
         Unity on Unity.id_unity= Area_unity.id_unity)
         Inner Join
         Area on Area.id_area = Area_unity.id_area) WHERE Unity.id_unity =:id_unity `
