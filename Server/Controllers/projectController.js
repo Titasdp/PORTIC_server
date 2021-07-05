@@ -763,7 +763,8 @@ const selectProjectTeam = async (id_project) => {
                     }
 
                     if (el.id_picture === null) {
-                        teamMemberObj.picture = process.env.API_URL + el.id_picture
+                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                        teamMemberObj.picture = process.env.API_URL + fetchImgResult.toClient.processResult
                     }
                     teamMemberArray.push(teamMemberObj)
                 }
@@ -841,7 +842,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                     let outsideInvestors = await outsideInvestorController.fetchProjectOutsideInvestor(el.id_project)
                     let news = await fetchProjectNewsByAdmin(el.id_project)
                     let galleryImgs = await selectProjectGallery(el.id_project)
-                    let projectTeam = await selectProjectTeam(el.id_project)
+                    let projectTeam = await FetchProjectTeamForAdmin(el.id_project)
 
 
                     let projectObj = {
@@ -1599,14 +1600,12 @@ const fetchProjectNewsByAdmin = async (id_project) => {
 };
 
 
-const selectProjectTeamForAdmin = async (id_project) => {
+const FetchProjectTeamForAdmin = async (id_project) => {
     let processResp = {}
-    let query = `SELECT User.id_user,User.full_name, User.email,User.phone_numb,User.id_picture From (( ( Project_team  inner Join 
+    let query = `SELECT User.id_user,User.full_name, User.email,User.phone_numb,User.id_picture , Project_team.can_edit From ((  Project_team  inner Join 
         Project on Project.id_project = Project_team.id_project)
         Inner Join
-        User on User.id_user= Project_team.id_team_member)
-        Inner Join
-        User_status on User_status.id_status= User.id_status)  where User_status.designation= 'Normal' and   Project.id_project=:id_project;`
+        User on User.id_user= Project_team.id_team_member)  where Project.id_project=:id_project;`
     await sequelize
         .query(query, {
             replacements: {
@@ -1630,11 +1629,13 @@ const selectProjectTeamForAdmin = async (id_project) => {
                         full_name: el.full_name,
                         email: el.email,
                         phone_number: el.phone_numb,
-                        picture: null
+                        picture: null,
+                        can_edit: el.can_edit
                     }
 
                     if (el.id_picture === null) {
-                        teamMemberObj.picture = process.env.API_URL + el.id_picture
+                        let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
+                        teamMemberObj.picture = process.env.API_URL + fetchImgResult.toClient.processResult
                     }
                     teamMemberArray.push(teamMemberObj)
                 }
