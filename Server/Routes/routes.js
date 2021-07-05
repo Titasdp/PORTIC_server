@@ -1491,6 +1491,13 @@ router.delete("/projects/:id_project/courses/:id_course", async (req, res) => {
 //* <Areas -Connections
 //Course
 router.post("/areas/:id_area/courses/:id_course", async (req, res) => {
+    console.log("params:");
+    console.log(req.params);
+    console.log("body:");
+    console.log(req.body);
+    console.log("Authorization:");
+    console.log(req.headers.authorization);
+
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -1506,7 +1513,7 @@ router.post("/areas/:id_area/courses/:id_course", async (req, res) => {
 
 
 router.delete("/areas/:id_area/courses/:id_course", async (req, res) => {
-    console.log(req.body);
+
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
