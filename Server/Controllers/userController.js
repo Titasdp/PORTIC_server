@@ -731,7 +731,7 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
     let processResp = {}
 
 
-    if (!dataObj.id_user || !dataObj.req.sanitize(dataObj.req.body.username) || !dataObj.req.sanitize(dataObj.req.body.email) || !dataObj.req.sanitize(dataObj.req.body.phone_numb) || !dataObj.req.sanitize(dataObj.req.body.linkedIn_url) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.facebook_url) || !dataObj.req.sanitize(dataObj.req.body.full_name)) {
+    if (!dataObj.id_user || !dataObj.req.sanitize(dataObj.req.body.username) || !dataObj.req.sanitize(dataObj.req.body.email) || !dataObj.req.sanitize(dataObj.req.body.phone_numb) || !dataObj.req.sanitize(dataObj.req.body.linkedIn_url) || !dataObj.req.sanitize(dataObj.req.body.description_pt) || !dataObj.req.sanitize(dataObj.req.body.description_eng) || !dataObj.req.sanitize(dataObj.req.body.full_name)) {
         processResult = {
             processRespCode: 400,
             toClient: {
