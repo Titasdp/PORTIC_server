@@ -762,7 +762,7 @@ const selectProjectTeam = async (id_project) => {
                         picture: null
                     }
 
-                    if (el.id_picture === null) {
+                    if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
                         teamMemberObj.picture = process.env.API_URL + fetchImgResult.toClient.processResult
                     }
@@ -1633,7 +1633,7 @@ const FetchProjectTeamForAdmin = async (id_project) => {
                         can_edit: el.can_edit
                     }
                     console.log(el.id_picture);
-                    if (el.id_picture === null) {
+                    if (el.id_picture !== null) {
                         let fetchImgResult = await pictureController.fetchPictureInSystemById(el.id_picture);
                         console.log(fetchImgResult);
                         teamMemberObj.picture = process.env.API_URL + fetchImgResult.toClient.processResult
