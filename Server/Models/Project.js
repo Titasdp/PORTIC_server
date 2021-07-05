@@ -35,6 +35,14 @@ Project.init({
         allowNull: true,
         defaultValue: null
     },
+    summary_pt: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    summary_eng: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     desc_html_structure_eng: {
         type: DataTypes.TEXT('long'),
         allowNull: false,

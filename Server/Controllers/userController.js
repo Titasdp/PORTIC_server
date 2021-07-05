@@ -526,8 +526,8 @@ const initUser = async (dataObj) => {
  */
 const fetchAllUsers = async (dataObj) => {
     let processResp = {}
-    let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.username, User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
-        User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+    let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.post,User.username, User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+        User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.post,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
             User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity) where Entity.id_entity = :id_entity`
 
     await sequelize
@@ -552,6 +552,7 @@ const fetchAllUsers = async (dataObj) => {
                         full_name: el.full_name,
                         description_eng: el.description_eng,
                         description_pt: el.description_pt,
+                        post: el.post,
                         email: el.email,
                         phone_numb: el.phone_numb,
                         facebook_url: el.facebook_url,
@@ -605,7 +606,7 @@ const fetchUserProfileById = async (dataObj) => {
     // var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
     // var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     // console.log(`${date} ${time}`);
-    let query = `SELECT User.id_user,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
+    let query = `SELECT User.id_user,User.username,User.post,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
     await sequelize
         .query(query, {
             replacements: {
@@ -632,6 +633,7 @@ const fetchUserProfileById = async (dataObj) => {
                         description_eng: el.description_eng,
                         description_pt: el.description_pt,
                         email: el.email,
+                        post: el.post,
                         phone_numb: el.phone_numb,
                         facebook_url: el.facebook_url,
                         linkedIn_url: el.linkedIn_url,
@@ -775,7 +777,7 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE User SET username = :username ,full_name =:full_name, description_eng =:description_eng, description_pt =:description_pt, email=:email,phone_numb=:phone_numb , facebook_url=:facebook_url,linkedIn_url =:linkedIn_url  Where User.id_user=:id_user `, {
+            `UPDATE User SET username = :username,post =:post ,full_name =:full_name, description_eng =:description_eng, description_pt =:description_pt, email=:email,phone_numb=:phone_numb , facebook_url=:facebook_url,linkedIn_url =:linkedIn_url  Where User.id_user=:id_user `, {
                 replacements: {
                     id_user: dataObj.id_user,
                     username: dataObj.req.sanitize(dataObj.req.body.username),
@@ -786,6 +788,7 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
                     facebook_url: dataObj.req.sanitize(dataObj.req.body.facebook_url),
                     linkedIn_url: dataObj.req.sanitize(dataObj.req.body.linkedIn_url),
                     full_name: dataObj.req.sanitize(dataObj.req.body.full_name),
+                    post: (!dataObj.req.sanitize(dataObj.req.body.post)) ? null : dataObj.req.sanitize(dataObj.req.body.post),
                 }
             }, {
                 model: UserModel.User
@@ -946,10 +949,6 @@ const updateUserEntity = async () => {
                 processRespCode: 201,
                 toClient: {
                     processResult: data[0],
-                    // {
-                    //     // pt_answer: "Perfil actualizado com sucesso!",
-                    //     // en_answer: "Profile updated Successfully"
-                    // },
                     processError: null,
                     processMsg: "The brand was updated successfully",
                 }

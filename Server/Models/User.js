@@ -59,7 +59,7 @@ User.init({
         allowNull: false,
         unique: true
     },
-    facebook_url: {
+    post: {
         type: DataTypes.STRING,
         allowNull: true,
         defaultValue: null,
