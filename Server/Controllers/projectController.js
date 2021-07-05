@@ -1104,7 +1104,7 @@ const editProject = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE Project SET title=:title,initials=:initials,summary_eng:summary_eng,summary_pt:summary_pt, reference =:reference, desc_html_structure_eng =:desc_html_structure_eng,desc_html_structure_pt=:desc_html_structure_pt,start_date=:start_date,
+            `UPDATE Project SET title=:title,initials=:initials,summary_eng=:summary_eng,summary_pt=:summary_pt, reference =:reference, desc_html_structure_eng =:desc_html_structure_eng,desc_html_structure_pt=:desc_html_structure_pt,start_date=:start_date,
             end_date=:end_date,  project_contact=:project_contact,project_email=:project_email Where Project.id_project=:id_project`, {
                 replacements: {
                     id_project: dataObj.req.sanitize(dataObj.req.params.id),
