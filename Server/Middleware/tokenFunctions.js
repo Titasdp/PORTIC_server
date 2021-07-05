@@ -30,6 +30,8 @@ const validateToken = (token, callback) => {
 
 
 const validateTokenForUsersMaxSecurity = async (token) => {
+    console.log("Token");
+    console.log(token);
     let processResp = {}
     if (!token) {
         processResp = {

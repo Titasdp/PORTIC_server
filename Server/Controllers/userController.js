@@ -1452,5 +1452,7 @@ module.exports = {
     refreshUserPassword,
     updateUserPassword,
 
+    updateUserLevel
+
 
 }

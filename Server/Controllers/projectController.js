@@ -1599,6 +1599,71 @@ const fetchProjectNewsByAdmin = async (id_project) => {
 };
 
 
+const selectProjectTeamForAdmin = async (id_project) => {
+    let processResp = {}
+    let query = `SELECT User.id_user,User.full_name, User.email,User.phone_numb,User.id_picture From (( ( Project_team  inner Join 
+        Project on Project.id_project = Project_team.id_project)
+        Inner Join
+        User on User.id_user= Project_team.id_team_member)
+        Inner Join
+        User_status on User_status.id_status= User.id_status)  where User_status.designation= 'Normal' and   Project.id_project=:id_project;`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_project: id_project
+            }
+        }, {
+            model: ProjectGalleryModel.Project_gallery
+        })
+        .then(async data => {
+            let teamMemberArray = []
+            let respCode = 200
+            let respMsg = "Fetch successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+
+                    let teamMemberObj = {
+                        id_user: el.id_user,
+                        full_name: el.full_name,
+                        email: el.email,
+                        phone_number: el.phone_numb,
+                        picture: null
+                    }
+
+                    if (el.id_picture === null) {
+                        teamMemberObj.picture = process.env.API_URL + el.id_picture
+                    }
+                    teamMemberArray.push(teamMemberObj)
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: teamMemberArray,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: teamMemberArray,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+
+}
 
 
 

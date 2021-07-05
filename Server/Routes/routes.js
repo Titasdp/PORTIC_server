@@ -79,7 +79,7 @@ const {
 
 
 //<DataStatus
-router.get("/data_status", async (req, res) => {
+router.get("/data/status", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -97,7 +97,7 @@ router.get("/data_status", async (req, res) => {
  * Fetch all user Status
  * Status:Completed
  */
-router.get("/user_status", async (req, res) => {
+router.get("/users/status", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
@@ -1506,6 +1506,7 @@ router.post("/areas/:id_area/courses/:id_course", async (req, res) => {
 
 
 router.delete("/areas/:id_area/courses/:id_course", async (req, res) => {
+    console.log(req.body);
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
         res.status(tokenResult.processRespCode).send(tokenResult.toClient)
