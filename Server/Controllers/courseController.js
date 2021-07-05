@@ -557,7 +557,7 @@ const selectCourseRelatedUnity = async (id_course, lng) => {
 //Done
 const selectCourseRelatedAreas = async (id_course, lng) => {
     let processResp = {}
-    let query = (lng === "pt") ? `SELECT Area.id_area, Area.description_pt as designation FROM((  Course_area  inner Join 
+    let query = (lng === "pt") ? `SELECT Area.id_area, Area.designation_pt as designation FROM((  Course_area  inner Join 
         Course on Course.id_course= Course_area.id_course)
         Inner Join
         Area on Area.id_area = Course_area.id_area)  where Course.id_course =:id_course;` : `SELECT Area.id_area, Area.designation_eng as designation FROM((  Course_area  inner Join 

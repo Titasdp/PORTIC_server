@@ -526,8 +526,8 @@ const initUser = async (dataObj) => {
  */
 const fetchAllUsers = async (dataObj) => {
     let processResp = {}
-    let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.post,User.username, User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
-        User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.post,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+    let query = (dataObj.user_level === `Super Admin`) ? ` SELECT User.id_user,User.post,User.username, User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb,  User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
+        User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity)` : ` SELECT User.id_user,User.post,User.username,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb,  User.linkedIn_url, User.created_at, User.updated_at, User.id_picture, Entity.initials as entity_initials, User_level.designation as user_level, User_status.designation as user_status FROM  ((((User INNER JOIN 
             User_status on User_status.id_status = User.id_status))INNER JOIN  User_level on User_level.id_user_level = User.id_user_level ) INNER JOIN Entity ON Entity.id_entity = User.id_entity) where Entity.id_entity = :id_entity`
 
     await sequelize
@@ -606,7 +606,7 @@ const fetchUserProfileById = async (dataObj) => {
     // var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
     // var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     // console.log(`${date} ${time}`);
-    let query = `SELECT User.id_user,User.username,User.post,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.facebook_url, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
+    let query = `SELECT User.id_user,User.username,User.post,User.full_name, User.description_eng, User.description_pt,User.email, User.phone_numb, User.linkedIn_url, User.id_picture, Entity.initials as entity_initials FROM  (User INNER JOIN Entity ON Entity.id_entity = User.id_entity) where User.id_user=:id_user;`
     await sequelize
         .query(query, {
             replacements: {
@@ -635,7 +635,6 @@ const fetchUserProfileById = async (dataObj) => {
                         email: el.email,
                         post: el.post,
                         phone_numb: el.phone_numb,
-                        facebook_url: el.facebook_url,
                         linkedIn_url: el.linkedIn_url,
                         created_at: el.created_at,
                         updated_at: el.updated_at,
