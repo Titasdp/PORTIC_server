@@ -555,7 +555,6 @@ const fetchAllUsers = async (dataObj) => {
                         post: el.post,
                         email: el.email,
                         phone_numb: el.phone_numb,
-                        facebook_url: el.facebook_url,
                         linkedIn_url: el.linkedIn_url,
                         created_at: el.created_at,
                         updated_at: el.updated_at,
@@ -776,7 +775,7 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE User SET username = :username,post =:post ,full_name =:full_name, description_eng =:description_eng, description_pt =:description_pt, email=:email,phone_numb=:phone_numb , facebook_url=:facebook_url,linkedIn_url =:linkedIn_url  Where User.id_user=:id_user `, {
+            `UPDATE User SET username = :username,post =:post ,full_name =:full_name, description_eng =:description_eng, description_pt =:description_pt, email=:email,phone_numb=:phone_numb ,linkedIn_url =:linkedIn_url  Where User.id_user=:id_user `, {
                 replacements: {
                     id_user: dataObj.id_user,
                     username: dataObj.req.sanitize(dataObj.req.body.username),
@@ -784,7 +783,6 @@ const editUserProfileByAdminOrProfileOwner = async (dataObj) => {
                     description_eng: dataObj.req.sanitize(dataObj.req.body.description_eng),
                     email: dataObj.req.sanitize(dataObj.req.body.email),
                     phone_numb: dataObj.req.sanitize(dataObj.req.body.phone_numb),
-                    facebook_url: dataObj.req.sanitize(dataObj.req.body.facebook_url),
                     linkedIn_url: dataObj.req.sanitize(dataObj.req.body.linkedIn_url),
                     full_name: dataObj.req.sanitize(dataObj.req.body.full_name),
                     post: (!dataObj.req.sanitize(dataObj.req.body.post)) ? null : dataObj.req.sanitize(dataObj.req.body.post),
