@@ -917,6 +917,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
  *Status:Completed
  */
 const addProject = async (dataObj) => {
+    console.log(dataObj.req.body);
     // console.log(dataObj.req.body);
     let processResp = {}
     if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email) || !dataObj.req.sanitize(dataObj.req.body.summary_eng), !dataObj.req.sanitize(dataObj.req.body.summary_pt) || !dataObj.req.sanitize(dataObj.req.body.coordinator)) {
