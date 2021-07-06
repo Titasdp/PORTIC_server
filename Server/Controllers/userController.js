@@ -902,7 +902,7 @@ const updateUserStatus = async (dataObj) => {
  * Patch user Entity
  * StatusCompleted
  */
-const updateUserEntity = async () => {
+const updateUserEntity = async (dataObj) => {
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.body.entity_initials)) {
         processResult = {
@@ -972,9 +972,9 @@ const updateUserEntity = async () => {
  * Patch user Entity
  * StatusCompleted
  */
-const updateUserLevel = async () => {
+const updateUserLevel = async (dataObj) => {
     let processResp = {}
-    if (!dataObj.req.sanitize(dataObj.req.body.entity_initials)) {
+    if (!dataObj.req.sanitize(dataObj.req.body.user_level)) {
         processResult = {
             processRespCode: 400,
             toClient: {
@@ -987,7 +987,7 @@ const updateUserLevel = async () => {
     }
 
 
-    let fetchResult = await userLevelController.fetchUserLevelIdByDesignation(dataObj.req.sanitize(dataObj.req.body.entity_initials))
+    let fetchResult = await userLevelController.fetchUserLevelIdByDesignation(dataObj.req.sanitize(dataObj.req.body.user_level))
     if (fetchResult.processRespCode !== 200) {
         processResp = {
             processRespCode: 500,
@@ -1004,7 +1004,7 @@ const updateUserLevel = async () => {
         .query(
             `UPDATE User SET User.id_user_level =:id_user_level  Where User.id_user=:id_user `, {
                 replacements: {
-                    id_status: fetchResult.toClient.processResult.id_entity,
+                    id_status: fetchResult.toClient.processResult.id_user_level,
                     id_user: dataObj.id_user
                 }
             }, {
@@ -1448,7 +1448,8 @@ module.exports = {
     refreshUserPassword,
     updateUserPassword,
 
-    updateUserLevel
+    updateUserLevel,
+    updateUserEntity
 
 
 }

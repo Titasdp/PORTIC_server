@@ -273,12 +273,11 @@ const addAreaFocus = async (dataObj) => {
         req: dataObj.req
     })
     if (pictureUploadResult.processRespCode !== 201) {
-        console.log("here");
         return pictureUploadResult
     }
 
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_AreaFocus'), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idUser, dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId, ],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idUser, dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId],
     ]
     await sequelize
         .query(

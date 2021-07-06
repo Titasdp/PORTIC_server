@@ -109,47 +109,80 @@ const initMenu = async (dataObj) => {
 }
 
 
-/**
- * Fetches all Menus 
- * Status: Completed
- * @param {Object} req Request sended by the client 
- * @param {Callback} callback 
- */
-const fetchMenus = (req, callback) => {
-    sequelize
-        .query("SELECT * FROM Menu", {
-            model: MenuModel.Menu
-        })
-        .then(data => {
-            let respCode = 200;
-            let respMsg = "Fetched successfully."
-            if (data.length === 0) {
-                respCode = 204
-                respMsg = "Fetch process completed successfully, but there is no content."
+const addDefaultMenus = async (dataObj) => {
+    let processResp = {}
+
+    if (dataObj.idEntity === null) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later.",
             }
-            let processResp = {
-                processRespCode: respCode,
+        }
+        return processResp
+    }
+
+
+
+    let dataStatusFetchResult = await (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+    //If success returns the hashed password
+    let insertArray = [
+        [uniqueIdPack.generateRandomId('_Menu'), "Contacts", "Sobre Nós", null, null, `Contacts`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Units", "Unidades", `PORTIC integrates several research, development and innovation units, either internal or making space available for external units and entities.`, `O PORTIC integra diversas unidades de investigação, desenvolvimento e inovação, seja internas, seja disponibilizando espaço para unidades e entidades externas.`, `Unities`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Courses", "Cursos", `Research and development, technology and knowledge transfer, innovation and creativity, entrepreneurship, incubation, spin-offs, startups – these are all part of Research, Technology & Innovation, a holistic chain of interrelated activities. PORTIC includes units and groups with activities in different stages of the knowledge and innovation chain, in several areas of knowledge.`, `Investigação e desenvolvimento, transferência de tecnologia e conhecimento, inovação e criatividade, empreendedorismo, incubação, spin-offs, start-ups - tudo isto faz parte da Investigação, Tecnologia & Inovação, uma cadeia holística de actividades inter-relacionadas. PORTIC inclui unidades e grupos com actividades em diferentes fases da cadeia do conhecimento e da inovação, em várias áreas do conhecimento.`, `Courses`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Projects", "Projetos", null, null, `ProjectsCatalog`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Media", "Media", `Research and development, technology and knowledge transfer, innovation and creativity, entrepreneurship, incubation, spin-offs, startups – these are all part of Research, Technology & Innovation, a holistic chain of interrelated activities. PORTIC includes units and groups with activities in different stages of the knowledge and innovation chain, in several areas of knowledge.`, `Investigação e desenvolvimento, transferência de tecnologia e conhecimento, inovação e criatividade, empreendedorismo, incubação, spin-offs, start-ups - tudo isto faz parte da Investigação, Tecnologia & Inovação, uma cadeia holística de actividades inter-relacionadas. PORTIC inclui unidades e grupos com actividades em diferentes fases da cadeia do conhecimento e da inovação, em várias áreas do conhecimento.`, `Media`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Positions", "Recrutamento", `nothing`, `nada`, `Positions`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Login", "Login", null, null, `SignIn`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+        [uniqueIdPack.generateRandomId('_Menu'), "Entidades", "Entities", null, null, `Entities`, dataStatusFetchResult.toClient.processResult[0].id_status, dataObj.idEntity],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Menu (id_menu,designation_eng,designation_pt,page_description_eng,page_description_pt,router_link,id_status,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: MenuModel.Menu
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
                 toClient: {
                     processResult: data,
                     processError: null,
-                    processMsg: respMsg,
+                    processMsg: "All data Where created successfully.",
                 }
             }
-            return callback(true, processResp)
+
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
                     processError: null,
-                    processMsg: "Something when wrong please try again later",
+                    processMsg: "Something went wrong please try again later",
                 }
             }
-            return callback(false, processResp)
+
         });
-};
+    return processResp
+}
+
 
 
 
@@ -230,6 +263,6 @@ const fetchEntityMenus = async (dataObj) => {
 
 module.exports = {
     initMenu,
-    fetchMenus,
-    fetchEntityMenus
+    fetchEntityMenus,
+    addDefaultMenus
 }

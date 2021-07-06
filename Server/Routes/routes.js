@@ -367,6 +367,34 @@ router.patch("/users/:id/profile/status", async (req, res) => {
 })
 
 
+router.patch("/users/:id/profile/level", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await userController.updateUserLevel({
+            req: req,
+            id_user: req.sanitize(req.params.id)
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+router.patch("/users/:id/profile/entity", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    console.log(tokenResult);
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await userController.updateUserEntity({
+            req: req,
+            id_user: req.sanitize(req.params.id)
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
 
 
 router.patch("/users/:id/profile/password", async (req, res) => {
@@ -1781,7 +1809,7 @@ router.post("/init/data", async (req, res) => {
 
                         let idUser = userFetchResult.toClient.processResult[0].id_user
                         let idDataStatus = dataStatusFetchResult.toClient.processResult[0].id_status
-                        console.log(idUser);
+
 
                         //Fourth Wave Init
                         let initMenusResult = await menuController.initMenu({

@@ -5,10 +5,9 @@ const uniqueIdPack = require("../Middleware/uniqueId");
 const fsPack = require("../Middleware/fsFunctions")
 // Controllers
 const menuController = require("./menuController")
-const entityEmailController = require("./entityEmailController")
-const entityContactController = require("./entityContactController")
-const socialMediaController = require("./socialMediaController")
+const dataStatusController = require("../Controllers/dataStatusController")
 const pictureController = require("../Controllers/pictureController")
+const entityLevelController = require("../Controllers/entityLevelController")
 
 //.ENV
 require("dotenv").config();
@@ -487,15 +486,33 @@ const editEntity = async (dataObj) => {
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_eng) ||
         !dataObj.req.sanitize(dataObj.req.body.slogan_eng) || !dataObj.req.sanitize(dataObj.req.body.slogan_pt) || !dataObj.req.sanitize(dataObj.req.body.colors) || !dataObj.req.sanitize(dataObj.req.body.main_email) ||
-        !dataObj.req.sanitize(dataObj.req.body.secondary_email) || !dataObj.req.sanitize(dataObj.req.body.main_contact) || !dataObj.req.sanitize(dataObj.req.body.linkedIn) || !dataObj.req.sanitize(dataObj.req.body.facebook) ||
-        !dataObj.req.sanitize(dataObj.req.body.facebook) || !dataObj.req.sanitize(dataObj.req.body.facebook) || !dataObj.req.sanitize(dataObj.req.body.facebook) || !dataObj.req.sanitize(dataObj.req.body.facebook)
-    ) {
+        !dataObj.req.sanitize(dataObj.req.body.secondary_email) || !dataObj.req.sanitize(dataObj.req.body.main_contact)) {
         processResp = {
             processRespCode: 400,
             toClient: {
                 processResult: null,
                 processError: null,
                 processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+
+
+    let confirmUserExistentByParamsResult = await confirmUserExistentByParams({
+        paramsValueArray: [dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.initials)],
+        id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+    })
+
+
+    if (confirmUserExistentByParamsResult.processRespCode !== 204) {
+        processResp = {
+            processRespCode: confirmUserExistentByParamsResult.processRespCode,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: confirmUserExistentByParamsResult.toClient.processMsg,
             }
         }
         return processResp
@@ -517,14 +534,14 @@ const editEntity = async (dataObj) => {
                     main_email: dataObj.req.sanitize(dataObj.req.body.main_email),
                     secondary_email: dataObj.req.sanitize(dataObj.req.body.secondary_email),
                     main_contact: dataObj.req.sanitize(dataObj.req.body.main_contact),
-                    linkedIn: dataObj.req.sanitize(dataObj.req.body.linkedIn),
-                    facebook: dataObj.req.sanitize(dataObj.req.body.facebook),
-                    instagram: dataObj.req.sanitize(dataObj.req.body.instagram),
-                    youtube: dataObj.req.sanitize(dataObj.req.body.youtube),
-                    twitter: dataObj.req.sanitize(dataObj.req.body.twitter),
+                    linkedIn: (!dataObj.req.sanitize(dataObj.req.body.linkedIn)) ? null : dataObj.req.sanitize(dataObj.req.body.linkedIn),
+                    facebook: (!dataObj.req.sanitize(dataObj.req.body.facebook)) ? null : dataObj.req.sanitize(dataObj.req.body.facebook),
+                    instagram: (!dataObj.req.sanitize(dataObj.req.body.instagram)) ? null : dataObj.req.sanitize(dataObj.req.body.instagram),
+                    youtube: (!dataObj.req.sanitize(dataObj.req.body.youtube)) ? null : dataObj.req.sanitize(dataObj.req.body.youtube),
+                    twitter: (!dataObj.req.sanitize(dataObj.req.body.twitter)) ? null : dataObj.req.sanitize(dataObj.req.body.twitter),
                 }
             }, {
-                model: ProjectModel.Project
+                model: EntityModel.Entity
             }
         )
         .then(data => {
@@ -551,8 +568,590 @@ const editEntity = async (dataObj) => {
         });
 
     return processResp
+}
+
+
+
+
+
+
+
+
+/**
+ * Add Media  
+ * StatusCompleted
+ */
+const addEntity = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_eng) ||
+        !dataObj.req.sanitize(dataObj.req.body.slogan_eng) || !dataObj.req.sanitize(dataObj.req.body.slogan_pt) || !dataObj.req.sanitize(dataObj.req.body.colors) || !dataObj.req.sanitize(dataObj.req.body.main_email) ||
+        !dataObj.req.sanitize(dataObj.req.body.secondary_email) || !dataObj.req.sanitize(dataObj.req.body.main_contact)) {
+        processResp = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Content missing from the request",
+            }
+        }
+        return processResp
+    }
+
+    let confirmUserExistentByParamsResult = await confirmUserExistentByParams({
+        paramsValueArray: [dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.initials)],
+        id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+    })
+
+
+    if (confirmUserExistentByParamsResult.processRespCode !== 204) {
+        processResp = {
+            processRespCode: confirmUserExistentByParamsResult.processRespCode,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: confirmUserExistentByParamsResult.toClient.processMsg,
+            }
+        }
+        return processResp
+    }
+
+
+
+
+
+    let dataStatusFetchResult = await (await dataStatusController.fetchDataStatusIdByDesignation("Published"))
+    if (dataStatusFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+
+
+
+    let entityLevelFetchResult = await (await entityLevelController.fetchEntityLevelIdByDesignation("Secondary"))
+    if (entityLevelFetchResult.processRespCode === 500) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something went wrong please try again later",
+            }
+        }
+        return processResp
+    }
+
+
+    let pictureUploadResult = await pictureController.addPictureOnCreate({
+        folder: `/Images/Logos/`,
+        req: dataObj.req
+    })
+    if (pictureUploadResult.processRespCode !== 201) {
+        return pictureUploadResult
+    }
+    let generatedId = uniqueIdPack.generateRandomId('_Entity')
+    // dataStatusFetchResult.toClient.processResult[0].id_status,
+    let insertArray = [
+        [generatedId, dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.initials), dataObj.req.sanitize(dataObj.req.body.desc_html_pt), dataObj.req.sanitize(dataObj.req.body.desc_html_eng), dataObj.req.sanitize(dataObj.req.body.slogan_eng),
+            dataObj.req.sanitize(dataObj.req.body.slogan_pt),
+            dataObj.req.sanitize(dataObj.req.body.colors),
+            dataObj.req.sanitize(dataObj.req.body.main_email),
+            dataObj.req.sanitize(dataObj.req.body.secondary_email),
+            dataObj.req.sanitize(dataObj.req.body.main_contact),
+            (!dataObj.req.sanitize(dataObj.req.body.linkedIn)) ? null : dataObj.req.sanitize(dataObj.req.body.linkedIn),
+            (!dataObj.req.sanitize(dataObj.req.body.facebook)) ? null : dataObj.req.sanitize(dataObj.req.body.facebook),
+            (!dataObj.req.sanitize(dataObj.req.body.instagram)) ? null : dataObj.req.sanitize(dataObj.req.body.instagram),
+            (!dataObj.req.sanitize(dataObj.req.body.youtube)) ? null : dataObj.req.sanitize(dataObj.req.body.youtube),
+            (!dataObj.req.sanitize(dataObj.req.body.twitter)) ? null : dataObj.req.sanitize(dataObj.req.body.twitter), dataObj.idEntity, entityLevelFetchResult.toClient.processResult[0].id_entity_level, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status,
+        ],
+    ]
+    await sequelize
+        .query(
+            `INSERT INTO Entity (id_entity,designation,initials,desc_html_pt,desc_html_eng,slogan_eng,slogan_pt,colors,main_email,secondary_email,main_contact,linkedIn,facebook,instagram,youtube,twitter,id_entity_level,id_logo,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+                replacements: insertArray
+            }, {
+                model: EntityModel.Entity
+            }
+        )
+        .then(async data => {
+            let menuControllerAddResult = await menuController.addDefaultMenus({
+                idEntity: generatedId
+            })
+
+            if (menuControllerAddResult.processRespCode) {
+                let deleteResponse = await deleteEntityOnFailCreation(generatedId)
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong please try again later",
+                    }
+                }
+
+
+            } else {
+
+                processResp = {
+                    processRespCode: 201,
+                    toClient: {
+                        processResult: data,
+                        processError: null,
+                        processMsg: "All data Where created successfully.",
+                    }
+                }
+            }
+
+            // processResp = {
+            //     processRespCode: 201,
+            //     toClient: {
+            //         processResult: data,
+            //         processError: null,
+            //         processMsg: "All data Where created successfully.",
+            //     }
+            // }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+
+        });
+    return processResp
+}
+const deleteEntityOnFailCreation = async (id_entity) => {
+    let processResp = {}
+    await sequelize
+        .query(
+            `DELETE FROM Entity Where Entity.id_entity=:id_entity `, {
+                replacements: {
+                    id_entity: id_entity
+                }
+            }, {
+                model: EntityModel.Entity
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 200,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: "Data Deleted Successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+
+
+/**
+ * Patch  Media status 
+ * StatusCompleted
+ */
+const updateEntityStatus = async (dataObj) => {
+    let processResp = {}
+    if (!dataObj.req.sanitize(dataObj.req.body.new_status)) {
+        processResult = {
+            processRespCode: 400,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Client request is incomplete !!"
+            }
+        }
+        return processResult
+    }
+
+
+    let fetchResult = await dataStatusController.fetchDataStatusIdByDesignation(dataObj.req.sanitize(dataObj.req.body.new_status))
+    if (fetchResult.processRespCode !== 200) {
+        processResp = {
+            processRespCode: 500,
+            toClient: {
+                processResult: null,
+                processError: null,
+                processMsg: "Something when wrong please try again later",
+            }
+        }
+        return processResult
+    }
+
+    await sequelize
+        .query(
+            `UPDATE Entity SET Entity.id_status =:id_status  Where Entity.id_entity=:id_entity `, {
+                replacements: {
+                    id_status: fetchResult.toClient.processResult[0].id_status,
+                    id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+                }
+            }, {
+                model: EntityModel.Entity
+            }
+        )
+        .then(data => {
+            processResp = {
+                processRespCode: 201,
+                toClient: {
+                    processResult: data[0],
+                    // {
+                    //     // pt_answer: "Perfil actualizado com sucesso!",
+                    //     // en_answer: "Profile updated Successfully"
+                    // },
+                    processError: null,
+                    processMsg: "The brand was updated successfully",
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong, please try again later.",
+                }
+            }
+        });
+
+    return processResp
+}
+
+
+
+/**
+ * patch Logo 
+ * Status:Completed
+ */
+const updateEntityLogo = async (dataObj) => {
+    let fetchResult = await fetchEntityLogo(dataObj.req.sanitize(dataObj.req.params.id))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let uploadResult = await pictureController.updatePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Images/Logos/`
+    })
+
+
+    if (uploadResult.processRespCode !== 201) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `UPDATE Entity SET Entity.id_logo =:id_logo  Where Entity.id_entity=:id_entity `, {
+                    replacements: {
+                        id_logo: uploadResult.toClient.processResult.generatedId,
+                        id_entity: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: EntityModel.Entity
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+
 
 }
+
+
+
+
+
+/**
+ * Delete 
+ * Status:Completed
+ */
+const deleteEntity = async (dataObj) => {
+    let fetchResult = await fetchEntityLogo(dataObj.req.sanitize(dataObj.req.params.id))
+
+    if (fetchResult.processRespCode === 500) {
+        return fetchResult
+    }
+    let deleteResult = await pictureController.deletePictureInSystemById({
+        req: dataObj.req,
+        id_picture: fetchResult.toClient.processResult,
+        folder: `/Images/Logos/`
+    })
+
+
+    if (deleteResult.processRespCode !== 200) {
+        return uploadResult
+    } else {
+        await sequelize
+            .query(
+                `DELETE FROM Entity Where Entity.id_entity=:id_entity `, {
+                    replacements: {
+                        id_areas_focus: dataObj.req.sanitize(dataObj.req.params.id)
+                    }
+                }, {
+                    model: EntityAreasFocusModel.Entity_areas_focus
+                }
+            )
+            .then(data => {
+                processResp = {
+                    processRespCode: 200,
+                    toClient: {
+                        processResult: data[0],
+                        processError: null,
+                        processMsg: "The brand was updated successfully",
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.log(error);
+                processResp = {
+                    processRespCode: 500,
+                    toClient: {
+                        processResult: null,
+                        processError: null,
+                        processMsg: "Something went wrong, please try again later.",
+                    }
+                }
+            });
+
+        return processResp
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Confirms if params has been taken Assist the login , Register back up 
+ * Status :Completed 
+ * @param {Obj} dataObj Contains Multiple data
+ * @returns 
+ */
+const confirmUserExistentByParams = async (dataObj) => {
+
+    let processResp = {}
+    let arrayOfColumn = ['designation', 'initials']
+    let responses = ['The designation is already associated with another entity.', 'The initials are already associated with another entity.']
+    for (let i = 0; i < 3; i++) {
+        let confirmExistenceResponse = await confirmParamsValueTaken({
+            selectedField: arrayOfColumn[i],
+            substitute: dataObj.paramsValueArray[i],
+            id_entity: dataObj.id_entity,
+        })
+
+
+
+        if (confirmExistenceResponse.processRespCode === 500) {
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something went wrong please try again later.",
+                }
+            }
+            return processResp
+        }
+
+        if (confirmExistenceResponse.processRespCode === 200) {
+            processResp = {
+                processRespCode: 409,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: responses[i],
+                }
+            }
+            return processResp
+        }
+    }
+    return processResp = {
+        processRespCode: 204,
+        toClient: {
+            processResult: null,
+            processError: null,
+            processMsg: "Fetch process completed successfully, but there is no content."
+        }
+    }
+
+}
+const confirmParamsValueTaken = async (dataObj) => {
+    let processResp = {}
+
+    let query = (dataObj.id_entity === null) ? `SELECT id_entity FROM Entity where ${dataObj.selectedField} =:substitute` : `SELECT id_entity FROM Entity where ${dataObj.selectedField} =:substitute and Entity.id_entity !=:id_entity`
+
+    await sequelize
+        .query(query, {
+            replacements: {
+                substitute: dataObj.substitute,
+                id_entity: dataObj.id_entity
+            }
+
+        }, {
+            model: UserModel.User
+        })
+        .then(data => {
+            let respCode = 200
+            let respMsg = "Data fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something went wrong please try again later",
+                }
+            }
+        });
+    return processResp
+}
+
+
+
+
+/**
+ * Fetches user data based on his username 
+ * Status: Complete
+ */
+const fetchEntityLogo = async (id_areas_focus) => {
+    let processResp = {}
+    await sequelize
+        .query(`select id_logo From Entity where Entity.id_entity =:id_entity;`, {
+            replacements: {
+                id_areas_focus: id_areas_focus
+            }
+        }, {
+            model: EntityAreasFocusModel.Entity_areas_focus
+        })
+        .then(data => {
+            console.log(data);
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            // console.log(data[0].id_picture);
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: ((!data[0][0].id_logo) ? null : data[0][0].id_logo),
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -566,7 +1165,8 @@ module.exports = {
     //
     fetchAllEntitiesInitials,
     // 
-    editEntity
+    editEntity,
+    deleteEntity
 }
 
 
