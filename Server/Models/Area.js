@@ -11,7 +11,7 @@ const {
 const sequelize = require("../Database/connection");
 
 
-const UserModel = require("./User")
+// const UserModel = require("./User")
 const EntityModel = require("./Entity")
 
 class Area extends Model {}
@@ -88,20 +88,20 @@ Area.belongsTo(EntityModel.Entity, {
 });
 
 //User connection
-UserModel.User.hasMany(Area, {
-    foreignKey: {
-        name: "id_publisher",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Area.belongsTo(UserModel.User, {
-    foreignKey: {
-        name: "id_publisher",
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-});
+// UserModel.User.hasMany(Area, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         allowNull: false,
+//         type: DataTypes.STRING,
+//     }
+// });
+// Area.belongsTo(UserModel.User, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         type: DataTypes.STRING,
+//         allowNull: false,
+//     }
+// });
 
 module.exports = {
     Area

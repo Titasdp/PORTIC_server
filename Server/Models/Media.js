@@ -11,7 +11,7 @@ const {
 const sequelize = require("../Database/connection");
 
 
-const UserModel = require("../Models/User")
+// const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
 const DataStatusModel = require("../Models/DataStatus")
 
@@ -89,20 +89,20 @@ Media.belongsTo(EntityModel.Entity, {
 });
 
 //User connection
-UserModel.User.hasMany(Media, {
-    foreignKey: {
-        name: "id_publisher",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Media.belongsTo(UserModel.User, {
-    foreignKey: {
-        name: "id_publisher",
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-});
+// UserModel.User.hasMany(Media, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         allowNull: false,
+//         type: DataTypes.STRING,
+//     }
+// });
+// Media.belongsTo(UserModel.User, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         type: DataTypes.STRING,
+//         allowNull: false,
+//     }
+// });
 
 //DataStatus connection
 DataStatusModel.Data_status.hasMany(Media, {

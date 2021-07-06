@@ -162,16 +162,16 @@ const initAreaFocus = async (dataObj) => {
     }
     //If success returns the hashed password
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Procura e desenvolvimento`, `Search and development`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[0]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Tecnologia e partilha de conhecimentos`, `Technology and knowledge sharing`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[1]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Inovação e criatividade`, `Innovation and creativity`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[2]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Empreendedorismo`, `Entrepreneurship`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[3]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Incubação tecnológica`, `Technology incubation`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[4]],
-        [uniqueIdPack.generateRandomId('_AreaFocus'), `Startups e spin-offs`, `Startups and spin-offs`, dataObj.idCreator, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[5]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Procura e desenvolvimento`, `Search and development`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[0]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Tecnologia e partilha de conhecimentos`, `Technology and knowledge sharing`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[1]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Inovação e criatividade`, `Innovation and creativity`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[2]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Empreendedorismo`, `Entrepreneurship`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[3]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Incubação tecnológica`, `Technology incubation`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[4]],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), `Startups e spin-offs`, `Startups and spin-offs`, dataObj.idEntity, imgsInitResult.toClient.processResult.generatedIds[5]],
     ]
     await sequelize
         .query(
-            `INSERT INTO Entity_Areas_focus(id_areas_focus,description_pt,description_eng,id_creator,id_entity,id_icon) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Entity_Areas_focus(id_areas_focus,description_pt,description_eng,id_entity,id_icon) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: EntityAreasFocusModel.Entity_areas_focus
@@ -277,11 +277,11 @@ const addAreaFocus = async (dataObj) => {
     }
 
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_AreaFocus'), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idUser, dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId],
+        [uniqueIdPack.generateRandomId('_AreaFocus'), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.idEntity, pictureUploadResult.toClient.processResult.generatedId],
     ]
     await sequelize
         .query(
-            `INSERT INTO Entity_Areas_focus(id_areas_focus,description_pt,description_eng,id_creator,id_entity,id_icon) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Entity_Areas_focus(id_areas_focus,description_pt,description_eng,id_entity,id_icon) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: EntityAreasFocusModel.Entity_areas_focus
@@ -321,9 +321,10 @@ const addAreaFocus = async (dataObj) => {
 const fetchAreaFocusByAdmin = async (dataObj) => {
     let processResp = {}
 
-    let query = (dataObj.user_level === `Super Admin`) ? `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng ,Entity_Areas_focus.description_pt,Entity_Areas_focus.created_at, Picture.img_path as img, Entity.initials ,User.username from  
-    (((Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) INNER JOIN Entity on Entity.id_entity = Entity_Areas_focus.id_entity) INNER JOIN User ON User.id_user = Entity_Areas_focus.id_creator)` : `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng ,Entity_Areas_focus.description_pt,Entity_Areas_focus.created_at, Picture.img_path as img, Entity.initials ,User.username from  
-    (((Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) INNER JOIN Entity on Entity.id_entity = Entity_Areas_focus.id_entity) INNER JOIN User ON User.id_user = Entity_Areas_focus.id_creator) WHERE Entity.id_entity = :id_entity`
+    let query = (dataObj.user_level === `Super Admin`) ? `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng ,Entity_Areas_focus.description_pt,Entity_Areas_focus.created_at, Picture.img_path as img, Entity.initials  from  
+    ((Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon)
+     INNER JOIN Entity on Entity.id_entity = Entity_Areas_focus.id_entity)` : `Select Entity_Areas_focus.id_areas_focus, Entity_Areas_focus.description_eng ,Entity_Areas_focus.description_pt,Entity_Areas_focus.created_at, Picture.img_path as img, Entity.initials from  
+    ((Entity_Areas_focus INNER JOIN Picture ON Picture.id_picture = Entity_Areas_focus.id_icon) INNER JOIN Entity on Entity.id_entity = Entity_Areas_focus.id_entity) WHERE Entity.id_entity = :id_entity`
     await sequelize
         .query(query, {
             replacements: {
@@ -347,7 +348,6 @@ const fetchAreaFocusByAdmin = async (dataObj) => {
                         created_at: el.created_at,
                         img: process.env.API_URL + el.img,
                         entity_initials: el.initials,
-                        creator: el.username,
                     }
                     areasFocus.push(areaFocusObj)
                 }

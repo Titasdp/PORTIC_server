@@ -132,14 +132,14 @@ const initMedia = async (dataObj) => {
     }
     //If success returns the hashed password
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Media'), `Video 01`, `Vídeo 01`, `Portuguese Minister of Labour, Solidarity and Social Security, Ana Godinho, visits PORTIC`, `Portuguese Minister of Labour, Solidarity and Social Security, Ana Godinho, visits PORTIC`, `https://www.youtube.com/watch?v=t4-8lJ0ALNU&t=4s`, dataObj.idUser, dataObj.idEntity, dataObj.idDataStatus],
-        [uniqueIdPack.generateRandomId('_Media'), `Video 02`, `Vídeo 02`, `Portuguese Minister of Science, Technology and Higher Education, Manuel Heitor, visits PORTIC`, `Portuguese Minister of Science, Technology and Higher Education, Manuel Heitor, visits PORTIC`, `https://youtu.be/io-5NSsoXqQ`, dataObj.idUser, dataObj.idEntity, dataObj.idDataStatus],
-        [uniqueIdPack.generateRandomId('_Media'), `Video 03`, `Vídeo 03`, `Welcome to PORTIC`, `Bem-vindo to PORTIC`, `https://youtu.be/U0CxhBa4XWw`, dataObj.idUser, dataObj.idEntity, dataObj.idDataStatus],
-        [uniqueIdPack.generateRandomId('_Media'), `Video 04`, `Vídeo 04`, `PORTIC's deed of grant video`, `PORTIC's deed of grant video`, `https://youtu.be/io-5NSsoXqQ`, dataObj.idUser, dataObj.idEntity, dataObj.idDataStatus],
+        [uniqueIdPack.generateRandomId('_Media'), `Video 01`, `Vídeo 01`, `Portuguese Minister of Labour, Solidarity and Social Security, Ana Godinho, visits PORTIC`, `Portuguese Minister of Labour, Solidarity and Social Security, Ana Godinho, visits PORTIC`, `https://www.youtube.com/watch?v=t4-8lJ0ALNU&t=4s`, dataObj.idEntity, dataObj.idDataStatus],
+        [uniqueIdPack.generateRandomId('_Media'), `Video 02`, `Vídeo 02`, `Portuguese Minister of Science, Technology and Higher Education, Manuel Heitor, visits PORTIC`, `Portuguese Minister of Science, Technology and Higher Education, Manuel Heitor, visits PORTIC`, `https://youtu.be/io-5NSsoXqQ`, dataObj.idEntity, dataObj.idDataStatus],
+        [uniqueIdPack.generateRandomId('_Media'), `Video 03`, `Vídeo 03`, `Welcome to PORTIC`, `Bem-vindo to PORTIC`, `https://youtu.be/U0CxhBa4XWw`, dataObj.idEntity, dataObj.idDataStatus],
+        [uniqueIdPack.generateRandomId('_Media'), `Video 04`, `Vídeo 04`, `PORTIC's deed of grant video`, `PORTIC's deed of grant video`, `https://youtu.be/io-5NSsoXqQ`, dataObj.idEntity, dataObj.idDataStatus],
     ]
     await sequelize
         .query(
-            `INSERT INTO Media(id_media,title_eng,title_pt,description_eng,description_pt,youtube_path,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Media(id_media,title_eng,title_pt,description_eng,description_pt,youtube_path,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: MediaModel.Media
@@ -180,11 +180,9 @@ const initMedia = async (dataObj) => {
  */
 const fetchAllMedia = async (dataObj) => {
     let processResp = {}
-    let query = (dataObj.user_level === `Super Admin`) ? `Select Media.id_media, Media.title_eng, Media.title_pt, Media.description_eng , Media.description_pt  , Media.appearance_case, Media.youtube_path  ,Media.created_at ,User.username, Data_Status.designation  ,Entity.initials
-    From (((Media Inner Join Data_Status on Data_Status.id_status = Media.id_status ) 
-    INNER JOIN  User on User.id_user = Media.id_publisher)Inner join Entity on Entity.id_entity = Media.id_entity) ` : `Select Media.id_media, Media.title_eng, Media.title_pt, Media.description_eng , Media.description_pt  , Media.appearance_case, Media.youtube_path  ,Media.created_at ,User.username, Data_Status.designation  ,Entity.initials
-    From (((Media Inner Join Data_Status on Data_Status.id_status = Media.id_status ) 
-    INNER JOIN  User on User.id_user = Media.id_publisher)Inner join Entity on Entity.id_entity = Media.id_entity)  Where Entity.id_entity =: id_entity`
+    let query = (dataObj.user_level === `Super Admin`) ? `Select Media.id_media, Media.title_eng, Media.title_pt, Media.description_eng , Media.description_pt  , Media.appearance_case, Media.youtube_path  ,Media.created_at , Data_Status.designation  ,Entity.initials
+    From ((Media Inner Join Data_Status on Data_Status.id_status = Media.id_status ) Inner join Entity on Entity.id_entity = Media.id_entity) ` : `Select Media.id_media, Media.title_eng, Media.title_pt, Media.description_eng , Media.description_pt  , Media.appearance_case, Media.youtube_path  ,Media.created_at , Data_Status.designation  ,Entity.initials
+    From ((Media Inner Join Data_Status on Data_Status.id_status = Media.id_status ) Inner join Entity on Entity.id_entity = Media.id_entity)  Where Entity.id_entity =: id_entity`
     await sequelize
         .query(query, {
             replacements: {
@@ -442,11 +440,11 @@ const addMedia = async (dataObj) => {
     }
     // dataStatusFetchResult.toClient.processResult[0].id_status,
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Media'), dataObj.req.sanitize(dataObj.req.body.title_eng), dataObj.req.sanitize(dataObj.req.body.title_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.appearance_case), dataObj.req.sanitize(dataObj.req.body.youtube_path), dataObj.idUser, dataObj.idEntity, dataStatusFetchResult.toClient.processResult[0].id_status, ],
+        [uniqueIdPack.generateRandomId('_Media'), dataObj.req.sanitize(dataObj.req.body.title_eng), dataObj.req.sanitize(dataObj.req.body.title_pt), dataObj.req.sanitize(dataObj.req.body.description_eng), dataObj.req.sanitize(dataObj.req.body.description_pt), dataObj.req.sanitize(dataObj.req.body.appearance_case), dataObj.req.sanitize(dataObj.req.body.youtube_path), dataObj.idEntity, dataStatusFetchResult.toClient.processResult[0].id_status, ],
     ]
     await sequelize
         .query(
-            `INSERT INTO Media(id_media,title_eng,title_pt,description_eng,description_pt,appearance_case,youtube_path,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Media(id_media,title_eng,title_pt,description_eng,description_pt,appearance_case,youtube_path,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: MediaModel.Media

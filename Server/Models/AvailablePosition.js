@@ -12,7 +12,7 @@ const {
 
 const sequelize = require("../Database/connection");
 
-const UserModel = require("../Models/User")
+// const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
 
 class Available_position extends Model {}
@@ -106,20 +106,20 @@ Available_position.belongsTo(EntityModel.Entity, {
 });
 
 //User connection
-UserModel.User.hasMany(Available_position, {
-    foreignKey: {
-        name: "id_publisher",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Available_position.belongsTo(UserModel.User, {
-    foreignKey: {
-        name: "id_publisher",
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-});
+// UserModel.User.hasMany(Available_position, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         allowNull: false,
+//         type: DataTypes.STRING,
+//     }
+// });
+// Available_position.belongsTo(UserModel.User, {
+//     foreignKey: {
+//         name: "id_publisher",
+//         type: DataTypes.STRING,
+//         allowNull: false,
+//     }
+// });
 
 module.exports = {
     Available_position

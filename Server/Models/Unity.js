@@ -12,7 +12,7 @@ const sequelize = require("../Database/connection");
 
 const EntityModel = require("../Models/Entity")
 const PictureModel = require("../Models/Picture")
-const UserModel = require("../Models/User")
+// const UserModel = require("../Models/User")
 const DataStatusModel = require("../Models/DataStatus")
 
 class Unity extends Model {}
@@ -74,21 +74,21 @@ Unity.belongsTo(PictureModel.Picture, {
     }
 });
 
-//User connection
-UserModel.User.hasMany(Unity, {
-    foreignKey: {
-        name: "id_creator",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Unity.belongsTo(UserModel.User, {
-    foreignKey: {
-        name: "id_creator",
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-});
+// //User connection
+// UserModel.User.hasMany(Unity, {
+//     foreignKey: {
+//         name: "id_creator",
+//         allowNull: false,
+//         type: DataTypes.STRING,
+//     }
+// });
+// Unity.belongsTo(UserModel.User, {
+//     foreignKey: {
+//         name: "id_creator",
+//         type: DataTypes.STRING,
+//         allowNull: false
+//     }
+// });
 
 //Entity connection
 EntityModel.Entity.hasMany(Unity, {

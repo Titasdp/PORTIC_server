@@ -12,7 +12,7 @@ const {
 //!About us page
 const sequelize = require("../Database/connection");
 
-const UserModel = require("../Models/User")
+// const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
 const PictureModel = require("../Models/Picture")
 
@@ -75,20 +75,20 @@ Entity_areas_focus.belongsTo(EntityModel.Entity, {
 });
 
 //User connection
-UserModel.User.hasMany(Entity_areas_focus, {
-    foreignKey: {
-        name: "id_creator",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Entity_areas_focus.belongsTo(UserModel.User, {
-    foreignKey: {
-        name: "id_creator",
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-});
+// UserModel.User.hasMany(Entity_areas_focus, {
+//     foreignKey: {
+//         name: "id_creator",
+//         allowNull: false,
+//         type: DataTypes.STRING,
+//     }
+// });
+// Entity_areas_focus.belongsTo(UserModel.User, {
+//     foreignKey: {
+//         name: "id_creator",
+//         type: DataTypes.STRING,
+//         allowNull: false,
+//     }
+// });
 //Picture connection
 PictureModel.Picture.hasMany(Entity_areas_focus, {
     foreignKey: {

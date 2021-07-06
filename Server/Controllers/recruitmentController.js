@@ -238,7 +238,7 @@ const initAvailablePosition = async (dataObj) => {
         <br>
         <br>
         <span wfd-id="424">Candidates can send an email with a brief CV, motivation statement identifying the area and foreseen research topics, to jobs@portic.ipp.pt, no later than March 28th, 2021, for support with the application process.</span>
-        </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idUser, dataObj.idEntity, `cybersecurity`, ` Digital Systems for Health and Telehealth`, null],
+        </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idEntity, `cybersecurity`, ` Digital Systems for Health and Telehealth`, null],
 
 
         [randomIds[1], `Scholarships`, `Scholarships`, `<p>
@@ -259,11 +259,11 @@ const initAvailablePosition = async (dataObj) => {
          </ul>
          <br>
          Information about these positions will be made available soon. If wanting to ask for more information, or send a spontaneous application, contact at <a href="mailto:jobs@portic.ipp.pt" target="_blank">jobs@portic.ipp.pt</a>.
-         </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idUser, dataObj.idEntity, `Health Technologies`, ` Digital Systems for Health and Telehealth`, null]
+         </p>`, `https://portal.ipp.pt/concursos/sc/pessoal/`, dataObj.idEntity, `Health Technologies`, ` Digital Systems for Health and Telehealth`, null]
     ]
     await sequelize
         .query(
-            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,candidacy_link,id_publisher,id_entity,category_1,category_2,category_3) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,candidacy_link,id_entity,category_1,category_2,category_3) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: AvailablePositionModel.Available_position
@@ -599,11 +599,11 @@ const addAvailable = async (dataObj) => {
         return processResp
     }
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_AvailablePos'), dataObj.req.sanitize(dataObj.req.body.designation_pt), dataObj.req.sanitize(dataObj.req.body.designation_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), ((!dataObj.req.sanitize(dataObj.req.body.pdf_path)) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path)), ((!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? null : dataObj.req.sanitize(dataObj.req.body.candidacy_link)), dataObj.idUser, dataObj.idEntity, ((!dataObj.req.sanitize(dataObj.req.body.category_1)) ? null : dataObj.req.sanitize(dataObj.req.body.category_1)), ((!dataObj.req.sanitize(dataObj.req.body.category_2)) ? null : dataObj.req.sanitize(dataObj.req.body.category_2)), ((!dataObj.req.sanitize(dataObj.req.body.category_3)) ? null : dataObj.req.sanitize(dataObj.req.body.category_3))],
+        [uniqueIdPack.generateRandomId('_AvailablePos'), dataObj.req.sanitize(dataObj.req.body.designation_pt), dataObj.req.sanitize(dataObj.req.body.designation_eng), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt), dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng), ((!dataObj.req.sanitize(dataObj.req.body.pdf_path)) ? null : dataObj.req.sanitize(dataObj.req.body.pdf_path)), ((!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? null : dataObj.req.sanitize(dataObj.req.body.candidacy_link)), dataObj.idEntity, ((!dataObj.req.sanitize(dataObj.req.body.category_1)) ? null : dataObj.req.sanitize(dataObj.req.body.category_1)), ((!dataObj.req.sanitize(dataObj.req.body.category_2)) ? null : dataObj.req.sanitize(dataObj.req.body.category_2)), ((!dataObj.req.sanitize(dataObj.req.body.category_3)) ? null : dataObj.req.sanitize(dataObj.req.body.category_3))],
     ]
     await sequelize
         .query(
-            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,pdf_path,candidacy_link,id_publisher,id_entity,category_1,category_2,category_3) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Available_position(id_available_position,designation_pt,designation_eng,desc_html_structure_pt,desc_html_structure_eng,pdf_path,candidacy_link,id_entity,category_1,category_2,category_3) VALUES  ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: AvailablePositionModel.Available_position
@@ -641,10 +641,10 @@ const addAvailable = async (dataObj) => {
  */
 const fetchAvailablePositionByAdmin = async (dataObj) => {
     let processResp = {}
-    let query = await (dataObj.user_level === `Super Admin`) ? `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, User.username, Available_position.category_1,Available_position.category_2,Available_position.category_3 
-    FROM ((Available_position INNER JOIN User on User.id_user = Available_position.id_publisher)
-    INNER JOIN Entity On Entity.id_entity = Available_position.id_entity);` : `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, User.username 
-    FROM ((Available_position INNER JOIN User on User.id_user = Available_position.id_publisher)
+    let query = await (dataObj.user_level === `Super Admin`) ? `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials, Available_position.category_1,Available_position.category_2,Available_position.category_3 
+    FROM (Available_position 
+    INNER JOIN Entity On Entity.id_entity = Available_position.id_entity);` : `SELECT Available_position.id_available_position, Available_position.designation_pt ,Available_position.designation_eng   ,Available_position.desc_html_structure_pt , Available_position.desc_html_structure_eng,Available_position.pdf_path, Available_position.candidacy_link,Available_position.created_at, Entity.initials
+    FROM (Available_position
     INNER JOIN Entity On Entity.id_entity = Available_position.id_entity) Where Available_position.id_entity = :id_entity;`
     await sequelize
         .query(query, {
@@ -680,7 +680,6 @@ const fetchAvailablePositionByAdmin = async (dataObj) => {
                         candidacy_link: el.candidacy_link,
                         created_at: el.created_at,
                         entity_initials: el.initials,
-                        creator: el.username,
                         course_tags: courseTags,
                         project_tags: projectTags,
                         area_tags: areaTags,

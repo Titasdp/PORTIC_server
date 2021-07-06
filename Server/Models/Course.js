@@ -91,18 +91,19 @@ Course.belongsTo(EntityModel.Entity, {
 //User connection
 UserModel.User.hasMany(Course, {
     foreignKey: {
-        name: "id_publisher",
+        name: "id_coordinator",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
 Course.belongsTo(UserModel.User, {
     foreignKey: {
-        name: "id_publisher",
+        name: "id_coordinator",
         type: DataTypes.STRING,
         allowNull: false,
     }
 });
+// id_publisher
 
 //DataStatus connection
 DataStatusModel.Data_status.hasMany(Course, {

@@ -251,7 +251,7 @@ const initProject = async (dataObj) => {
     ]
     await sequelize
         .query(
-            `INSERT INTO Project (id_project,summary_pt,summary_eng,title,initials,desc_html_structure_eng,desc_html_structure_pt,start_date,end_date,project_contact,project_email,id_creator,id_leader_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Project (id_project,summary_pt,summary_eng,title,initials,desc_html_structure_eng,desc_html_structure_pt,start_date,end_date,project_contact,project_email,id_leader_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: ProjectModel.Project
@@ -811,16 +811,16 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
 
     let query = (dataObj.user_level === `Super Admin`) ? `Select Project.id_project, Project.summary_eng, Project.summary_pt, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials as entity
     From (((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
-    INNER JOIN  User on User.id_user = Project.id_creator)
+    INNER JOIN  User on User.id_user = Project.id_coordinator)
     Inner join Entity on Entity.id_entity = Project.id_leader_entity);` : ((dataObj.user_level === `Entity Admin`) ? `Select Project.id_project, Project.summary_eng, Project.summary_pt, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials as entity
         From (((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
-        INNER JOIN  User on User.id_user = Project.id_creator)
+        INNER JOIN  User on User.id_user = Project.id_coordinator)
         Inner join Entity on Entity.id_entity = Project.id_leader_entity)  Where Entity.id_entity =  :id_entity;` : `Select Project.id_project, Project.summary_eng, Project.summary_pt, Project.title, Project.initials , Project.reference  , Project.desc_html_structure_eng, Project.desc_html_structure_pt  ,Project.start_date, Project.end_date,Project.project_contact,Project.project_email,Project.pdf_path,Project.created_at ,User.username, Data_Status.designation  ,Entity.initials as entity
         From ((((Project Inner Join Data_Status on Data_Status.id_status = Project.id_status ) 
-        INNER JOIN  User on User.id_user = Project.id_creator)
+        INNER JOIN  User on User.id_user = Project.id_coordinator)
         Inner join Entity on Entity.id_entity = Project.id_leader_entity)
         INNER JOIN Project_team on Project_team.id_project = Project.id_project)  
-        Where Project_team.id_team_member = :id_user or Project.id_creator = :id_user and Project_team.can_edit =1;`)
+        Where Project_team.id_team_member = :id_user or Project.id_coordinator = :id_user and Project_team.can_edit =1;`)
     await sequelize
         .query(query, {
             replacements: {
@@ -959,8 +959,8 @@ const addProject = async (dataObj) => {
 
     await sequelize
         .query(
-            `INSERT INTO Project(id_project,summary_pt,summary_eng,title,initials,reference,desc_html_structure_eng,desc_html_structure_pt,project_contact,project_email,start_date,end_date,pdf_path,id_leader_entity,id_creator,id_status) VALUES (:id_project,:summary_pt,:summary_eng,:title,:initials,:reference,:desc_html_structure_eng,:desc_html_structure_pt,:project_contact,:project_email,:start_date,:end_date,:pdf_path,:id_leader_entity,:id_creator,:id_status);
-                  INSERT INTO Project_team(id_project, id_team_member,can_edit) VALUES (:id_project,:id_creator,1) ;
+            `INSERT INTO Project(id_project,summary_pt,summary_eng,title,initials,reference,desc_html_structure_eng,desc_html_structure_pt,project_contact,project_email,start_date,end_date,pdf_path,id_leader_entity,id_coordinator,id_status) VALUES (:id_project,:summary_pt,:summary_eng,:title,:initials,:reference,:desc_html_structure_eng,:desc_html_structure_pt,:project_contact,:project_email,:start_date,:end_date,:pdf_path,:id_leader_entity,:id_coordinator,:id_status);
+                  INSERT INTO Project_team(id_project, id_team_member,can_edit) VALUES (:id_project,:id_coordinator,1) ;
             `, {
                 replacements: {
                     id_project: randomId,
@@ -977,7 +977,7 @@ const addProject = async (dataObj) => {
                     end_date: dataObj.req.sanitize(dataObj.req.body.end_date),
                     pdf_path: (pdfUploadResult == null) ? null : (pdfUploadResult.toClient.processResult),
                     id_leader_entity: dataObj.idEntity,
-                    id_creator: dataObj.idUser,
+                    id_coordinator: dataObj.idUser,
                     id_status: dataStatusFetchResult.toClient.processResult[0].id_status
                 },
                 dialectOptions: {

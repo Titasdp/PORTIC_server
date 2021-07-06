@@ -425,7 +425,7 @@ const initCourse = async (dataObj) => {
     ]
     await sequelize
         .query(
-            `INSERT INTO Course(id_course,designation,html_structure_eng,html_structure_pt,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Course(id_course,designation,html_structure_eng,html_structure_pt,id_coordinator,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: CourseModel.Course
@@ -725,9 +725,9 @@ const fetchAllCourseByAdmin = async (dataObj) => {
     let processResp = {}
     let query = (dataObj.user_level === `Super Admin`) ? ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation as data_status,Entity.initials
     From (((Course Inner Join Data_Status on Data_Status.id_status = Course.id_status ) 
-    INNER JOIN  User on User.id_user = Course.id_publisher)Inner join Entity on Entity.id_entity = Course.id_entity) ` : ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation as data_status  ,Entity.initials
+    INNER JOIN  User on User.id_user = Course.id_coordinator)Inner join Entity on Entity.id_entity = Course.id_entity) ` : ` Select Course.id_course, Course.designation,Course.html_structure_eng ,Course.html_structure_pt ,Course.candidacy_link, Course.pdf_url  ,Course.created_at ,User.username, Data_Status.designation as data_status  ,Entity.initials
     From (((Course Inner Join Data_Status on Data_Status.id_status = Course.id_status ) 
-    INNER JOIN  User on User.id_user = Course.id_publisher)Inner join Entity on Entity.id_entity = Course.id_entity) Where Entity.id_entity = id_entity`;
+    INNER JOIN  User on User.id_user = Course.id_coordinator)Inner join Entity on Entity.id_entity = Course.id_entity) Where Entity.id_entity = id_entity`;
     await sequelize
         .query(query, {
             replacements: {
@@ -758,7 +758,7 @@ const fetchAllCourseByAdmin = async (dataObj) => {
                         created_at: el.created_at,
                         entity_initials: el.initials,
                         data_status: el.data_status,
-                        creator: el.username,
+                        coordinator: el.username,
                         area_tags: areaTags,
                         project_tags: projectTags,
                         recruitment_tags: recruitmentTags,
@@ -801,7 +801,7 @@ const fetchAllCourseByAdmin = async (dataObj) => {
  */
 const addCourse = async (dataObj) => {
     let processResp = {}
-    if (dataObj.idUser === null || dataObj.idEntity === null || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt)) {
+    if (dataObj.idUser === null || dataObj.idEntity === null || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.coordinator)) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -827,11 +827,11 @@ const addCourse = async (dataObj) => {
     }
     // dataStatusFetchResult.toClient.processResult[0].id_status,
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Course'), dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.html_structure_eng), dataObj.req.sanitize(dataObj.req.body.html_structure_pt), dataObj.idUser, dataObj.idEntity, dataStatusFetchResult.toClient.processResult[0].id_status],
+        [uniqueIdPack.generateRandomId('_Course'), dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.html_structure_eng), dataObj.req.sanitize(dataObj.req.body.html_structure_pt), dataObj.req.sanitize(dataObj.req.body.coordinator), dataStatusFetchResult.toClient.processResult[0].id_status],
     ]
     await sequelize
         .query(
-            `INSERT INTO Course(id_course,designation,html_structure_eng,html_structure_pt,id_publisher,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Course(id_course,designation,html_structure_eng,html_structure_pt,id_coordinator,id_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: CourseModel.Course
@@ -869,7 +869,7 @@ const addCourse = async (dataObj) => {
  */
 const editCourse = async (dataObj) => {
     let processResp = {}
-    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt)) {
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.coordinator)) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -883,14 +883,16 @@ const editCourse = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE Course SET designation=:designation,html_structure_eng=:html_structure_eng, html_structure_pt =:html_structure_pt, candidacy_link =:candidacy_link, pdf_url=:pdf_url Where Course.id_course=:id_course`, {
+            `UPDATE Course SET designation=:designation,html_structure_eng=:html_structure_eng, html_structure_pt =:html_structure_pt, candidacy_link =:candidacy_link, pdf_url=:pdf_url,id_coordinator=:id_coordinator Where Course.id_course=:id_course`, {
                 replacements: {
                     id_course: dataObj.req.sanitize(dataObj.req.params.id),
                     designation: dataObj.req.sanitize(dataObj.req.body.designation),
+                    id_coordinator: dataObj.req.sanitize(dataObj.req.body.coordinator),
                     html_structure_eng: dataObj.req.sanitize(dataObj.req.body.html_structure_eng),
                     html_structure_pt: dataObj.req.sanitize(dataObj.req.body.html_structure_pt),
                     candidacy_link: (!dataObj.req.sanitize(dataObj.req.body.candidacy_link)) ? "" : dataObj.req.sanitize(dataObj.req.body.candidacy_link),
                     pdf_url: (!dataObj.req.sanitize(dataObj.req.body.pdf_url)) ? "" : dataObj.req.sanitize(dataObj.req.body.pdf_url),
+
                 }
             }, {
                 model: CourseAreaModel.Course_area

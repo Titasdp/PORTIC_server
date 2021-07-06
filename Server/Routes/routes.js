@@ -1780,7 +1780,7 @@ router.post("/init/data", async (req, res) => {
                         idEntity: idEntity,
                         idTitle: userTitleFetchResult.toClient.processResult[0].id_title,
                     })
-                    if (userInitResult.processRespCode === 500) {
+                    if (userInitResult.processRespCode === 500 || (!userInitResult.processRespCode)) {
                         res.status(500).send({
                             initSuccessResult: {
                                 firstWave: true,
