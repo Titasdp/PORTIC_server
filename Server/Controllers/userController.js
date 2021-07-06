@@ -934,7 +934,7 @@ const updateUserEntity = async (dataObj) => {
         .query(
             `UPDATE User SET User.id_entity =:id_entity  Where User.id_user=:id_user `, {
                 replacements: {
-                    id_entity: fetchResult.toClient.processResult.id_entity,
+                    id_entity: fetchResult.toClient.processResult[0].id_entity,
                     id_user: dataObj.id_user
                 }
             }, {

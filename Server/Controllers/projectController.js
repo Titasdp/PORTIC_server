@@ -60,8 +60,8 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
 
     }
 
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT Project.id_project,Project.summary_pt as summary, Project.title,Project.initials, desc_html_structure_pt as desc_html_structure, Project.start_date, Project.end_date, Project.project_contact,Project.project_email, Project.pdf_path  FROM( Project INNER JOIN 
-        Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Project.id_leader_entity =:id_entity;` : ` SELECT Project.id_project ,Project.summary_eng as summary, Project.title,Project.initials, desc_html_structure_eng as desc_html_structure, Project.start_date, Project.end_date, Project.project_contact,Project.project_email,Project.pdf_path  FROM( Project INNER JOIN 
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? `SELECT Project.id_project,Project.summary_pt as summary,Project.reference, Project.title,Project.initials, desc_html_structure_pt as desc_html_structure, Project.start_date, Project.end_date, Project.project_contact,Project.project_email, Project.pdf_path  FROM( Project INNER JOIN 
+        Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Project.id_leader_entity =:id_entity;` : ` SELECT Project.id_project ,Project.summary_eng as summary,Project.reference, Project.title,Project.initials, desc_html_structure_eng as desc_html_structure, Project.start_date, Project.end_date, Project.project_contact,Project.project_email,Project.pdf_path  FROM( Project INNER JOIN 
         Data_Status on Data_Status.id_status= Project.id_status)  where Data_Status.designation= 'Published' and Project.id_leader_entity =:id_entity `
     await sequelize
         .query(query, {
@@ -92,9 +92,10 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
 
                     let projectObj = {
                         id_project: el.id_project,
+                        reference: reference,
                         title: el.title,
                         initials: el.initials,
-                        summary_pt: el.summary,
+                        summary: el.summary,
                         desc_html_structure: el.desc_html_structure,
                         start_date: el.start_date,
                         end_date: el.end_date,
