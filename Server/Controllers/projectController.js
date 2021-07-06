@@ -92,7 +92,7 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
 
                     let projectObj = {
                         id_project: el.id_project,
-                        reference: reference,
+                        reference: el.reference,
                         title: el.title,
                         initials: el.initials,
                         summary: el.summary,
