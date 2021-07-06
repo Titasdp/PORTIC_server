@@ -251,7 +251,7 @@ const initProject = async (dataObj) => {
     ]
     await sequelize
         .query(
-            `INSERT INTO Project (id_project,summary_pt,summary_eng,title,initials,desc_html_structure_eng,desc_html_structure_pt,start_date,end_date,project_contact,project_email,id_leader_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
+            `INSERT INTO Project (id_project,summary_pt,summary_eng,title,initials,desc_html_structure_eng,desc_html_structure_pt,start_date,end_date,project_contact,project_email,id_coordinator,id_leader_entity,id_status) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                 replacements: insertArray
             }, {
                 model: ProjectModel.Project
@@ -865,7 +865,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                         created_at: el.created_at,
                         entity_initials: el.entity,
                         data_status: el.data_status,
-                        creator: el.username,
+                        coordinator: el.username,
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
                         news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
                         gallery_imgs: ((galleryImgs.processRespCode === 200) ? galleryImgs.toClient.processResult : []),
@@ -919,7 +919,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
 const addProject = async (dataObj) => {
     // console.log(dataObj.req.body);
     let processResp = {}
-    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email) || !dataObj.req.sanitize(dataObj.req.body.summary_eng), !dataObj.req.sanitize(dataObj.req.body.summary_pt)) {
+    if (!dataObj.idUser || !dataObj.idEntity || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email) || !dataObj.req.sanitize(dataObj.req.body.summary_eng), !dataObj.req.sanitize(dataObj.req.body.summary_pt) || !dataObj.req.sanitize(dataObj.req.body.coordinator)) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -977,7 +977,7 @@ const addProject = async (dataObj) => {
                     end_date: dataObj.req.sanitize(dataObj.req.body.end_date),
                     pdf_path: (pdfUploadResult == null) ? null : (pdfUploadResult.toClient.processResult),
                     id_leader_entity: dataObj.idEntity,
-                    id_coordinator: dataObj.idUser,
+                    id_coordinator: dataObj.req.sanitize(dataObj.req.body.coordinator),
                     id_status: dataStatusFetchResult.toClient.processResult[0].id_status
                 },
                 dialectOptions: {
@@ -1091,7 +1091,7 @@ const updatePdf = async (dataObj) => {
  */
 const editProject = async (dataObj) => {
     let processResp = {}
-    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email) || !dataObj.req.sanitize(dataObj.req.body.summary_eng), !dataObj.req.sanitize(dataObj.req.body.summary_pt)) {
+    if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.title) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_eng) || !dataObj.req.sanitize(dataObj.req.body.desc_html_structure_pt) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.start_date) || !dataObj.req.sanitize(dataObj.req.body.end_date) || !dataObj.req.sanitize(dataObj.req.body.project_contact) || !dataObj.req.sanitize(dataObj.req.body.project_email) || !dataObj.req.sanitize(dataObj.req.body.summary_eng), !dataObj.req.sanitize(dataObj.req.body.summary_pt), !dataObj.req.sanitize(dataObj.req.body.coordinator)) {
         processResp = {
             processRespCode: 400,
             toClient: {
@@ -1106,7 +1106,7 @@ const editProject = async (dataObj) => {
     await sequelize
         .query(
             `UPDATE Project SET title=:title,initials=:initials,summary_eng=:summary_eng,summary_pt=:summary_pt, reference =:reference, desc_html_structure_eng =:desc_html_structure_eng,desc_html_structure_pt=:desc_html_structure_pt,start_date=:start_date,
-            end_date=:end_date,  project_contact=:project_contact,project_email=:project_email Where Project.id_project=:id_project`, {
+            end_date=:end_date,id_coordinator=:id_coordinator,  project_contact=:project_contact,project_email=:project_email Where Project.id_project=:id_project`, {
                 replacements: {
                     id_project: dataObj.req.sanitize(dataObj.req.params.id),
                     title: dataObj.req.sanitize(dataObj.req.body.title),
@@ -1120,6 +1120,8 @@ const editProject = async (dataObj) => {
                     end_date: dataObj.req.sanitize(dataObj.req.body.end_date),
                     project_contact: dataObj.req.sanitize(dataObj.req.body.project_contact),
                     project_email: dataObj.req.sanitize(dataObj.req.body.project_email),
+                    id_coordinator: dataObj.req.sanitize(dataObj.req.body.coordinator),
+                    //!
                 }
             }, {
                 model: ProjectModel.Project

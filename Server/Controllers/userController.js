@@ -464,8 +464,8 @@ const initUser = async (dataObj) => {
         }
         return processResp
     }
-    return await new Promise((resolve) => {
-        encryptPack.encryptPassword("porticSuperAdmin", (encryptError, encryptResult) => {
+    return await new Promise(async (resolve) => {
+        await encryptPack.encryptPassword("porticSuperAdmin", async (encryptError, encryptResult) => {
             if (encryptError) {
                 processResp = {
                     processRespCode: 500,
@@ -480,7 +480,7 @@ const initUser = async (dataObj) => {
                 let insertArray = [
                     [uniqueIdPack.generateRandomId('_User'), `superAdmin`, encryptResult, "Tiago de Pina", "eu tiago", "Me Tiago", "tiagopina20014@gmail.com", "939908427", dataObj.idTitle, dataObj.idDataStatus, dataObj.idUserLevel, dataObj.idEntity],
                 ]
-                sequelize
+                await sequelize
                     .query(
                         `INSERT INTO User (id_user,username,password,full_name,description_pt,description_eng,email,phone_numb,id_title,id_status,id_user_level,id_entity) VALUES ${insertArray.map(element => '(?)').join(',')};`, {
                             replacements: insertArray

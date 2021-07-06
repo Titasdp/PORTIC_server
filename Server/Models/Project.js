@@ -113,14 +113,14 @@ Project.belongsTo(EntityModel.Entity, {
 //User connection
 UserModel.User.hasMany(Project, {
     foreignKey: {
-        name: "id_creator",
+        name: "id_coordinator",
         allowNull: false,
         type: DataTypes.STRING,
     }
 });
 Project.belongsTo(UserModel.User, {
     foreignKey: {
-        name: "id_creator",
+        name: "id_coordinator",
         type: DataTypes.STRING,
         allowNull: false,
     }
