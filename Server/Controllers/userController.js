@@ -1000,6 +1000,7 @@ const updateUserLevel = async (dataObj) => {
         return processResult
     }
 
+    console.log(fetchResult);
     await sequelize
         .query(
             `UPDATE User SET User.id_user_level =:id_user_level  Where User.id_user=:id_user `, {
