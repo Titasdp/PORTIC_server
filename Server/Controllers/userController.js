@@ -322,6 +322,8 @@ const loginFetchUserData = async (username) => {
 const proceedUserRegister = async (dataObj) => {
     let processResp = {}
 
+    console.log("req.body:");
+    console.log(dataObj.req.body);
 
     if (dataObj.req.sanitize(dataObj.req.body.username) == null || dataObj.req.sanitize(dataObj.req.body.password) == null || dataObj.req.sanitize(dataObj.req.body.first_name) == null || dataObj.req.sanitize(dataObj.req.body.last_name) == null || dataObj.req.sanitize(dataObj.req.body.email) == null || dataObj.req.sanitize(dataObj.req.body.phone_numb) == null) {
 
@@ -369,9 +371,10 @@ const proceedUserRegister = async (dataObj) => {
 
 
 
-    return await new Promise((resolve) => {
-        encryptPack.encryptPassword(dataObj.req.sanitize(dataObj.req.body.password), async (encryptError, encryptResult) => {
+    return await new Promise(async (resolve) => {
+        await encryptPack.encryptPassword(dataObj.req.sanitize(dataObj.req.body.password), async (encryptError, encryptResult) => {
             if (encryptError) {
+                console.log(encryptResult);
                 processResp = {
                     processRespCode: 500,
                     toClient: {
