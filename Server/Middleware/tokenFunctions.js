@@ -117,7 +117,7 @@ const validateTokenForUsersMaxSecurity = async (token) => {
                                     }
                                 }
                             } else {
-                                if (decoded.data.user_data.user_level !== 'Entity Admin' && decoded.data.user_data.user_level !== 'Super Admin') {
+                                if (decoded.data.user_data.user_level !== 'Coord. Entidade' && decoded.data.user_data.user_level !== 'Super Admin') {
                                     processResp = {
                                         processRespCode: 401,
                                         toClient: {

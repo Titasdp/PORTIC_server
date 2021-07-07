@@ -62,11 +62,11 @@ const initUserLevel = async () => {
 
     let insertArray = [
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Super Admin'],
-        [uniqueIdPack.generateRandomId('_UserLevel'), 'Entity Admin'],
-        [uniqueIdPack.generateRandomId('_UserLevel'), 'Project manager'],
-        [uniqueIdPack.generateRandomId('_UserLevel'), 'Professor'],
-        [uniqueIdPack.generateRandomId('_UserLevel'), 'Investigator'],
-        [uniqueIdPack.generateRandomId('_UserLevel'), 'Undefine'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Coord. Entidade'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Coord. projeto'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Coord. curso'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Coord. global'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Admin global'],
     ]
     await sequelize
         .query(
