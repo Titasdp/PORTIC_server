@@ -336,7 +336,58 @@ const fetchMainEntityId = async () => {
  * @param {String} designation designation of an entity
  * @returns object of data 
  */
-const fetchEntityIdByDesignation = async (initials) => {
+const fetchEntityIdByDesignation = async (designation) => {
+    let processResp = {}
+    await sequelize
+        .query("SELECT id_entity FROM Entity where designation =:designation", {
+            replacements: {
+                designation: designation
+            }
+        }, {
+            model: EntityModel.Entity
+        })
+        .then(data => {
+
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respCode = 204
+                respMsg = "Fetch process completed successfully, but there is no content."
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: data[0],
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: error,
+                    processError: null,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+        });
+
+
+    return processResp
+};
+
+
+
+/**
+ * fetches the id of an entity based on a specific designation 
+ * @param {String} designation designation of an entity
+ * @returns object of data 
+ */
+const fetchEntityIdByInitials = async (initials) => {
     let processResp = {}
     await sequelize
         .query("SELECT id_entity FROM Entity where initials =:initials", {
@@ -379,7 +430,6 @@ const fetchEntityIdByDesignation = async (initials) => {
 
     return processResp
 };
-
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!New!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
@@ -426,53 +476,53 @@ const fetchAllEntitiesInitials = async () => {
 
 
 
-/**
- * Fetches the id of an specific entity based on his initials
- * Status:Completed
- * @returns obj of data
- */
-const fetchEntityIdByInitials = async (initials) => {
-    let processResp = {}
-    await sequelize
-        .query("SELECT id_entity FROM Entity where initials =:initials", {
-            replacements: {
-                initials: initials
-            }
-        }, {
-            model: EntityModel.Entity
-        })
-        .then(data => {
+// /**
+//  * Fetches the id of an specific entity based on his initials
+//  * Status:Completed
+//  * @returns obj of data
+//  */
+// const fetchEntityIdByInitials = async (initials) => {
+//     let processResp = {}
+//     await sequelize
+//         .query("SELECT id_entity FROM Entity where initials =:initials", {
+//             replacements: {
+//                 initials: initials
+//             }
+//         }, {
+//             model: EntityModel.Entity
+//         })
+//         .then(data => {
 
-            let respCode = 200;
-            let respMsg = "Fetched successfully."
-            if (data[0].length === 0) {
-                respCode = 204
-                respMsg = "Fetch process completed successfully, but there is no content."
-            }
-            processResp = {
-                processRespCode: respCode,
-                toClient: {
-                    processResult: data[0],
-                    processError: null,
-                    processMsg: respMsg,
-                }
-            }
+//             let respCode = 200;
+//             let respMsg = "Fetched successfully."
+//             if (data[0].length === 0) {
+//                 respCode = 204
+//                 respMsg = "Fetch process completed successfully, but there is no content."
+//             }
+//             processResp = {
+//                 processRespCode: respCode,
+//                 toClient: {
+//                     processResult: data[0],
+//                     processError: null,
+//                     processMsg: respMsg,
+//                 }
+//             }
 
-        })
-        .catch(error => {
-            console.log(error);
-            processResp = {
-                processRespCode: 500,
-                toClient: {
-                    processResult: null,
-                    processError: null,
-                    processMsg: "Something when wrong please try again later",
-                }
-            }
+//         })
+//         .catch(error => {
+//             console.log(error);
+//             processResp = {
+//                 processRespCode: 500,
+//                 toClient: {
+//                     processResult: null,
+//                     processError: null,
+//                     processMsg: "Something when wrong please try again later",
+//                 }
+//             }
 
-        });
-    return processResp
-};
+//         });
+//     return processResp
+// };
 
 
 
@@ -1162,6 +1212,7 @@ module.exports = {
     // fetchEntityIdByName,
     fetchFullEntityDataById,
     fetchEntityIdByDesignation,
+    fetchEntityIdByInitials,
     //
     fetchAllEntitiesInitials,
     // 

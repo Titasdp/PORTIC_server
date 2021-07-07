@@ -919,7 +919,7 @@ const updateUserEntity = async (dataObj) => {
     }
 
 
-    let fetchResult = await entityController.fetchEntityIdByDesignation(dataObj.req.sanitize(dataObj.req.body.entity_initials))
+    let fetchResult = await entityController.fetchEntityIdByInitials(dataObj.req.sanitize(dataObj.req.body.entity_initials))
     console.log("fetchResult:");
     console.log(fetchResult.toClient.processResult);
 
