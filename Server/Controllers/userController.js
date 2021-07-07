@@ -903,6 +903,8 @@ const updateUserStatus = async (dataObj) => {
  * StatusCompleted
  */
 const updateUserEntity = async (dataObj) => {
+    console.log("body:");
+    console.log(dataObj.req.body);
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.body.entity_initials)) {
         processResult = {
@@ -918,6 +920,9 @@ const updateUserEntity = async (dataObj) => {
 
 
     let fetchResult = await entityController.fetchEntityIdByDesignation(dataObj.req.sanitize(dataObj.req.body.entity_initials))
+    console.log("fetchResult:");
+    console.log(fetchResult.toClient.processResult);
+
     if (fetchResult.processRespCode !== 200) {
         processResp = {
             processRespCode: 500,
