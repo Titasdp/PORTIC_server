@@ -27,6 +27,7 @@ const projectController = require("../Controllers/projectController")
 const newsController = require("../Controllers/newsController")
 //
 const outsideInvestorController = require("../Controllers/outsideInvestorController")
+const govInvestorController = require("../Controllers/governmentInvestorController")
 const projectTeamController = require("../Controllers/projectTeamController")
 
 //
@@ -55,8 +56,7 @@ const courseUnitController = require("../Controllers/courseUnitController")
 
 
 
-
-
+// !!!!!!!!!!Delet
 
 
 
@@ -1237,6 +1237,49 @@ router.delete("/projects/:id/investors/:id_outside_investor", async (req, res) =
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
     }
 })
+
+router.post("/projects/:id/gov/investors", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await govInvestorController.addProjectGovInvestor({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.delete("/projects/:id/investors/gov/:id_investor", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await govInvestorController.deleteProjectGovInvestor({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

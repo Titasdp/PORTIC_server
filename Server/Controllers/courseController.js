@@ -827,7 +827,7 @@ const addCourse = async (dataObj) => {
     }
     // dataStatusFetchResult.toClient.processResult[0].id_status,
     let insertArray = [
-        [uniqueIdPack.generateRandomId('_Course'), dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.html_structure_eng), dataObj.req.sanitize(dataObj.req.body.html_structure_pt), dataObj.req.sanitize(dataObj.req.body.coordinator), dataStatusFetchResult.toClient.processResult[0].id_status],
+        [uniqueIdPack.generateRandomId('_Course'), dataObj.req.sanitize(dataObj.req.body.designation), dataObj.req.sanitize(dataObj.req.body.html_structure_eng), dataObj.req.sanitize(dataObj.req.body.html_structure_pt), dataObj.req.sanitize(dataObj.req.body.coordinator), dataObj.idEntity, dataStatusFetchResult.toClient.processResult[0].id_status],
     ]
     await sequelize
         .query(
