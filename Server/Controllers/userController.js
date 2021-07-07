@@ -322,9 +322,6 @@ const loginFetchUserData = async (username) => {
 const proceedUserRegister = async (dataObj) => {
     let processResp = {}
 
-    console.log("req.body:");
-    console.log(dataObj.req.body);
-
     if (dataObj.req.sanitize(dataObj.req.body.username) == null || dataObj.req.sanitize(dataObj.req.body.password) == null || dataObj.req.sanitize(dataObj.req.body.first_name) == null || dataObj.req.sanitize(dataObj.req.body.last_name) == null || dataObj.req.sanitize(dataObj.req.body.email) == null || dataObj.req.sanitize(dataObj.req.body.phone_numb) == null) {
 
         processResp = {

@@ -67,6 +67,7 @@ const initUserLevel = async () => {
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Coord. curso'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Coord. global'],
         [uniqueIdPack.generateRandomId('_UserLevel'), 'Admin global'],
+        [uniqueIdPack.generateRandomId('_UserLevel'), 'Undefine'],
     ]
     await sequelize
         .query(
