@@ -336,12 +336,12 @@ const fetchMainEntityId = async () => {
  * @param {String} designation designation of an entity
  * @returns object of data 
  */
-const fetchEntityIdByDesignation = async (designation) => {
+const fetchEntityIdByDesignation = async (initials) => {
     let processResp = {}
     await sequelize
-        .query("SELECT id_entity FROM Entity where designation =:designation", {
+        .query("SELECT id_entity FROM Entity where initials =:initials", {
             replacements: {
-                designation: designation
+                initials: initials
             }
         }, {
             model: EntityModel.Entity
