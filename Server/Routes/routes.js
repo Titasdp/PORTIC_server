@@ -28,6 +28,7 @@ const newsController = require("../Controllers/newsController")
 //
 const outsideInvestorController = require("../Controllers/outsideInvestorController")
 const govInvestorController = require("../Controllers/governmentInvestorController")
+const externalCollaboratorController = require("../Controllers/externalCollaboratorController")
 const projectTeamController = require("../Controllers/projectTeamController")
 
 //
@@ -1262,6 +1263,39 @@ router.delete("/projects/:id/investors/gov/:id_investor", async (req, res) => {
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
     }
 })
+
+
+
+
+router.post("/projects/:id/collaborators", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await externalCollaboratorController.addProjectCollaborator({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+router.delete("/projects/:id/collaborators/:id_collaborator", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await externalCollaboratorController.deleteProjectCollaborator({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
 
 
 

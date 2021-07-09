@@ -26,6 +26,7 @@ const projectTeamController = require("../Controllers/projectTeamController")
 const pictureController = require("../Controllers/pictureController")
 const dataStatusController = require("../Controllers/dataStatusController")
 const govInvestorController = require("../Controllers/governmentInvestorController")
+const externalCollaboratorController = require("../Controllers/externalCollaboratorController")
 
 
 // 
@@ -87,6 +88,7 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                     // let insideInvestors = await selectProjectInsideInvestor(el.id_project)
                     let outsideInvestors = await outsideInvestorController.fetchProjectOutsideInvestor(el.id_project)
                     let govInvestors = await govInvestorController.fetchProjectGovInvestor(el.id_project)
+                    let externalCollaborators = await externalCollaboratorController.fetchProjectExternalCollaborator(el.id_project)
                     let news = await selectProjectNews(el.id_project, dataObj.req.sanitize(dataObj.req.params.lng))
                     let galleryImgs = await selectProjectGallery(el.id_project)
                     let projectTeam = await selectProjectTeam(el.id_project)
@@ -106,7 +108,8 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                         pdf_path: (!el.pdf_path) ? null : process.env.API_URL + el.pdf_path,
                         // inside_investors: ((insideInvestors.processRespCode === 200) ? insideInvestors.toClient.processResult : []),
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
-                        govInvestors: ((outsideInvestors.processRespCode === 200) ? govInvestors.toClient.processResult : []),
+                        govInvestors: ((govInvestors.processRespCode === 200) ? govInvestors.toClient.processResult : []),
+                        externalCollaborators: ((externalCollaborators.processRespCode === 200) ? externalCollaborators.toClient.processResult : []),
                         news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
                         gallery_imgs: ((galleryImgs.processRespCode === 200) ? galleryImgs.toClient.processResult : []),
                         project_team: ((projectTeam.processRespCode === 200) ? projectTeam.toClient.processResult : []),
@@ -114,6 +117,7 @@ const fetchEntityProjectByIdEntity = async (dataObj) => {
                         area_tags: areaTags,
                         recruitment_tags: recruitmentTags,
                         unity_tags: unityTags,
+
                         // project_sheet: await (pdf.processRespCode === 200) ? pdf.toClient.processResult : [],
 
                     }
@@ -847,6 +851,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                     // let insideInvestors = await selectProjectInsideInvestor(el.id_project)
                     let outsideInvestors = await outsideInvestorController.fetchProjectOutsideInvestor(el.id_project)
                     let govInvestors = await govInvestorController.fetchProjectGovInvestor(el.id_project)
+                    let externalCollaborators = await externalCollaboratorController.fetchProjectExternalCollaborator(el.id_project)
                     let news = await fetchProjectNewsByAdmin(el.id_project)
                     let galleryImgs = await selectProjectGallery(el.id_project)
                     let projectTeam = await FetchProjectTeamForAdmin(el.id_project)
@@ -872,6 +877,7 @@ const fetchProjectByAdminAndDev = async (dataObj) => {
                         coordinator: el.username,
                         outside_investors: ((outsideInvestors.processRespCode === 200) ? outsideInvestors.toClient.processResult : []),
                         govInvestors: ((outsideInvestors.processRespCode === 200) ? govInvestors.toClient.processResult : []),
+                        externalCollaborators: ((externalCollaborators.processRespCode === 200) ? externalCollaborators.toClient.processResult : []),
                         news: ((news.processRespCode === 200) ? news.toClient.processResult : []),
                         gallery_imgs: ((galleryImgs.processRespCode === 200) ? galleryImgs.toClient.processResult : []),
                         project_team: ((projectTeam.processRespCode === 200) ? projectTeam.toClient.processResult : []),
