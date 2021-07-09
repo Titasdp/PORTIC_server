@@ -55,10 +55,8 @@ const recruitmentUnitController = require("../Controllers/recruitmentUnitControl
 const courseUnitController = require("../Controllers/courseUnitController")
 
 
-
-// !!!!!!!!!!Delet
-
-
+//
+const testimonialController = require("../Controllers/testimonialController")
 
 //
 const entityController = require("../Controllers/entityController");
@@ -1267,22 +1265,6 @@ router.delete("/projects/:id/investors/gov/:id_investor", async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 router.post("/projects/:id/news", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
@@ -1745,6 +1727,82 @@ router.delete("/courses/:id_course/units/:id_unity", async (req, res) => {
 
 
 // !ConnectionsModels>
+
+
+
+// <Testimonials
+router.get("/:lng/entities/:id/testimonials", async (req, res) => {
+    let fetchResult = await testimonialController.fetchEntityTestimonialsByIdEntity({
+        req: req
+    })
+    res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+})
+
+
+router.get("/testimonials", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await testimonialController.fetchTestimonialsByAdmin(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+router.post("/testimonials", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await testimonialController.addTestimonial({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+router.delete("/testimonials/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await testimonialController.deleteTestimonial({
+            req: req,
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+
+
+
+//Testimonials>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

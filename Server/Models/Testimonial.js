@@ -10,7 +10,7 @@ const {
 const sequelize = require("../Database/connection");
 const uniqueIdPack = require("../Middleware/uniqueId")
 
-const UserModel = require("../Models/User")
+// const UserModel = require("../Models/User")
 const EntityModel = require("../Models/Entity")
 const PictureModel = require("../Models/Picture")
 
@@ -32,8 +32,8 @@ Testimonial.init({
     },
     institution_name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: true,
+        unique: false
     },
 
     testimonial_text_pt: {
@@ -56,8 +56,6 @@ Testimonial.init({
     },
 
 
-    // id_publisher, id_entity
-
 }, {
     sequelize,
     timestamps: true,
@@ -69,20 +67,20 @@ Testimonial.init({
 });
 
 //User connection
-UserModel.User.hasMany(Testimonial, {
-    foreignKey: {
-        name: "id_creator",
-        allowNull: false,
-        type: DataTypes.STRING,
-    }
-});
-Testimonial.belongsTo(UserModel.User, {
-    foreignKey: {
-        name: "id_creator",
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-});
+// UserModel.User.hasMany(Testimonial, {
+//     foreignKey: {
+//         name: "id_creator",
+//         allowNull: false,
+//         type: DataTypes.STRING,
+//     }
+// });
+// Testimonial.belongsTo(UserModel.User, {
+//     foreignKey: {
+//         name: "id_creator",
+//         type: DataTypes.STRING,
+//         allowNull: false
+//     }
+// });
 //Entity connection
 EntityModel.Entity.hasMany(Testimonial, {
     foreignKey: {
