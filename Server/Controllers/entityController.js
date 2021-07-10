@@ -807,6 +807,10 @@ const addEntity = async (dataObj) => {
     console.log("colors");
     console.log(dataObj.req.body.colors);
 
+
+    console.log(!dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_eng) ||
+        !dataObj.req.sanitize(dataObj.req.body.slogan_eng) || !dataObj.req.sanitize(dataObj.req.body.slogan_pt) || !dataObj.req.sanitize(dataObj.req.body.colors) || !dataObj.req.sanitize(dataObj.req.body.main_email) ||
+        !dataObj.req.sanitize(dataObj.req.body.secondary_email) || !dataObj.req.sanitize(dataObj.req.body.main_contact));
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_eng) ||
         !dataObj.req.sanitize(dataObj.req.body.slogan_eng) || !dataObj.req.sanitize(dataObj.req.body.slogan_pt) || !dataObj.req.sanitize(dataObj.req.body.colors) || !dataObj.req.sanitize(dataObj.req.body.main_email) ||
