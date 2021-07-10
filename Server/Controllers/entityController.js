@@ -729,11 +729,9 @@ const editEntity = async (dataObj) => {
         return processResp
     }
 
-    console.log("Menus");
-    console.log();
-    console.log();
-    console.log();
-    console.log();
+    console.log("Body:");
+    console.log(dataObj.req.body);
+
 
     await sequelize
         .query(
