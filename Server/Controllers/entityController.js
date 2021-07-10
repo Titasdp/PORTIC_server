@@ -732,14 +732,19 @@ const editEntity = async (dataObj) => {
     console.log("Body:");
     console.log(dataObj.req.body);
     console.log(dataObj.req.body.optional_project_menu);
+    console.log("teste");
+    console.log(dataObj.req.body.optional_project_menu == 0);
+    console.log(dataObj.req.body.optional_course_menu == 0);
+    console.log(dataObj.req.body.optional_recruitment_menu == 0);
+    console.log(dataObj.req.body.optional_media_menu == 0);
+
 
 
     await sequelize
         .query(
             `UPDATE Entity SET designation=:designation,initials=:initials, desc_html_pt =:desc_html_pt, desc_html_eng =:desc_html_eng,slogan_eng=:slogan_eng,slogan_pt=:slogan_pt,
             colors=:colors,  main_email=:main_email,secondary_email=:secondary_email,main_contact=:main_contact , 
-            main_contact=:main_contact,linkedIn=:linkedIn,facebook=:facebook,instagram=:instagram ,twitter=:twitter,youtube=:youtube,
-            optional_course_menu=:optional_course_menu,
+            main_contact=:main_contact,linkedIn=:linkedIn,facebook=:facebook,instagram=:instagram ,twitter=:twitter,youtube=:youtube,optional_course_menu=:optional_course_menu,
             optional_project_menu=:optional_project_menu,
             optional_recruitment_menu=:optional_recruitment_menu,
             optional_media_menu=:optional_media_menu
