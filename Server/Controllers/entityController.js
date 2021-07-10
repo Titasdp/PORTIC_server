@@ -738,6 +738,7 @@ const editEntity = async (dataObj) => {
     console.log(dataObj.req.body.optional_recruitment_menu == 0);
     console.log(dataObj.req.body.optional_media_menu == 0);
 
+    let media = (dataObj.req.body.optional_media_menu == 0) ? 0 : 1
 
 
     await sequelize
@@ -770,13 +771,14 @@ const editEntity = async (dataObj) => {
                     optional_course_menu: (dataObj.req.body.optional_course_menu == 0) ? 0 : 1,
                     optional_project_menu: (dataObj.req.body.optional_project_menu == 0) ? 0 : 1,
                     optional_recruitment_menu: (dataObj.req.body.optional_recruitment_menu == 0) ? 0 : 1,
-                    optional_media_menu: (dataObj.req.body.optional_media_menu == 0) ? 0 : 1
+                    optional_media_menu: media
                 }
             }, {
                 model: EntityModel.Entity
             }
         )
         .then(data => {
+            console.log(data);
             processResp = {
                 processRespCode: 200,
                 toClient: {
