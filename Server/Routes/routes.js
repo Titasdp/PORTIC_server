@@ -221,6 +221,96 @@ router.get("/entities/main", async (req, res) => {
 
 })
 
+router.post("/entities", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await entityController.addEntity({
+            req: req,
+            idUser: req.sanitize(tokenResult.toClient.processResult.id_user),
+            idEntity: req.sanitize(tokenResult.toClient.processResult.id_entity),
+        })
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.patch("/entities/:id/status", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let patchResult = await entityController.updateEntityStatus({
+            req: req,
+            id_user: req.sanitize(req.params.id)
+        })
+        res.status(patchResult.processRespCode).send(patchResult.toClient)
+    }
+})
+
+
+
+router.patch("/entities/:id/logo", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let putResult = await entityController.updateEntityLogo({
+            req: req,
+            id_user: req.sanitize(tokenResult.toClient.processResult.id_user)
+        })
+        res.status(putResult.processRespCode).send(putResult.toClient)
+    }
+})
+
+
+router.put("/entities/:id", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForProfileFetch(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let putResult = await entityController.editEntity({
+            req: req,
+            id_user: req.sanitize(tokenResult.toClient.processResult.id_user)
+        })
+        res.status(putResult.processRespCode).send(putResult.toClient)
+    }
+})
+router.get("/entities", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let fetchResult = await entityController.fetchEntitiesByAdmin(tokenResult.toClient.processResult)
+        res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+    }
+})
+
+
+router.put("/entities/:id/menus/:id_menu", async (req, res) => {
+    let tokenResult = await tokenPack.validateTokenForProfileFetch(req.sanitize(req.headers.authorization))
+    if (tokenResult.processRespCode !== 200) {
+        res.status(tokenResult.processRespCode).send(tokenResult.toClient)
+    } else {
+        let putResult = await menuController.editEntityMenu({
+            req: req,
+            id_user: req.sanitize(tokenResult.toClient.processResult.id_user)
+        })
+        res.status(putResult.processRespCode).send(putResult.toClient)
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1281,7 +1371,7 @@ router.post("/projects/:id/collaborators", async (req, res) => {
     }
 })
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 router.delete("/projects/:id/collaborators/:id_collaborator", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {
@@ -1293,9 +1383,6 @@ router.delete("/projects/:id/collaborators/:id_collaborator", async (req, res) =
         res.status(fetchResult.processRespCode).send(fetchResult.toClient)
     }
 })
-
-
-
 
 
 

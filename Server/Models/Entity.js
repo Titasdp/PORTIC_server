@@ -141,6 +141,35 @@ Entity.init({
         allowNull: true,
         defaultValue: `https://twitter.com/politecnico`
     },
+
+
+    optional_course_menu: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: true,
+        //
+    },
+    optional_project_menu: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: true,
+        //
+
+    },
+    optional_recruitment_menu: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: true,
+        //
+    },
+    optional_media_menu: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: true,
+        //
+    },
+
+
     created_at: {
         type: 'TIMESTAMP',
         defaultValue: sequelize.NOW,

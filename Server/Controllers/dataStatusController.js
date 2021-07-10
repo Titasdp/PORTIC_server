@@ -147,6 +147,8 @@ const fetchDataStatusIdByDesignation = async (designation) => {
             model: DataStatusModel.Data_status
         })
         .then(data => {
+            console.log("Inside data:");
+            console.log(data);
             let respCode = 200;
             let respMsg = "Fetched successfully."
             if (data[0].length === 0) {
@@ -164,7 +166,7 @@ const fetchDataStatusIdByDesignation = async (designation) => {
         })
         .catch(error => {
             console.log(error);
-            let processResp = {
+            processResp = {
                 processRespCode: 500,
                 toClient: {
                     processResult: null,
