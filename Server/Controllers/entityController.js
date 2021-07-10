@@ -895,10 +895,7 @@ const addEntity = async (dataObj) => {
             (!dataObj.req.sanitize(dataObj.req.body.instagram)) ? null : dataObj.req.sanitize(dataObj.req.body.instagram),
             (!dataObj.req.sanitize(dataObj.req.body.youtube)) ? null : dataObj.req.sanitize(dataObj.req.body.youtube),
             (!dataObj.req.sanitize(dataObj.req.body.twitter)) ? null : dataObj.req.sanitize(dataObj.req.body.twitter),
-            (!dataObj.req.sanitize(dataObj.req.body.optional_course_menu)) ? 0 : dataObj.req.sanitize(dataObj.req.body.optional_course_menu),
-            (!dataObj.req.sanitize(dataObj.req.body.optional_project_menu)) ? 0 : dataObj.req.sanitize(dataObj.req.body.optional_project_menu),
-            (!dataObj.req.sanitize(dataObj.req.body.optional_recruitment_menu)) ? 0 : dataObj.req.sanitize(dataObj.req.body.optional_recruitment_menu),
-            (!dataObj.req.sanitize(dataObj.req.body.optional_media_menu)) ? 0 : dataObj.req.sanitize(dataObj.req.body.optional_media_menu),
+            false, false, false, false,
             entityLevelFetchResult.toClient.processResult[0].id_entity_level, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status,
 
         ],
