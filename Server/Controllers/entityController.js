@@ -731,6 +731,7 @@ const editEntity = async (dataObj) => {
 
     console.log("Body:");
     console.log(dataObj.req.body);
+    console.log(dataObj.req.body.optional_project_menu);
 
 
     await sequelize
