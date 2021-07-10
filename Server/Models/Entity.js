@@ -144,28 +144,28 @@ Entity.init({
 
 
     optional_course_menu: {
-        type: DataTypes.BOOLEAN,
-        allowNull: true,
-        defaultValue: true,
+        type: DataTypes.INTEGER(1),
+        allowNull: false,
+        defaultValue: 1,
         //
     },
     optional_project_menu: {
-        type: DataTypes.BOOLEAN,
-        allowNull: true,
-        defaultValue: true,
+        type: DataTypes.INTEGER(1),
+        allowNull: false,
+        defaultValue: 1,
         //
 
     },
     optional_recruitment_menu: {
-        type: DataTypes.BOOLEAN,
-        allowNull: true,
-        defaultValue: true,
+        type: DataTypes.INTEGER(1),
+        allowNull: false,
+        defaultValue: 1,
         //
     },
     optional_media_menu: {
-        type: DataTypes.BOOLEAN,
-        allowNull: true,
-        defaultValue: true,
+        type: DataTypes.INTEGER(1),
+        allowNull: false,
+        defaultValue: 1,
         //
     },
 

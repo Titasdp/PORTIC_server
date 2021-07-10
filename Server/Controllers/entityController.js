@@ -900,7 +900,7 @@ const addEntity = async (dataObj) => {
             (!dataObj.req.sanitize(dataObj.req.body.instagram)) ? null : dataObj.req.sanitize(dataObj.req.body.instagram),
             (!dataObj.req.sanitize(dataObj.req.body.youtube)) ? null : dataObj.req.sanitize(dataObj.req.body.youtube),
             (!dataObj.req.sanitize(dataObj.req.body.twitter)) ? null : dataObj.req.sanitize(dataObj.req.body.twitter),
-            false, false, false, false,
+            0, 0, 0, 0,
             entityLevelFetchResult.toClient.processResult[0].id_entity_level, pictureUploadResult.toClient.processResult.generatedId, dataStatusFetchResult.toClient.processResult[0].id_status,
 
         ],
