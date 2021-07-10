@@ -815,6 +815,7 @@ const addEntity = async (dataObj) => {
     if (!dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_eng) ||
         !dataObj.req.sanitize(dataObj.req.body.slogan_eng) || !dataObj.req.sanitize(dataObj.req.body.slogan_pt) || !dataObj.req.sanitize(dataObj.req.body.colors) || !dataObj.req.sanitize(dataObj.req.body.main_email) ||
         !dataObj.req.sanitize(dataObj.req.body.secondary_email) || !dataObj.req.sanitize(dataObj.req.body.main_contact)) {
+        console.log("here fuck");
         processResp = {
             processRespCode: 400,
             toClient: {
