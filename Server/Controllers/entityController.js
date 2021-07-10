@@ -872,7 +872,7 @@ const addEntity = async (dataObj) => {
         return processResp
     }
 
-
+    console.log("here titias");
     let pictureUploadResult = await pictureController.addPictureOnCreate({
         folder: `/Images/Logos/`,
         req: dataObj.req

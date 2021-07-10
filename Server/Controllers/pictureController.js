@@ -434,7 +434,9 @@ const fetchPicturePathById = async (id_picture) => {
 
 
 const addPictureOnCreate = async (dataObj) => {
+    console.log(dataObj.req.files.file);
     if (!dataObj.req.files || Object.keys(dataObj.req.files).length === 0) {
+        console.log("failed inside files");
         processResp = {
             processRespCode: 400,
             toClient: {
