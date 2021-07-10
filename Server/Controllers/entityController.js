@@ -767,10 +767,10 @@ const editEntity = async (dataObj) => {
                     youtube: (!dataObj.req.sanitize(dataObj.req.body.youtube)) ? null : dataObj.req.sanitize(dataObj.req.body.youtube),
                     twitter: (!dataObj.req.sanitize(dataObj.req.body.twitter)) ? null : dataObj.req.sanitize(dataObj.req.body.twitter),
                     // 
-                    optional_course_menu: parseInt(dataObj.req.sanitize(dataObj.req.body.optional_course_menu)),
-                    optional_project_menu: parseInt(dataObj.req.sanitize(dataObj.req.body.optional_project_menu)),
-                    optional_recruitment_menu: parseInt(dataObj.req.sanitize(dataObj.req.body.optional_recruitment_menu)),
-                    optional_media_menu: parseInt(dataObj.req.sanitize(dataObj.req.body.optional_media_menu)),
+                    optional_course_menu: (dataObj.req.body.optional_course_menu == 0) ? 0 : 1,
+                    optional_project_menu: (dataObj.req.body.optional_project_menu == 0) ? 0 : 1,
+                    optional_recruitment_menu: (dataObj.req.body.optional_recruitment_menu == 0) ? 0 : 1,
+                    optional_media_menu: (dataObj.req.body.optional_media_menu == 0) ? 0 : 1
                 }
             }, {
                 model: EntityModel.Entity
