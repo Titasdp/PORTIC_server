@@ -634,8 +634,8 @@ const fetchEntitiesByAdmin = async (dataObj) => {
                         ],
                         optional_course_menu: el.optional_course_menu,
                         optional_project_menu: el.optional_project_menu,
-                        optional_recruitment_menu: el.optional_project_menu,
-                        optional_media_menu: el.optional_project_menu,
+                        optional_recruitment_menu: el.optional_recruitment_menu,
+                        optional_media_menu: el.optional_media_menu,
                         entity_level: el.entity_level,
                         data_status: el.data_status,
                     }
@@ -738,7 +738,6 @@ const editEntity = async (dataObj) => {
     console.log(dataObj.req.body.optional_recruitment_menu == 0);
     console.log(dataObj.req.body.optional_media_menu == 0);
 
-    let media = (dataObj.req.body.optional_media_menu == 0) ? 2 : 1
 
 
     await sequelize
@@ -746,9 +745,9 @@ const editEntity = async (dataObj) => {
             `UPDATE Entity SET designation=:designation,initials=:initials, desc_html_pt =:desc_html_pt, desc_html_eng =:desc_html_eng,slogan_eng=:slogan_eng,slogan_pt=:slogan_pt,
             colors=:colors,  main_email=:main_email,secondary_email=:secondary_email,main_contact=:main_contact , 
             main_contact=:main_contact,linkedIn=:linkedIn,facebook=:facebook,instagram=:instagram ,twitter=:twitter,youtube=:youtube,optional_course_menu=:optional_course_menu,
-            Entity.optional_project_menu=:optional_project_menu,
-            Entity.optional_recruitment_menu=:optional_recruitment_menu,
-            Entity.optional_media_menu=:optional_media_menu
+            optional_project_menu=:optional_project_menu,
+            optional_recruitment_menu=:optional_recruitment_menu,
+            optional_media_menu=:optional_media_menu
             Where Entity.id_entity=:id_entity`, {
                 replacements: {
                     id_entity: dataObj.req.sanitize(dataObj.req.params.id),
@@ -771,14 +770,13 @@ const editEntity = async (dataObj) => {
                     optional_course_menu: (dataObj.req.body.optional_course_menu == 0) ? 0 : 1,
                     optional_project_menu: (dataObj.req.body.optional_project_menu == 0) ? 0 : 1,
                     optional_recruitment_menu: (dataObj.req.body.optional_recruitment_menu == 0) ? 0 : 1,
-                    optional_media_menu: media
+                    optional_media_menu: (dataObj.req.body.optional_media_menu == 0) ? 0 : 1
                 }
             }, {
                 model: EntityModel.Entity
             }
         )
         .then(data => {
-            console.log(data);
             processResp = {
                 processRespCode: 200,
                 toClient: {
