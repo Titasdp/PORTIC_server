@@ -805,7 +805,7 @@ const addEntity = async (dataObj) => {
     console.log(dataObj.req.body);
 
     console.log("colors");
-    console.log(dataObj.req.body.colors);
+    console.log(!dataObj.req.body.colors);
 
 
     console.log(!dataObj.req.sanitize(dataObj.req.body.designation) || !dataObj.req.sanitize(dataObj.req.body.initials) || !dataObj.req.sanitize(dataObj.req.body.desc_html_pt) || !dataObj.req.sanitize(dataObj.req.body.desc_html_eng) ||
