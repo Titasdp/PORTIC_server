@@ -156,13 +156,13 @@ Entity.init({
         //
 
     },
-    optional_recruitment: {
+    optional_recruitment_menu: {
         type: DataTypes.INTEGER(1),
         allowNull: false,
         defaultValue: 1,
         //
     },
-    media_optional_menu: {
+    optional_media_menu: {
         type: DataTypes.INTEGER(1),
         allowNull: false,
         defaultValue: 1,
