@@ -738,7 +738,7 @@ const editEntity = async (dataObj) => {
     console.log(dataObj.req.body.optional_recruitment_menu == 0);
     console.log(dataObj.req.body.optional_media_menu == 0);
 
-    let media = (dataObj.req.body.optional_media_menu == 0) ? 0 : 1
+    let media = (dataObj.req.body.optional_media_menu == 0) ? 2 : 1
 
 
     await sequelize
