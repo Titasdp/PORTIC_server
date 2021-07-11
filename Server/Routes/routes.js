@@ -221,6 +221,17 @@ router.get("/entities/main", async (req, res) => {
 
 })
 
+router.get("/entities/Secondaries", async (req, res) => {
+    let fetchResult = await entityController.fetchAllSecondaryEntities()
+    res.status(fetchResult.processRespCode).send(fetchResult.toClient)
+})
+
+
+
+
+
+
+
 router.post("/entities", async (req, res) => {
     let tokenResult = await tokenPack.validateTokenForUsersMaxSecurity(req.sanitize(req.headers.authorization))
     if (tokenResult.processRespCode !== 200) {

@@ -194,10 +194,6 @@ const fetchFullEntityDataById = async (dataObj, callback) => {
 };
 
 
-
-
-
-
 /**
  * Initialize the table Entity by introducing predefined data to it.
  * @param {Object} dataObj 
@@ -675,6 +671,77 @@ const fetchEntitiesByAdmin = async (dataObj) => {
 };
 
 
+
+
+
+
+// Todo : Adjust to new format 
+/**
+ * 
+ * @param {Object} dataObject 
+ * @param {*} callback 
+ */
+const fetchAllSecondaryEntities = async (dataObj) => {
+    let processResp = {}
+
+    let query = `SELECT  Entity.id_entity, Entity.designation, Entity.initials, Picture.img_path as img  
+    FROM((( Entity inner Join 
+            Entity_level on Entity.id_entity_level= Entity_level.id_entity_level)
+            Inner Join
+            Picture on Picture.id_picture = Entity.id_logo)
+            Inner Join
+            Data_Status on Data_Status.id_status= Entity.id_status)
+     where Entity_level.designation = "Secondary" and Data_Status.designation="Published";`
+    await sequelize
+        .query(query, {
+            replacements: {
+                id_entity: dataObj.id_entity
+            }
+        }, {
+            model: EntityModel.Entity
+        })
+        .then(async data => {
+            let entities = []
+            let respCode = 200;
+            let respMsg = "Fetched successfully."
+            if (data[0].length === 0) {
+                respMsg = "Fetch process completed successfully, but there is no content."
+            } else {
+                for (const el of data[0]) {
+                    let obj = {
+                        id_entity: el.id_entity,
+                        designation: el.designation,
+                        initials: el.initials,
+                        img: process.env.API_URL + el.img,
+                    }
+                    entities.push(obj)
+                }
+            }
+            processResp = {
+                processRespCode: respCode,
+                toClient: {
+                    processResult: entities,
+                    processError: null,
+                    processMsg: respMsg,
+                }
+            }
+
+        })
+        .catch(error => {
+            console.log(error);
+            processResp = {
+                processRespCode: 500,
+                toClient: {
+                    processResult: null,
+                    processError: error,
+                    processMsg: "Something when wrong please try again later",
+                }
+            }
+
+        });
+
+    return processResp
+};
 
 
 
@@ -1380,7 +1447,8 @@ module.exports = {
     updateEntityStatus,
     editEntity,
     deleteEntity,
-    updateEntityLogo
+    updateEntityLogo,
+    fetchAllSecondaryEntities
 }
 
 

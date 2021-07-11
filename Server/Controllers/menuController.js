@@ -346,11 +346,7 @@ const fetchEntityMenusByAdmin = async (id_entity) => {
 
 
 const editEntityMenu = async (dataObj) => {
-    console.log("params");
-    console.log(dataObj.req.params);
 
-    console.log("body");
-    console.log(dataObj.req.body);
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation_pt) || !dataObj.req.sanitize(dataObj.req.body.designation_eng) || !dataObj.req.sanitize(dataObj.req.body.page_description_eng) || !dataObj.req.sanitize(dataObj.req.body.page_description_pt)) {
         processResult = {
@@ -363,8 +359,6 @@ const editEntityMenu = async (dataObj) => {
         }
         return processResult
     }
-
-
     await sequelize
         .query(
             `UPDATE Menu SET designation_eng=:designation_eng,designation_pt=:designation_pt,page_description_eng =:page_description_eng,page_description_pt=:page_description_pt  Where Menu.id_menu=:id_menu`, {
