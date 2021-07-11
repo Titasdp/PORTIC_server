@@ -221,7 +221,7 @@ router.get("/entities/main", async (req, res) => {
 
 })
 
-router.get("/entities/Secondaries", async (req, res) => {
+router.get("/entities/secondaries", async (req, res) => {
     let fetchResult = await entityController.fetchAllSecondaryEntities()
     res.status(fetchResult.processRespCode).send(fetchResult.toClient)
 })
