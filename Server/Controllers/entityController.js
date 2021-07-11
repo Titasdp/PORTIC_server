@@ -729,14 +729,6 @@ const editEntity = async (dataObj) => {
         return processResp
     }
 
-    console.log("Body:");
-    console.log(dataObj.req.body);
-    console.log(dataObj.req.body.optional_project_menu);
-    console.log("teste");
-    console.log(dataObj.req.body.optional_project_menu == 0);
-    console.log(dataObj.req.body.optional_course_menu == 0);
-    console.log(dataObj.req.body.optional_recruitment_menu == 0);
-    console.log(dataObj.req.body.optional_media_menu == 0);
 
 
 

@@ -199,7 +199,7 @@ const addDefaultMenus = async (dataObj) => {
  */
 const fetchEntityMenus = async (dataObj) => {
     let processResp = {}
-    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? ` SELECT Menu.id_menu ,Menu.designation_pt as menu_designation,Menu.default, Menu.external_path,  Menu.info_html_pt as info_html , Menu.page_description_pt as page_description, Menu.router_link FROM ( Menu  INNER JOIN Data_Status on Data_Status.id_status = Menu.id_status) where Data_Status.designation = "Published" and Menu.id_entity =:id_entity and Menu.router_link not In ${dataObj.notIn};` : `SELECT Menu.id_menu ,Menu.designation_eng as menu_designation,Menu.default, Menu.external_path, Menu.info_html_eng as info_html ,Menu.page_description_eng as page_description, Menu.router_link FROM ( Menu  INNER JOIN Data_Status on Data_Status.id_status = Menu.id_status) where Data_Status.designation = "Published" and Menu.id_entity =:id_entity and  and Menu.router_link not In ${dataObj.notIn};`
+    let query = (dataObj.req.sanitize(dataObj.req.params.lng) === "pt") ? ` SELECT Menu.id_menu ,Menu.designation_pt as menu_designation,Menu.default, Menu.external_path,  Menu.info_html_pt as info_html , Menu.page_description_pt as page_description, Menu.router_link FROM ( Menu  INNER JOIN Data_Status on Data_Status.id_status = Menu.id_status) where Data_Status.designation = "Published" and Menu.id_entity =:id_entity and Menu.router_link not In ${dataObj.notIn};` : `SELECT Menu.id_menu ,Menu.designation_eng as menu_designation,Menu.default, Menu.external_path, Menu.info_html_eng as info_html ,Menu.page_description_eng as page_description, Menu.router_link FROM ( Menu INNER JOIN Data_Status on Data_Status.id_status = Menu.id_status) where Data_Status.designation = "Published" and Menu.id_entity =:id_entity and  Menu.router_link not In ${dataObj.notIn};`
     await sequelize
         .query(query, {
             replacements: {
@@ -231,8 +231,6 @@ const fetchEntityMenus = async (dataObj) => {
                         menu_designation: el.menu_designation,
                         default: el.default,
                         external_path: el.external_path,
-                        spotlight_1: el.spotlight_1,
-                        spotlight_2: el.spotlight_2,
                         info_html: el.info_html,
                         page_description: el.page_description,
                         router_link: el.router_link,
