@@ -346,6 +346,8 @@ const fetchEntityMenusByAdmin = async (id_entity) => {
 
 
 const editEntityMenu = async (dataObj) => {
+    console.log("params");
+    console.log(dataObj.req.params);
 
     console.log("body");
     console.log(dataObj.req.body);
