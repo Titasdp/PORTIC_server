@@ -346,6 +346,9 @@ const fetchEntityMenusByAdmin = async (id_entity) => {
 
 
 const editEntityMenu = async (dataObj) => {
+
+    console.log("body");
+    console.log(dataObj.req.body);
     let processResp = {}
     if (!dataObj.req.sanitize(dataObj.req.params.id) || !dataObj.req.sanitize(dataObj.req.body.designation_pt) || !dataObj.req.sanitize(dataObj.req.body.designation_eng) || !dataObj.req.sanitize(dataObj.req.body.page_description_eng) || !dataObj.req.sanitize(dataObj.req.body.page_description_pt)) {
         processResult = {
