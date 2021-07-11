@@ -693,11 +693,7 @@ const fetchAllSecondaryEntities = async (dataObj) => {
             Data_Status on Data_Status.id_status= Entity.id_status)
      where Entity_level.designation = "Secondary" and Data_Status.designation="Published";`
     await sequelize
-        .query(query, {
-            replacements: {
-                id_entity: dataObj.id_entity
-            }
-        }, {
+        .query(query, {}, {
             model: EntityModel.Entity
         })
         .then(async data => {
