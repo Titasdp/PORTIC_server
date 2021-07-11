@@ -367,7 +367,7 @@ const editEntityMenu = async (dataObj) => {
 
     await sequelize
         .query(
-            `UPDATE Menu SET designation_eng=:designation_eng,designation_pt=:designation_pt,page_description_eng :=page_description_eng,page_description_pt:=page_description_pt  Where Menu.id_menu=:id_menu`, {
+            `UPDATE Menu SET designation_eng=:designation_eng,designation_pt=:designation_pt,page_description_eng =:page_description_eng,page_description_pt=:page_description_pt  Where Menu.id_menu=:id_menu`, {
                 replacements: {
                     id_menu: dataObj.req.sanitize(dataObj.req.params.id_menu),
                     designation_pt: dataObj.req.sanitize(dataObj.req.body.designation_pt),
