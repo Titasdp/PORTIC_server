@@ -700,9 +700,11 @@ const fetchAllSecondaryEntities = async (dataObj) => {
             let entities = []
             let respCode = 200;
             let respMsg = "Fetched successfully."
+
             if (data[0].length === 0) {
                 respMsg = "Fetch process completed successfully, but there is no content."
             } else {
+                console.log("here");
                 for (const el of data[0]) {
                     let obj = {
                         id_entity: el.id_entity,
